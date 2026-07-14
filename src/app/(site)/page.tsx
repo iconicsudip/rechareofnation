@@ -930,9 +930,9 @@ export default function HomePage() {
       </section>
 
       {/* 14. VIP GATEWAY NEWSLETTER BANNER */}
-      <section className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)] bg-[#090e1a]/80">
         <div className="container">
-          <div className="glass-panel p-8 md:p-12 text-center rounded-3xl bg-gradient-to-b from-gray-900 to-indigo-950/20 border-cyan-500/20 relative overflow-hidden shadow-2xl flex flex-col items-center gap-6">
+          <div className="p-8 md:p-12 text-center rounded-3xl bg-[#0f1629] border border-gray-800/80 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center gap-6">
             <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-bl-full filter blur-xl"></div>
             
             <span className="text-[10px] font-mono tracking-widest text-pink-500 font-bold uppercase">VIP GATEWAY</span>
@@ -953,14 +953,15 @@ export default function HomePage() {
                 <input 
                   type="email" 
                   placeholder="you@company.com" 
-                  className="form-input flex-grow text-xs rounded-xl bg-gray-900 border-gray-800"
+                  className="form-input flex-grow text-xs rounded-xl bg-gray-950 border-gray-800 text-white placeholder-gray-500 focus:border-gray-700 focus:ring-1 focus:ring-gray-700"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   required
                 />
                 <button 
                   type="submit" 
-                  className="btn bg-pink-500 hover:bg-pink-600 text-slate-950 font-black text-xs px-8 py-3.5 rounded-xl shadow-lg hover:shadow-neon-pink transition-all shrink-0"
+                  className="py-3.5 px-8 rounded-xl font-bold text-xs shadow-lg transition-all font-primary uppercase tracking-wide cursor-pointer text-white flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: '#ec4899' }}
                 >
                   JOIN CREW
                 </button>
