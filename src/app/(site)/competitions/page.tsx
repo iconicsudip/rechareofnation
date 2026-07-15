@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Trophy, Calendar, MapPin, Award, ShieldAlert, ArrowRight, 
+import {
+  Trophy, Calendar, MapPin, Award, ShieldAlert, ArrowRight,
   User, Check, Sparkles, ChevronRight, HelpCircle, AlertCircle
 } from "lucide-react";
+import CompetitorBoardingModal from "@/components/CompetitorBoardingModal";
 
 export default function CompetitionsPage() {
   // Pageant Score Simulator States
@@ -33,6 +34,9 @@ export default function CompetitionsPage() {
 
   // FAQ Accordion State
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+  // Competitor Boarding Modal State
+  const [showBoardingModal, setShowBoardingModal] = useState(false);
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({
@@ -62,7 +66,7 @@ export default function CompetitionsPage() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Contender registration initialized for ${contenderName} (${coutureDivision}) focusing on ${handloomFocus}! Redirecting to checkout...`);
+    setShowBoardingModal(true);
   };
 
   const regionalHubs = {
@@ -585,6 +589,14 @@ export default function CompetitionsPage() {
         </div>
 
       </div>
+
+      {showBoardingModal && (
+        <CompetitorBoardingModal
+          onClose={() => setShowBoardingModal(false)}
+          initialName={contenderName}
+          initialTrack={coutureDivision}
+        />
+      )}
     </div>
   );
 }

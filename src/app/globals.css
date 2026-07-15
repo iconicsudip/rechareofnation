@@ -364,6 +364,23 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 12px !important;
 }
 
+/* Plain (no prefix/suffix) input variant — no affix-wrapper is rendered in this case */
+.antd-cyber-input.ant-input {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0F172A !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.antd-cyber-input.ant-input:hover,
+.antd-cyber-input.ant-input:focus {
+  border-color: #4F46E5 !important;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.15) !important;
+}
+
 .antd-cyber-select.ant-select {
   height: 42px !important;
   width: 100% !important;
