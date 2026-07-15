@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, User, LogOut, Trophy, Home, Info, Calendar, Image, FileText, Phone, Award, Sparkles, ChevronRight, Zap, Target, BookOpen, Layers, Laptop } from "lucide-react";
+import { 
+  Menu, X, User, LogOut, Trophy, Home, Info, Calendar, Image, 
+  FileText, Phone, Award, Sparkles, ChevronRight, Zap, Target, 
+  BookOpen, Layers, Laptop, Search, Ticket, Compass, ArrowRight
+} from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
 
 export default function Navbar() {
@@ -33,330 +37,376 @@ export default function Navbar() {
     router.push("/");
   };
 
+  // Search Modal States
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allEvents, setAllEvents] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  // Fetch all events on load
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const events = await ApiClient.getEvents();
+      setAllEvents(events);
+    };
+    fetchEvents();
+  }, []);
+
+  // Filter events in real-time
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
+    }
+    const q = searchQuery.toLowerCase();
+    const matches = allEvents.filter(e => 
+      e.name.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q) ||
+      e.city.toLowerCase().includes(q)
+    );
+    setSearchResults(matches.slice(0, 5));
+  }, [searchQuery, allEvents]);
+
+  // Escape key close handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowSearchModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const navLinks = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Events", href: "/events", icon: Calendar },
-    { name: "Competitions", href: "/competitions", icon: Trophy },
-    { name: "Gallery", href: "/gallery", icon: Image },
-    { name: "Sponsors", href: "/sponsors", icon: Award },
-    { name: "Blogs", href: "/blogs", icon: FileText },
-    { name: "About", href: "/about", icon: Info },
-    { name: "Contact", href: "/contact", icon: Phone },
+    { name: "Explore Events", href: "/events" },
+    { name: "Mr/Miss Traditional", href: "/competitions" },
+    { name: "Sponsors", href: "/sponsors" },
+    { name: "Gallery", href: "/gallery" },
+    { name: "Blogs", href: "/blogs" }
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-800/80 bg-[#070b13]/90 backdrop-blur-md">
-      <div className="container">
-        <div className="flex h-16 items-center justify-between relative">
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+      {/* Top accent gradient stripe */}
+      <div className="h-1 w-full bg-gradient-to-r from-pink-500 via-indigo-500 to-cyan-400"></div>
+
+      <div className="container max-w-[1550px] mx-auto px-4">
+        <div className="flex h-16 items-center justify-between relative gap-4">
           
-          {/* Logo */}
-          <Link href="/" className="flex items-center select-none">
-            <span className="text-[19px] font-black tracking-tighter text-white font-primary uppercase">
-              RECHARGE NATION
-            </span>
-          </Link>
+          {/* Logo Section */}
+          <div className="flex items-center gap-2 select-none shrink-0">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-pink-500 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm shadow-pink-500/10">
+                <Ticket size={18} className="shrink-0" />
+              </div>
+              <div className="flex flex-col text-left leading-none">
+                <span className="text-[14px] font-black tracking-tight text-slate-800 font-primary uppercase leading-tight">
+                  RECHARGE<span className="text-pink-500">NATION</span>
+                </span>
+                <span className="text-[7.5px] font-mono font-bold tracking-widest text-slate-400 uppercase mt-0.5 leading-none">
+                  Experience India
+                </span>
+              </div>
+            </Link>
+
+          </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-7">
+          <div className="hidden lg:flex items-center gap-4 xl:gap-6 shrink-0">
+            <Link
+              href="/"
+              className={`text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${
+                pathname === "/" 
+                  ? "bg-pink-50 text-pink-600 shadow-[0_2px_8px_rgba(236,72,153,0.08)]" 
+                  : "text-slate-600 hover:text-pink-500"
+              }`}
+            >
+              Home
+            </Link>
+
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-              const hasEventsMega = link.name === "Events";
-              const hasCompsMega = link.name === "Competitions";
-
               return (
-                <div key={link.name} className="relative group/nav py-5">
-                  <Link
-                    href={link.href}
-                    className={`text-[12.5px] font-bold transition-all duration-300 hover:text-white relative pb-1.5 group/item font-secondary uppercase tracking-wider ${
-                      isActive ? "text-white" : "text-gray-400"
-                    }`}
-                  >
-                    {link.name}
-                    {/* Underline Slide Effect */}
-                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-white rounded-full transition-all duration-300 group-hover/item:w-3/4 ${
-                      isActive ? "w-2/3 bg-white" : ""
-                    }`}></span>
-                  </Link>
-
-                  {/* Events Mega Menu */}
-                  {hasEventsMega && (
-                    <div className="absolute top-[48px] left-1/2 -translate-x-1/2 mt-0 w-[580px] bg-[#070b13]/98 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-6 shadow-[0_25px_60px_rgba(0,0,0,0.85)] transition-all duration-300 opacity-0 translate-y-3 pointer-events-none group-hover/nav:opacity-100 group-hover/nav:translate-y-0 group-hover/nav:pointer-events-auto z-50 grid grid-cols-3 gap-6">
-                      
-                      {/* Column 1: By Category */}
-                      <div className="flex flex-col gap-3">
-                        <span className="text-[9px] font-mono tracking-widest text-gray-500 font-bold uppercase border-b border-gray-850 pb-2">By Category</span>
-                        <div className="flex flex-col gap-2">
-                          <Link href="/events?search=Cultural" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Sparkles size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Cultural Programs</span>
-                          </Link>
-                          <Link href="/events?search=Dance" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Trophy size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Dance Cup Battles</span>
-                          </Link>
-                          <Link href="/events?search=Trade" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Laptop size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Trade & Tech Expos</span>
-                          </Link>
-                          <Link href="/events?search=Food" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Zap size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Food Festivals</span>
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Column 2: By Location */}
-                      <div className="flex flex-col gap-3">
-                        <span className="text-[9px] font-mono tracking-widest text-gray-500 font-bold uppercase border-b border-gray-850 pb-2">By Location</span>
-                        <div className="flex flex-col gap-2">
-                          <Link href="/events?location=New%20Delhi" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Info size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Delhi JNS Arena</span>
-                          </Link>
-                          <Link href="/events?location=Mumbai" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Info size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Mumbai Corridor</span>
-                          </Link>
-                          <Link href="/events?location=Bengaluru" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Info size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Bengaluru Hub</span>
-                          </Link>
-                          <Link href="/events?location=Chennai" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Info size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Chennai Zone</span>
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Column 3: Promo Card */}
-                      <div className="bg-[#0b0f19] border border-gray-800/80 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden group/promo">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.01] rounded-full blur-xl"></div>
-                        <div className="flex flex-col gap-2">
-                          <span className="bg-gray-850 border border-gray-800 text-gray-400 text-[8px] font-mono font-bold px-2 py-0.5 rounded tracking-widest uppercase w-fit">Featured Pass</span>
-                          <h4 className="text-[11px] font-black text-white leading-tight font-primary uppercase tracking-tight">Elite Automotive Expo</h4>
-                          <p className="text-[9.5px] text-gray-500 leading-normal font-secondary">Get VIP pit gate access to India's tuning show clash.</p>
-                          
-                          {/* Structured Meta Grid */}
-                          <div className="grid grid-cols-2 gap-1.5 border-t border-gray-900 pt-2.5 mt-1 font-mono text-[8px] text-gray-500">
-                            <div>
-                              <span className="block text-[7px] uppercase tracking-wider text-gray-600 font-bold">DATE</span>
-                              <span className="text-white font-bold">OCT 24-26</span>
-                            </div>
-                            <div>
-                              <span className="block text-[7px] uppercase tracking-wider text-gray-600 font-bold">PASS TYPE</span>
-                              <span className="text-white font-bold">VIP ACCESS</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Link href="/events/recharge-cultural-odyssey-2026" className="text-[9.5px] font-bold text-white hover:text-gray-300 transition-colors uppercase tracking-wider mt-4 flex items-center gap-1 group-hover/promo:translate-x-0.5 duration-300">
-                          <span>Book VIP pass</span>
-                          <ChevronRight size={10} />
-                        </Link>
-                      </div>
-
-                    </div>
-                  )}
-
-                  {/* Competitions Mega Menu */}
-                  {hasCompsMega && (
-                    <div className="absolute top-[48px] left-1/2 -translate-x-1/2 mt-0 w-[580px] bg-[#070b13]/98 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-6 shadow-[0_25px_60px_rgba(0,0,0,0.85)] transition-all duration-300 opacity-0 translate-y-3 pointer-events-none group-hover/nav:opacity-100 group-hover/nav:translate-y-0 group-hover/nav:pointer-events-auto z-50 grid grid-cols-3 gap-6">
-                      
-                      {/* Column 1: Active Arenas */}
-                      <div className="flex flex-col gap-3">
-                        <span className="text-[9px] font-mono tracking-widest text-gray-500 font-bold uppercase border-b border-gray-850 pb-2">Active Arenas</span>
-                        <div className="flex flex-col gap-2">
-                          <Link href="/competitions" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Trophy size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Choreo Battle Chime</span>
-                          </Link>
-                          <Link href="/competitions" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Sparkles size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Singer Solo Cup</span>
-                          </Link>
-                          <Link href="/competitions" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Target size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Cyber Coding Clash</span>
-                          </Link>
-                          <Link href="/competitions" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Zap size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Art Fusion Elite</span>
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Column 2: Resources */}
-                      <div className="flex flex-col gap-3">
-                        <span className="text-[9px] font-mono tracking-widest text-gray-500 font-bold uppercase border-b border-gray-850 pb-2">Resources</span>
-                        <div className="flex flex-col gap-2">
-                          <Link href="/blogs" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <BookOpen size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Rules & Regulations</span>
-                          </Link>
-                          <Link href="/sponsors" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Award size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Prize Pool Details</span>
-                          </Link>
-                          <Link href="/about" className="flex items-center gap-3 text-[11.5px] text-gray-400 hover:text-white transition-all duration-200 group/sub hover:translate-x-1">
-                            <div className="w-6 h-6 rounded-md bg-gray-900 border border-gray-850 flex items-center justify-center group-hover/sub:border-white transition-colors">
-                              <Layers size={11} className="text-gray-400 group-hover/sub:text-white transition-colors" />
-                            </div>
-                            <span>Jury Panel</span>
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Column 3: Promo Card */}
-                      <div className="bg-[#0b0f19] border border-gray-800/80 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden group/promo">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.01] rounded-full blur-xl"></div>
-                        <div className="flex flex-col gap-2">
-                          <span className="bg-gray-850 border border-gray-800 text-gray-400 text-[8px] font-mono font-bold px-2 py-0.5 rounded tracking-widest uppercase w-fit">Prize Shield</span>
-                          <h4 className="text-[11px] font-black text-white leading-tight font-primary uppercase tracking-tight">Choreo Cup 2026</h4>
-                          <p className="text-[9.5px] text-gray-500 leading-normal font-secondary">Register your dance crew for the national final battle.</p>
-                          
-                          {/* Structured Meta Grid */}
-                          <div className="grid grid-cols-2 gap-1.5 border-t border-gray-900 pt-2.5 mt-1 font-mono text-[8px] text-gray-500">
-                            <div>
-                              <span className="block text-[7px] uppercase tracking-wider text-gray-600 font-bold">DATE</span>
-                              <span className="text-white font-bold">OCT 24-26</span>
-                            </div>
-                            <div>
-                              <span className="block text-[7px] uppercase tracking-wider text-gray-600 font-bold">REWARD</span>
-                              <span className="text-white font-bold">₹10,00,000</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Link href="/competitions" className="text-[9.5px] font-bold text-white hover:text-gray-300 transition-colors uppercase tracking-wider mt-4 flex items-center gap-1 group-hover/promo:translate-x-0.5 duration-300">
-                          <span>Register crew</span>
-                          <ChevronRight size={10} />
-                        </Link>
-                      </div>
-
-                    </div>
-                  )}
-
-                </div>
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`text-[10px] font-black transition-all duration-300 hover:text-pink-500 font-secondary uppercase tracking-wider whitespace-nowrap shrink-0 ${
+                    isActive ? "text-pink-500" : "text-slate-600"
+                  }`}
+                >
+                  {link.name}
+                </Link>
               );
             })}
           </div>
 
-          {/* Desktop Auth Section */}
-          <div className="hidden lg:flex items-center gap-4">
+          {/* Desktop Action Buttons */}
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
+            {/* Search Icon Trigger */}
+            <button 
+              onClick={() => setShowSearchModal(true)} 
+              className="p-2 text-slate-500 hover:text-pink-500 hover:bg-slate-100 rounded-full transition-colors cursor-pointer shrink-0 mr-1.5"
+              title="Search Events"
+            >
+              <Search size={14} className="shrink-0" />
+            </button>
+
             {user ? (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-xs font-semibold text-gray-300 hover:text-white transition-colors bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] px-4 py-2 rounded-full"
+              <>
+                <Link 
+                  href="/dashboard" 
+                  className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
                 >
-                  <User size={14} className="text-gray-400" />
+                  <Ticket size={11} className="text-red-500 shrink-0" />
+                  <span>My Wallet</span>
+                </Link>
+
+                <Link 
+                  href="/dashboard" 
+                  className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
+                >
+                  <Layers size={11} className="text-slate-500 shrink-0" />
                   <span>Dashboard</span>
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="p-2 text-gray-400 hover:text-pink-400 transition-colors cursor-pointer"
-                  title="Logout"
+
+                <Link 
+                  href="/dashboard" 
+                  className="bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[9.5px] font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_4px_12px_rgba(79,70,229,0.12)] whitespace-nowrap shrink-0"
                 >
-                  <LogOut size={16} />
-                </button>
-              </div>
+                  <Compass size={11} className="text-white shrink-0" />
+                  <span>Scanner</span>
+                </Link>
+
+                <div className="flex items-center gap-2 pl-1.5 ml-1.5 border-l border-slate-200">
+                  <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-slate-750 text-xs font-bold font-mono">
+                    {user.name ? user.name[0].toUpperCase() : "U"}
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="p-1.5 text-slate-450 hover:text-pink-500 transition-colors cursor-pointer shrink-0"
+                    title="Logout"
+                  >
+                    <LogOut size={14} />
+                  </button>
+                </div>
+              </>
             ) : (
-              <Link 
-                href="/login" 
-                className="py-2.5 px-6 rounded-full border border-gray-700 bg-transparent text-white font-extrabold text-[11px] tracking-wider uppercase hover:bg-white hover:text-black hover:border-white transition-all duration-300"
-              >
-                Login / Register
-              </Link>
+              <>
+                <Link 
+                  href="/login" 
+                  className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
+                >
+                  <span>Login</span>
+                </Link>
+
+                <Link 
+                  href="/register" 
+                  className="bg-pink-500 hover:bg-pink-600 text-white text-[9.5px] font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_4px_12px_rgba(236,72,153,0.12)] whitespace-nowrap shrink-0"
+                >
+                  <span>Register</span>
+                </Link>
+              </>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex lg:hidden items-center justify-center p-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
-          >
-            {isOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {/* Mobile Menu Button & Search */}
+          <div className="flex lg:hidden items-center gap-1.5 shrink-0">
+            <button 
+              onClick={() => setShowSearchModal(true)} 
+              className="p-2 text-slate-650 hover:text-pink-500 transition-colors cursor-pointer"
+              title="Search Events"
+            >
+              <Search size={16} />
+            </button>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="flex items-center justify-center p-2 text-slate-650 hover:text-slate-900 transition-colors cursor-pointer"
+            >
+              {isOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile Drawer Overlay */}
       {isOpen && (
-        <div className="lg:hidden absolute top-16 left-0 w-full bg-[#070b13] border-b border-gray-800/80 py-6 px-5 flex flex-col gap-5 shadow-2xl animate-fade-in z-50">
+        <div className="lg:hidden absolute top-[68px] left-0 w-full bg-white border-b border-slate-200 py-6 px-5 flex flex-col gap-5 shadow-2xl animate-fade-in z-50">
           <div className="flex flex-col gap-4">
+            <Link
+              href="/"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${
+                pathname === "/" ? "text-pink-500" : "text-slate-650"
+              }`}
+            >
+              <Home size={16} />
+              <span>Home</span>
+            </Link>
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-              const LinkIcon = link.icon;
               return (
                 <Link
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 text-lg font-medium py-2 border-b border-[rgba(255,255,255,0.03)] hover:text-white ${
-                    isActive ? "text-white font-semibold" : "text-gray-400"
+                  className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${
+                    isActive ? "text-pink-500" : "text-slate-650"
                   }`}
                 >
-                  <LinkIcon size={18} />
+                  <Calendar size={16} />
                   <span>{link.name}</span>
                 </Link>
               );
             })}
           </div>
 
-          <div className="pt-2 flex flex-col gap-3">
+          <div className="pt-2 flex flex-wrap gap-2">
             {user ? (
               <>
                 <Link
                   href="/dashboard"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-full text-white text-center text-sm font-semibold"
+                  className="flex items-center justify-center gap-2 flex-grow py-3 border border-slate-200 rounded-xl text-slate-700 text-center text-xs font-extrabold uppercase"
                 >
-                  <User size={16} />
-                  <span>Go to Dashboard</span>
+                  <Ticket size={14} className="text-red-500" />
+                  <span>My Wallet</span>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 flex-grow py-3 border border-slate-200 rounded-xl text-slate-700 text-center text-xs font-extrabold uppercase"
+                >
+                  <Layers size={14} className="text-slate-500" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#4f46e5] rounded-xl text-white text-center text-xs font-extrabold uppercase shadow-lg shadow-indigo-500/10"
+                >
+                  <Compass size={14} className="text-white" />
+                  <span>Scanner</span>
                 </Link>
                 <button
-                  onClick={handleLogout}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-pink-900/20 border border-pink-900/30 text-pink-400 rounded-full text-center text-sm font-semibold hover:bg-pink-900/30 cursor-pointer"
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full mt-2 py-3 bg-slate-900 rounded-xl text-white text-center text-xs font-extrabold uppercase flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <LogOut size={16} />
-                  <span>Sign Out</span>
+                  <LogOut size={14} />
+                  <span>Logout</span>
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
-                onClick={() => setIsOpen(false)}
-                className="w-full py-3 text-center text-sm font-semibold rounded-full border border-gray-700 bg-transparent text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300"
-              >
-                Login / Register
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 flex-grow py-3 border border-slate-200 rounded-xl text-slate-700 text-center text-xs font-extrabold uppercase"
+                >
+                  <span>Login</span>
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 flex-grow py-3 bg-pink-500 rounded-xl text-white text-center text-xs font-extrabold uppercase"
+                >
+                  <span>Register</span>
+                </Link>
+              </>
             )}
+          </div>
+        </div>
+      )}
+      {/* Search Modal Overlay */}
+      {showSearchModal && (
+        <div 
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] flex items-start justify-center pt-24 md:pt-32 px-4 transition-all duration-300"
+          onClick={() => setShowSearchModal(false)}
+        >
+          <div 
+            className="w-full max-w-xl bg-white border border-slate-200/80 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col transition-all transform scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Input */}
+            <div className="flex items-center px-4 py-3.5 border-b border-slate-100 gap-3">
+              <Search className="text-slate-400 w-4 h-4 shrink-0" />
+              <input 
+                type="text" 
+                placeholder="Search events by name, city, category..." 
+                className="w-full bg-transparent text-sm text-slate-800 outline-none border-none py-1 placeholder-slate-400 font-secondary"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+              <button 
+                onClick={() => setShowSearchModal(false)}
+                className="text-[10px] font-mono font-bold text-slate-400 border border-slate-200 hover:border-slate-300 rounded px-1.5 py-0.5 bg-slate-50 transition-colors uppercase cursor-pointer"
+              >
+                Esc
+              </button>
+            </div>
+
+            {/* Results body */}
+            <div className="max-h-80 overflow-y-auto p-2 flex flex-col gap-1">
+              {searchQuery ? (
+                searchResults.length > 0 ? (
+                  searchResults.map((evt) => (
+                    <Link
+                      key={evt.id}
+                      href={`/events/${evt.slug}`}
+                      onClick={() => setShowSearchModal(false)}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group text-left"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-mono font-bold text-pink-500 uppercase tracking-wide">{evt.category}</span>
+                        <h4 className="text-[13px] font-extrabold text-slate-800 group-hover:text-pink-500 transition-colors font-primary line-clamp-1">{evt.name}</h4>
+                        <span className="text-[10px] text-slate-400 font-mono uppercase">{evt.city}</span>
+                      </div>
+                      <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-slate-400 text-xs font-secondary">
+                    No matching events found for "{searchQuery}"
+                  </div>
+                )
+              ) : (
+                <div className="p-3 flex flex-col gap-2.5">
+                  <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest block">Trending Searches</span>
+                  <div className="flex flex-col gap-1.5">
+                    {[
+                      { name: "Miss & Mr Traditional India 2026", href: "/competitions" },
+                      { name: "Abhyudaya Mega Cultural Fest", href: "/events/recharge-cultural-odyssey-2026" },
+                      { name: "Nataraja Classical Dance Clash", href: "/events/national-vibe-rhythm-dance-cup" }
+                    ].map((item, idx) => (
+                      <Link 
+                        key={idx}
+                        href={item.href}
+                        onClick={() => setShowSearchModal(false)}
+                        className="text-xs text-indigo-600 hover:text-pink-500 font-semibold flex items-center gap-1.5 transition-colors"
+                      >
+                        <Zap size={11} className="text-amber-500 font-bold" /> {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-50/80 border-t border-slate-100 py-2.5 px-4 flex items-center justify-between text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">
+              <span>Type query to search</span>
+              <Link 
+                href={`/events?q=${searchQuery}`} 
+                onClick={() => setShowSearchModal(false)}
+                className="text-slate-505 hover:text-pink-500 transition-colors flex items-center gap-0.5"
+              >
+                View Directory <ArrowRight size={10} />
+              </Link>
+            </div>
           </div>
         </div>
       )}

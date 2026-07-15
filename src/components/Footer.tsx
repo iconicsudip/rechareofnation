@@ -25,10 +25,10 @@ export default function Footer() {
   return (
     <footer className="border-t border-[rgba(255,255,255,0.06)] bg-[#070a13] pt-16 pb-8 text-gray-400 text-sm mt-auto text-left">
       <div className="container">
-        
+
         {/* Top Footer Section: Info & Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
-          
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
           {/* Column 1: Brand Info (2 Columns wide on large screens) */}
           <div className="lg:col-span-2 flex flex-col gap-5">
             {/* Two-tone logo with ticket icon */}
@@ -38,7 +38,7 @@ export default function Footer() {
                 RECHARGE<span className="text-pink-500">NATION</span>
               </span>
             </Link>
-            
+
             <p className="leading-relaxed text-xs max-w-sm font-secondary">
               Recharge Nation is the central portal for premium cultural programs, nationwide dance and singing clashes, style showcases, culinary festivals, and industrial exhibitions across India.
             </p>
@@ -92,7 +92,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-primary font-semibold text-xs uppercase tracking-wider mb-5">For Participants</h4>
             <div className="flex flex-col gap-3 text-xs">
-              <Link href="/events/india-youth-haute-couture-fashion-week-2026" className="hover:text-white transition-colors flex items-center gap-1">
+              <Link href="/competitions" className="hover:text-white transition-colors flex items-center gap-1">
                 <ChevronRight size={12} className="text-purple-400" /> Mr/Miss Traditional 2026
               </Link>
               <Link href="/events/national-vibe-rhythm-dance-cup" className="hover:text-white transition-colors flex items-center gap-1">
@@ -104,30 +104,9 @@ export default function Footer() {
               <Link href="/dashboard" className="hover:text-white transition-colors flex items-center gap-1">
                 <ChevronRight size={12} className="text-purple-400" /> Download Participant ID
               </Link>
-            </div>
-          </div>
-
-          {/* Column 4: App Download */}
-          <div>
-            <h4 className="text-white font-primary font-semibold text-xs uppercase tracking-wider mb-5">App Download</h4>
-            <div className="flex flex-col gap-3.5">
-              {/* App Store representation */}
-              <div className="flex items-center gap-2.5 px-4 py-2 border border-gray-800 bg-gray-900/40 rounded-xl cursor-pointer hover:border-cyan-500/35 transition-colors">
-                <div className="w-5 h-5 bg-white rounded-md flex items-center justify-center text-slate-950 font-black text-xs font-mono">A</div>
-                <div className="text-left font-mono text-[9px]">
-                  <span className="text-gray-500 block leading-none">Download on the</span>
-                  <span className="font-bold text-white text-[11px] leading-normal">App Store</span>
-                </div>
-              </div>
-              
-              {/* Play Store representation */}
-              <div className="flex items-center gap-2.5 px-4 py-2 border border-gray-800 bg-gray-900/40 rounded-xl cursor-pointer hover:border-cyan-500/35 transition-colors">
-                <div className="w-5 h-5 bg-cyan-500 rounded-md flex items-center justify-center text-slate-950 font-black text-xs font-mono">G</div>
-                <div className="text-left font-mono text-[9px]">
-                  <span className="text-gray-500 block leading-none">Get it on</span>
-                  <span className="font-bold text-white text-[11px] leading-normal">Google Play</span>
-                </div>
-              </div>
+              <Link href="/dashboard" className="hover:text-white transition-colors flex items-center gap-1 mt-1 border-t border-white/5 pt-1">
+                <ChevronRight size={12} className="text-amber-500" /> Admin Portal Access
+              </Link>
             </div>
           </div>
 
@@ -136,14 +115,14 @@ export default function Footer() {
         {/* Footer Bottom bar */}
         <div className="border-t border-[rgba(255,255,255,0.06)] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
           <p>&copy; {currentYear} Recharge Nation. All rights reserved.</p>
-          
+
           <div className="flex items-center gap-6">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
-            
+
             {/* Back to top button */}
-            <button 
-              onClick={scrollToTop} 
+            <button
+              onClick={scrollToTop}
               className="p-2.5 bg-[rgba(255,255,255,0.03)] border border-gray-800 hover:border-white rounded-lg text-gray-400 hover:text-white transition-all flex items-center justify-center shadow"
               title="Back to Top"
             >

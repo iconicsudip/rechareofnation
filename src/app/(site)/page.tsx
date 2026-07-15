@@ -6,11 +6,12 @@ import {
   Search, Calendar, MapPin, Trophy, ArrowRight, Star, Heart, 
   Flame, Compass, ChevronRight, Music, Sparkles, Paintbrush, 
   HelpCircle, Eye, Mail, Award, CheckCircle, Ticket, Layers, 
-  Laptop, Briefcase, GraduationCap, Globe, Shield, RefreshCw, ChevronLeft 
+  Laptop, Briefcase, GraduationCap, Globe, Shield, RefreshCw, ChevronLeft, BookOpen, Send
 } from "lucide-react";
-import { ApiClient, Event, Sponsor, GalleryItem } from "@/lib/api-client";
-import { Form, Input, Select, ConfigProvider } from "antd";
+import { ApiClient, Sponsor, GalleryItem } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
+import EventCard from "@/components/EventCard";
+import CompetitionCard from "@/components/CompetitionCard";
 
 // Carousel slides seed with high-end digital styling specs
 const HERO_SLIDES = [
@@ -67,34 +68,206 @@ const HERO_SLIDES = [
   }
 ];
 
+const HOMEPAGE_EVENTS = [
+  {
+    id: "ev-1",
+    slug: "recharge-cultural-odyssey-2026",
+    name: "ABHYUDAYA - NATIONAL CULTURAL MEGA FESTIVAL",
+    category: "Festivals",
+    city: "New Delhi",
+    price: 499,
+    date: "2026-10-14",
+    rating: 4.9,
+    reviews: 1420,
+    bannerUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
+    desc: "A grand celebration of Indian heritage, featuring classical dances, folk music, and theatrical displays.",
+    tag: "SELLING FAST"
+  },
+  {
+    id: "ev-6",
+    slug: "india-smart-city-tech-trade-expo-2026",
+    name: "INDIA SMART-CITY & TECH TRADE EXPO 2026",
+    category: "Expos",
+    city: "Mumbai",
+    price: 199,
+    date: "2026-11-04",
+    rating: 4.7,
+    reviews: 840,
+    bannerUrl: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80",
+    desc: "Exhibiting smart infrastructure, next-generation IoT hardware, clean energy, and mobility techs.",
+    tag: "SELLING FAST"
+  },
+  {
+    id: "ev-4",
+    slug: "deccan-founders-vcs-summit",
+    name: "DECCAN FOUNDERS & VCS SUMMIT",
+    category: "Business Networking",
+    city: "Bengaluru",
+    price: 1299,
+    date: "2026-09-22",
+    rating: 4.8,
+    reviews: 310,
+    bannerUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80",
+    desc: "Connecting high-growth startups, venture capitalists, corporate sponsors, and tech leaders."
+  },
+  {
+    id: "ev-2",
+    slug: "advanced-aero-modeling-uav-workshop",
+    name: "ADVANCED AERO-MODELING & UAV WORKSHOP",
+    category: "Workshops",
+    city: "Chennai",
+    price: 2499,
+    date: "2026-12-05",
+    rating: 4.9,
+    reviews: 195,
+    bannerUrl: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=600&q=80",
+    desc: "Master the design, construction and flying of unmanned aerial vehicles and modern RC aero-models."
+  }
+];
+
+const ARENAS = [
+  {
+    id: "ar-1",
+    name: "MISS & MR. TRADITIONAL INDIA 2026",
+    city: "BENGALURU",
+    prizePool: "25,00,000",
+    registrationFee: 1500,
+    bannerUrl: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80",
+    desc: "National grand finale showcasing handloom couture, traditional attire audits, and multi-state cultural representation."
+  },
+  {
+    id: "ar-2",
+    name: "NATARAJA INDIAN CLASSICAL & CONTEMPORARY DANCE CLASH",
+    city: "NEW DELHI",
+    prizePool: "5,00,000",
+    registrationFee: 750,
+    bannerUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
+    desc: "High-octane classical and modern fusion solo/group battle with top-tier choreographer panels and media coverage."
+  },
+  {
+    id: "ar-3",
+    name: "SWARANJALI NATIONAL VOCAL TALENT HUNT",
+    city: "KOLKATA",
+    prizePool: "3,50,000",
+    registrationFee: 500,
+    bannerUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
+    desc: "A search for India's finest voices, featuring classical thumri, light music, and contemporary vocal face-offs."
+  }
+];
+
+const CARNIVALS = [
+  {
+    id: "fest-1",
+    slug: "recharge-cultural-odyssey-2026",
+    name: "ABHYUDAYA - NATIONAL CULTURAL MEGA FESTIVAL",
+    city: "New Delhi",
+    date: "2026-10-14",
+    bannerUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "fest-2",
+    slug: "grand-dandiya-utsav-navratri-2026",
+    name: "GRAND DANDIYA UTSAV - NAVRATRI CELEBRATIONS 2026",
+    city: "Mumbai",
+    date: "2026-10-18",
+    bannerUrl: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "fest-3",
+    slug: "recharge-cultural-odyssey-2026", // link to existing details or lists
+    name: "BENGALURU SUNBURN FUSION & FOOD CARNIVAL 2026",
+    city: "Bengaluru",
+    date: "2026-11-05",
+    bannerUrl: "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "fest-4",
+    slug: "recharge-cultural-odyssey-2026", // link to existing details or lists
+    name: "SUNBURN GOA FESTIVAL & BEACH CARNIVAL 2026",
+    city: "Goa",
+    date: "2026-12-28",
+    bannerUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"
+  }
+];
+
+const EXPOS = [
+  {
+    id: "exp-1",
+    slug: "india-smart-city-tech-trade-expo-2026",
+    name: "INDIA SMART-CITY & TECH TRADE EXPO 2026",
+    city: "Mumbai",
+    bannerUrl: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "exp-2",
+    slug: "ev-future-mobility-india-expo-2026",
+    name: "EV & FUTURE MOBILITY INDIA EXPO 2026",
+    city: "Chennai",
+    bannerUrl: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "exp-3",
+    slug: "india-smart-city-tech-trade-expo-2026", // link to existing details or lists
+    name: "INDIA DEFENSE & AEROSPACE TECH EXPO 2026",
+    city: "New Delhi",
+    bannerUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    id: "exp-4",
+    slug: "india-smart-city-tech-trade-expo-2026", // link to existing details or lists
+    name: "SUSTAINABLE ENERGY & GREEN GRID EXPO 2026",
+    city: "Hyderabad",
+    bannerUrl: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80"
+  }
+];
+
+const ESSAYS = [
+  {
+    title: "THE REVIVAL OF TRADITIONAL HANDLOOM IN MODERN INDIAN PAGEANTRY",
+    author: "SUNITA MEHRA",
+    role: "FASHION LEAD",
+    date: "Jun 28, 2026",
+    excerpt: "How Miss & Mr. Traditional India 2026 is redirecting global runway attention to local weaving clusters in Benaras, Pochampally, and Kanjeevaram.",
+    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    title: "DESIGNING HIGHLY FRICTIONLESS EVENT TICKETING SYSTEMS FOR SCALE",
+    author: "RAJIV MALHOTRA",
+    role: "LEAD ARCHITECT",
+    date: "May 14, 2026",
+    excerpt: "Inside the engineering patterns that handle high-concurrency ticket surges during multi-city festival announcements in India.",
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80"
+  }
+];
+
+const TESTIMONIALS = [
+  { quote: "Booking the VIP tickets for Abhyudaya was incredibly smooth on Recharge Nation. The Smart QR wristband scanned immediately at Gates 1 and 3 without any check-in friction. Best ticketing experience in India.", author: "Rajesh Malhotra", role: "Auto Expo Sponsor" },
+  { quote: "I registered as a participant for Mr. Traditional India. The Participant ID Badge looked beautiful with my headshot, and security scanned me straight backstage in seconds. Extremely organized platform.", author: "Divya Nair", role: "Contestant Dancer" },
+  { quote: "We booked visitor passes for our college coding club to visit the Mumbai Tech Trade Expo. Scanning was extremely rapid. The interactive floor plan links inside our dashboard saved us so much time.", author: "Karthik Subramaniam", role: "General Badge Holder" },
+  { quote: "The runway coordinators at Miss & Mr. Traditional India 2026 were top-tier. My designer dress was handled with premium care, and our profile was broadcasted to major fashion agency sponsors.", author: "Ananya Sharma", role: "Fashion Designer" },
+  { quote: "Managing a corporate panel at Pragati Maidan can be chaotic, but the real-time registration desk dashboard let us track attendee metrics and check-in speeds with absolute accuracy.", author: "Vikram Seth", role: "Summit Convener" },
+  { quote: "Sunburn Goa beach carnival was unmatched! Getting my pass verified digitally via the WhatsApp ticket bot took less than 15 seconds. No queues, no hassle, just pure music vibes.", author: "Priya Patel", role: "Festival Visitor" },
+  { quote: "I love the clean interface of the national events portal. Filtering events by category (Expos, Carnivals, Arenas) is fast, and the layout looks so beautiful in both light and dark backgrounds.", author: "Rohan Gupta", role: "Tech Enthusiast" },
+  { quote: "Our college cultural committee partnered with Recharge of Nation to host our regional zonal qualifiers. The platform helped us sell 3,000 passes in less than 48 hours without any downtime.", author: "Sneha Reddy", role: "College Ambassador" },
+  { quote: "Highly recommend getting the Premium VIP pass! The exclusive lounge access, early check-in at the stadium, and complimentary delegate kit made the entire event feel extremely high-end.", author: "Amit Verma", role: "VIP Pass Holder" }
+];
+
 export default function HomePage() {
   const router = useRouter();
 
-  const handleSearchSubmit = () => {
-    const searchParam = searchQuery === "" && searchCategory !== "All Segments" ? searchCategory : searchQuery;
-    const locationParam = searchCity !== "All Cities" ? searchCity : "All";
-    router.push(`/events?search=${encodeURIComponent(searchParam)}&location=${locationParam}`);
-  };
-
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [activeSegment, setActiveSegment] = useState("Festivals");
   const [trendingCity, setTrendingCity] = useState("New Delhi");
   
   // Custom API seeded lists states
-  const [events, setEvents] = useState<Event[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchCategory, setSearchCategory] = useState("All Segments");
-  const [searchCity, setSearchCity] = useState("All Cities");
-  const [searchDate, setSearchDate] = useState("Any Date");
+  const [searchCategory, setSearchCategory] = useState("All");
+  const [searchCity, setSearchCity] = useState("All");
+  const [searchDate, setSearchDate] = useState("All");
 
-  // NFC Card flip state
-  const [isNfcFlipped, setIsNfcFlipped] = useState(false);
-
-  // Newsletter state
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
@@ -106,81 +279,25 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch list data from LocalStorage Mock REST engine
+  // Fetch list data
   useEffect(() => {
     const fetchData = async () => {
-      const allEvents = await ApiClient.getEvents();
       const allSponsors = await ApiClient.getSponsors();
       const allGallery = await ApiClient.getGalleryItems();
-      
-      setEvents(allEvents);
       setSponsors(allSponsors);
       setGallery(allGallery);
     };
     fetchData();
   }, []);
 
-  const handleNextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-  };
-
-  const handlePrevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-  };
-
-  const activeHero = HERO_SLIDES[currentSlide];
-
-  // Map segments to categories in our mockup
-  const getCategoryFilter = (segment: string) => {
-    switch (segment) {
-      case "Festivals":
-        return ["Cultural Programs", "Food Festivals"];
-      case "Competitions":
-        return ["Dance Competitions", "Educational Events"];
-      case "Expos":
-        return ["Trade Expos", "Art & Craft"];
-      case "Workshops":
-        return ["Educational Events", "Art & Craft"];
-      case "Corporate":
-        return ["Trade Expos"];
-      case "School & College":
-        return ["Educational Events"];
-      case "Business Networking":
-        return ["Trade Expos"];
-      default:
-        return [];
-    }
-  };
-
-  const activeCategoryFilter = getCategoryFilter(activeSegment);
-  const matchingEvents = events.filter(e => activeCategoryFilter.includes(e.category));
-  const featuredHeadliners = matchingEvents.length > 0 ? matchingEvents.slice(0, 6) : events.filter(e => e.isUpcoming).slice(0, 6);
-  const nationalArenas = events.filter(e => e.registrationFee && e.isUpcoming).slice(0, 4);
-  const megaCarnivals = events.filter(e => e.category === "Cultural Programs" || e.category === "Food Festivals").slice(0, 3);
-  const innovationExpos = events.filter(e => e.category === "Trade Expos" || e.category === "Art & Craft").slice(0, 3);
-
-  // Dynamic Trending Events List Based on City selection
-  const trendingEvents = {
-    "New Delhi": [
-      { id: "tr-1", title: "Recharge Cultural Odyssey", category: "Cultural Programs", rating: 4.9, reviews: 120, venue: "Jawaharlal Nehru Stadium", price: 299, image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80", desc: "India's largest multi-state heritage festival celebrating folk, cuisine, and design." },
-      { id: "tr-2", title: "Elite Supercar Automotive Clash", category: "Trade Expos", rating: 4.8, reviews: 90, venue: "BIC Arena, Noida", price: 499, image: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=600&q=80", desc: "Tuned supercars, drift tracks, and hypercar networking corridors." },
-      { id: "tr-3", title: "Cyber-Security Seminars", category: "Educational Events", rating: 4.7, reviews: 55, venue: "Pragati Maidan", price: 199, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80", desc: "Keynotes on zero-trust architectures and networking with security leaders." }
-    ],
-    "Mumbai": [
-      { id: "tr-4", title: "Youth Couture Fashion Week", category: "Fashion Shows", rating: 4.9, reviews: 140, venue: "Taj Lands End Ballroom", price: 499, image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80", desc: "Sustainable handloom weaves and modern streetwear designed by top youth minds." },
-      { id: "tr-5", title: "India Tech Trade Expo 2026", category: "Trade Expos", rating: 4.8, reviews: 110, venue: "Jio Convention Centre", price: 499, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80", desc: "Exhibiting AI, FinTech, and Green energy solutions to global VC firms." },
-      { id: "tr-6", title: "Indie Rock Jam Fest", category: "Cultural Programs", rating: 4.6, reviews: 80, venue: "NESCO, Goregaon", price: 699, image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80", desc: "High-energy live rock ensembles from college bands across Maharashtra." }
-    ],
-    "Bengaluru": [
-      { id: "tr-7", title: "India Culinary & Food Festival", category: "Food Festivals", rating: 4.8, reviews: 200, venue: "Palace Grounds", price: 150, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80", desc: "Live cooking masterclasses and native street eats from 20 Indian states." },
-      { id: "tr-8", title: "Art Expressions Exhibition", category: "Art & Craft", rating: 4.7, reviews: 75, venue: "Chitrakala Parishath", price: 99, image: "https://images.unsplash.com/photo-1459908272638-55f467b2f7a9?auto=format&fit=crop&w=600&q=80", desc: "Hand-spun textiles, clay pottery workshops, and heritage painting galleries." },
-      { id: "tr-9", title: "FinTech Hackathon & Expo", category: "Trade Expos", rating: 4.9, reviews: 95, venue: "KTPO, Whitefield", price: 250, image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=600&q=80", desc: "Connecting developers, tech creators, and fintech startup sponsors." }
-    ],
-    "Chennai": [
-      { id: "tr-10", title: "Nataraja Classical Dance Arena", category: "Dance Competitions", rating: 4.9, reviews: 105, venue: "Kalakshetra Foundation", price: 199, image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80", desc: "Classical Bharatnatyam and semi-classical fusion group showdowns." },
-      { id: "tr-11", title: "National Brainiac Quiz", category: "Quiz Competitions", rating: 4.6, reviews: 40, venue: "IIT Madras Hall", price: 99, image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80", desc: "High-octane science, general knowledge, and history quiz showdowns." },
-      { id: "tr-12", title: "Carnatic Vocal Symphony", category: "Singing Competitions", rating: 4.8, reviews: 65, venue: "Music Academy Hall", price: 300, image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80", desc: "Elite vocal recitals and violin orchestra accompaniments." }
-    ]
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    let url = `/events?`;
+    if (searchQuery) url += `search=${encodeURIComponent(searchQuery)}&`;
+    if (searchCategory !== "All") url += `category=${encodeURIComponent(searchCategory)}&`;
+    if (searchCity !== "All") url += `location=${encodeURIComponent(searchCity)}&`;
+    if (searchDate !== "All") url += `price=${encodeURIComponent(searchDate)}&`; // generic filter mapping
+    router.push(url);
   };
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -192,285 +309,200 @@ export default function HomePage() {
     }
   };
 
+  const activeHero = HERO_SLIDES[currentSlide];
+
+  // Dynamic Trending Events List Based on City selection
+  const trendingEvents = {
+    "New Delhi": [
+      { id: "tr-1", title: "ABHYUDAYA - NATIONAL CULTURAL MEGA FESTIVAL", category: "FESTIVALS", rating: 4.9, reviews: 1420, venue: "Jawaharlal Nehru Stadium", price: 299, image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80", desc: "India's largest multi-state heritage festival celebrating folk, cuisine, and design." },
+      { id: "tr-2", title: "INDICORP LEADERSHIP & SPORTS SUMMIT 2026", category: "CORPORATE", rating: 4.6, reviews: 220, venue: "Pragati Maidan", price: 1500, image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80", desc: "Strategic corporate leadership forums, panel discussions, team building audits, and CEO mixers." },
+      { id: "tr-3", title: "INDO-SEC: NATIONAL CYBER DEFENCE CONFERENCE", category: "CONFERENCES", rating: 4.6, reviews: 450, venue: "JNS Auditorium", price: 799, image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80", desc: "National security panel debates, threat matrix modules, white-hat workshops, and digital assets audit." }
+    ],
+    "Mumbai": [
+      { id: "tr-4", title: "GRAND DANDIYA UTSAV - NAVRATRI CELEBRATIONS 2026", category: "FESTIVALS", rating: 4.9, reviews: 980, venue: "Jio Convention Centre", price: 350, image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&q=80", desc: "Dance to traditional beats with India's top Garba artists, premium catering, and grand awards." },
+      { id: "tr-5", title: "INDIA SMART-CITY & TECH TRADE EXPO 2026", category: "EXPOS", rating: 4.8, reviews: 840, venue: "Jio World Hall", price: 199, image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80", desc: "Exhibiting smart infrastructure, next-generation IoT hardware, clean energy, and mobility techs." }
+    ],
+    "Bengaluru": [
+      { id: "tr-6", title: "DECCAN FOUNDERS & VCS SUMMIT", category: "BUSINESS NETWORKING", rating: 4.8, reviews: 310, venue: "Palace Grounds", price: 1299, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80", desc: "Connecting high-growth startups, venture capitalists, corporate sponsors, and tech leaders." }
+    ],
+    "Chennai": [
+      { id: "tr-7", title: "ADVANCED AERO-MODELING & UAV WORKSHOP", category: "WORKSHOPS", rating: 4.9, reviews: 195, venue: "IIT Madras Hall", price: 2499, image: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=600&q=80", desc: "Master the design, construction and flying of unmanned aerial vehicles and modern RC aero-models." }
+    ]
+  };
+
   return (
     <div className="flex flex-col text-left">
       
       {/* 1. HERO BANNER (CAROUSEL) */}
-      <section className="relative min-h-[90vh] lg:min-h-[95vh] flex items-center justify-center pt-24 pb-20 overflow-hidden">
-        {/* Background Image of active slide */}
+      <section className="relative min-h-[80vh] lg:min-h-[85vh] flex items-center justify-center pt-24 pb-20 overflow-hidden dark-bg">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform scale-102"
           style={{ backgroundImage: `url('${activeHero.image}')` }}
         ></div>
         
-        {/* Dark Overlay gradient for copy visibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/50 backdrop-blur-xs"></div>
-        
-        {/* Tech grid texture overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(255,255,255,0.015)_1px,_transparent_1px)] bg-[size:30px_30px] opacity-35"></div>
 
-        <div className="container relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Hero Left Content (7 Columns) - Auto-slideable */}
-          <div key={currentSlide} className="lg:col-span-7 flex flex-col gap-6 select-none animate-fade-in-up">
-            <span className="inline-flex w-fit items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-mono font-bold tracking-widest uppercase shadow-sm animate-pulse">
+        <div className="container relative z-10">
+          <div className="max-w-4xl text-left flex flex-col gap-6">
+            <span className="text-pink-500 font-mono text-xs font-black tracking-widest uppercase">
               {activeHero.badge}
             </span>
-            
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-tight font-primary text-white shadow-text-glow">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl tracking-tighter leading-none font-primary text-white shadow-text-glow uppercase">
               {activeHero.titleLine1} <br />
-              <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent">{activeHero.titleLine2}</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-indigo-400 to-cyan-400 font-primary">
+                {activeHero.titleLine2}
+              </span>
             </h1>
-            
-            <p className="text-gray-400 text-sm sm:text-base max-w-xl leading-relaxed font-secondary">
+            <p className="text-gray-300 text-xs sm:text-sm md:text-base font-secondary leading-relaxed max-w-xl">
               {activeHero.desc}
             </p>
-
             <div className="flex flex-wrap gap-4 mt-2">
-              <Link href={`/events/${activeHero.slug}`} className="btn btn-primary bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-sm tracking-wide rounded-lg px-8 py-4 shadow-neon-pink">
-                Register / Book Pass →
+              <Link href={`/events/${activeHero.slug}`} className="btn btn-primary bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-xs tracking-wide rounded-xl px-8 py-3.5 shadow-neon-pink">
+                BOOK PASS
               </Link>
-              <Link href="/events" className="btn btn-secondary bg-gray-900/50 hover:bg-gray-900 border border-gray-800 text-white font-semibold text-sm rounded-lg px-6 py-4">
-                Browse All Events
+              <Link href="/events" className="btn btn-secondary bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs rounded-xl px-6 py-3.5">
+                EXPLORE ALL
               </Link>
-            </div>
-
-            {/* Carousel Dot Indicators */}
-            <div className="flex items-center gap-2.5 mt-6">
-              {HERO_SLIDES.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentSlide === idx ? "w-8 bg-pink-500" : "w-2 bg-gray-700 hover:bg-gray-500"
-                  }`}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
             </div>
           </div>
-
-          <div className="lg:col-span-5 flex justify-center lg:justify-end relative">
-            <div className="glass-panel p-6 rounded-3xl border-[rgba(255,255,255,0.08)] bg-slate-950/80 shadow-2xl flex flex-col gap-5 w-full max-w-[430px]">
-              
-              {/* Header inside Search Widget */}
-              <div className="flex flex-col gap-1 text-left border-b border-[rgba(255,255,255,0.06)] pb-3">
-                <span className="text-[9px] font-mono tracking-widest text-cyan-400 font-bold uppercase">QUICK ACCESS PORTAL</span>
-                <h3 className="text-base font-black text-white font-primary uppercase">Find Your Pass</h3>
-              </div>
-
-              <ConfigProvider
-                theme={{
-                  token: {
-                    colorPrimary: '#ec4899', // Pink
-                    colorBgContainer: 'rgba(9, 13, 26, 0.6)',
-                    colorBorder: 'rgba(255, 255, 255, 0.08)',
-                    colorText: '#ffffff',
-                    colorTextPlaceholder: '#6b7280',
-                    borderRadius: 12,
-                    controlHeight: 42,
-                  },
-                }}
-              >
-                <Form 
-                  layout="vertical" 
-                  onFinish={handleSearchSubmit} 
-                  className="flex flex-col gap-1 text-left w-full mt-1"
-                >
-                  
-                  {/* Keyword Field */}
-                  <Form.Item 
-                    label={<span className="text-[9.5px] text-gray-500 font-mono font-bold uppercase tracking-wider leading-none">Keyword Search</span>}
-                    className="mb-0 flex flex-col gap-1.5"
-                  >
-                    <Input 
-                      prefix={<Search className="text-gray-500 mr-1.5" size={14} />}
-                      placeholder="Events, venues, artists..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="antd-cyber-input w-full"
-                    />
-                  </Form.Item>
-
-                  {/* Category Field */}
-                  <Form.Item 
-                    label={<span className="text-[9.5px] text-gray-500 font-mono font-bold uppercase tracking-wider leading-none">Category</span>}
-                    className="mb-0 flex flex-col gap-1.5"
-                  >
-                    <Select
-                      value={searchCategory}
-                      onChange={(val) => setSearchCategory(val)}
-                      suffixIcon={<Layers className="text-gray-500" size={14} />}
-                      className="antd-cyber-select w-full"
-                      options={[
-                        { value: "All Segments", label: "All Categories" },
-                        { value: "Cultural Programs", label: "Cultural Programs" },
-                        { value: "Dance Competitions", label: "Dance Competitions" },
-                        { value: "Trade Expos", label: "Trade Expos" },
-                        { value: "Food Festivals", label: "Food Festivals" }
-                      ]}
-                      classNames={{ popup: { root: "antd-cyber-popup" } }}
-                    />
-                  </Form.Item>
-
-                  {/* City/Location Field */}
-                  <Form.Item 
-                    label={<span className="text-[9.5px] text-gray-500 font-mono font-bold uppercase tracking-wider leading-none">City / Location</span>}
-                    className="mb-0 flex flex-col gap-1.5"
-                  >
-                    <Select
-                      value={searchCity}
-                      onChange={(val) => setSearchCity(val)}
-                      suffixIcon={<MapPin className="text-gray-500" size={14} />}
-                      className="antd-cyber-select w-full"
-                      options={[
-                        { value: "All Cities", label: "All Cities" },
-                        { value: "New Delhi", label: "New Delhi" },
-                        { value: "Mumbai", label: "Mumbai" },
-                        { value: "Bengaluru", label: "Bengaluru" },
-                        { value: "Chennai", label: "Chennai" }
-                      ]}
-                      classNames={{ popup: { root: "antd-cyber-popup" } }}
-                    />
-                  </Form.Item>
-
-                  {/* Date Field */}
-                  <Form.Item 
-                    label={<span className="text-[9.5px] text-gray-500 font-mono font-bold uppercase tracking-wider leading-none">Select Date</span>}
-                    className="mb-0 flex flex-col gap-1.5"
-                  >
-                    <Select
-                      value={searchDate}
-                      onChange={(val) => setSearchDate(val)}
-                      suffixIcon={<Calendar className="text-gray-500" size={14} />}
-                      className="antd-cyber-select w-full"
-                      options={[
-                        { value: "Any Date", label: "Any Date" },
-                        { value: "2026-10-15", label: "Oct 15, 2026" },
-                        { value: "2026-11-08", label: "Nov 08, 2026" },
-                        { value: "2026-12-05", label: "Dec 05, 2026" }
-                      ]}
-                      classNames={{ popup: { root: "antd-cyber-popup" } }}
-                    />
-                  </Form.Item>
-
-                  {/* Submit Button */}
-                  <button 
-                    type="submit"
-                    className="w-full py-3 rounded-xl text-white flex items-center justify-center gap-2 font-bold text-xs shadow-lg transition-all font-primary uppercase tracking-wide mt-3 cursor-pointer"
-                    style={{ backgroundColor: '#ec4899', color: '#ffffff' }}
-                  >
-                    <Search size={14} />
-                    Search Passes / Badges
-                  </button>
-
-                </Form>
-              </ConfigProvider>
-            </div>
-          </div>
-
         </div>
       </section>
 
+      {/* 2. FLOATING SEARCH PORTAL */}
+      <div className="container relative z-20">
+        <form onSubmit={handleSearchSubmit} className="max-w-5xl mx-auto bg-white border border-slate-200/80 shadow-[0_15px_50px_rgba(0,0,0,0.06)] rounded-[22px] p-4 flex flex-col md:flex-row items-center gap-3 -mt-8">
+          <div className="flex-[1.5] w-full relative">
+            <Search className="absolute left-3.5 top-3.5 text-slate-400" size={15} />
+            <input 
+              type="text" 
+              placeholder="Search Events, Artists, Venues..." 
+              className="w-full text-xs rounded-xl bg-slate-50 border border-slate-100 pl-10 pr-4 py-3.5 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-slate-200"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex-1 w-full relative">
+            <Sparkles className="absolute left-3.5 top-3.5 text-pink-500" size={15} />
+            <select 
+              className="w-full text-xs rounded-xl bg-slate-50 border border-slate-100 pl-10 pr-4 py-3.5 text-slate-700 outline-none cursor-pointer"
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+            >
+              <option value="All">All Categories / Segments</option>
+              <option value="Festivals">Festivals</option>
+              <option value="Competitions">Competitions</option>
+              <option value="Expos">Expos</option>
+              <option value="Workshops">Workshops</option>
+              <option value="Corporate">Corporate</option>
+              <option value="School & College">School & College</option>
+              <option value="Business Networking">Business Networking</option>
+            </select>
+          </div>
+
+          <div className="flex-1 w-full relative">
+            <MapPin className="absolute left-3.5 top-3.5 text-indigo-500" size={15} />
+            <select 
+              className="w-full text-xs rounded-xl bg-slate-50 border border-slate-100 pl-10 pr-4 py-3.5 text-slate-700 outline-none cursor-pointer"
+              value={searchCity}
+              onChange={(e) => setSearchCity(e.target.value)}
+            >
+              <option value="All">All Cities</option>
+              <option value="New Delhi">New Delhi</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Bengaluru">Bengaluru</option>
+              <option value="Chennai">Chennai</option>
+              <option value="Kolkata">Kolkata</option>
+            </select>
+          </div>
+
+          <div className="flex-1 w-full relative">
+            <Calendar className="absolute left-3.5 top-3.5 text-cyan-500" size={15} />
+            <select 
+              className="w-full text-xs rounded-xl bg-slate-50 border border-slate-100 pl-10 pr-4 py-3.5 text-slate-700 outline-none cursor-pointer"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            >
+              <option value="All">Any Date</option>
+              <option value="Today">Today</option>
+              <option value="Weekend">This Weekend</option>
+              <option value="Next30">Next 30 Days</option>
+            </select>
+          </div>
+
+          <button 
+            type="submit"
+            className="bg-[#ec4899] hover:bg-[#db2777] text-white p-3.5 rounded-xl flex items-center justify-center shrink-0 w-full md:w-auto cursor-pointer transition-colors duration-200"
+          >
+            <Search size={16} />
+          </button>
+        </form>
+      </div>
+
       {/* 3. BROWSE SEGMENT FAST-TRACKS */}
-      <section className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-12 bg-[#fbfcfd]">
         <div className="container">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1.5 mb-6 text-left">
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse"></span>
-                <span className="text-[10px] font-mono tracking-widest text-pink-400 font-bold uppercase">EXPLORE CATEGORIES</span>
-              </div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase tracking-tight">BROWSE EVENT CHANNELS</h2>
-              <p className="text-gray-500 text-xs font-secondary leading-relaxed">Navigate through specialized thematic programs, fast-track networks, and arenas.</p>
-            </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+          <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Browse Segment Fast-Tracks</span>
+          <div className="flex flex-wrap gap-2.5 mt-3">
             {[
-              { name: "Festivals", icon: Flame, color: "text-red-400 border-red-500/20 hover:border-red-500/50 hover:bg-red-950/20 hover-neon-pink", count: "05", label: "CARNIVALS" },
-              { name: "Competitions", icon: Trophy, color: "text-amber-400 border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-950/20 hover-neon-pink", count: "08", label: "ARENAS" },
-              { name: "Expos", icon: Laptop, color: "text-cyan-400 border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-950/20 hover-neon-pink", count: "03", label: "STALLS" },
-              { name: "Workshops", icon: Paintbrush, color: "text-purple-400 border-purple-500/20 hover:border-purple-500/50 hover:bg-purple-950/20 hover-neon-pink", count: "06", label: "ACADEMY" },
-              { name: "Corporate", icon: Briefcase, color: "text-indigo-400 border-indigo-500/20 hover:border-indigo-500/50 hover:bg-indigo-950/20 hover-neon-pink", count: "04", label: "SUMMITS" },
-              { name: "School & College", icon: GraduationCap, color: "text-green-400 border-green-500/20 hover:border-green-500/50 hover:bg-green-950/20 hover-neon-pink", count: "07", label: "CAMPUS" },
-              { name: "Business Networking", icon: Globe, color: "text-orange-400 border-orange-500/20 hover:border-orange-500/50 hover:bg-orange-950/20 hover-neon-pink", count: "05", label: "NETWORKS" }
+              { name: "Festivals", icon: Flame, bg: "bg-red-50/65", border: "border-red-100", text: "text-red-650" },
+              { name: "Competitions", icon: Trophy, bg: "bg-amber-50/65", border: "border-amber-100", text: "text-amber-650" },
+              { name: "Expos", icon: Laptop, bg: "bg-cyan-50/65", border: "border-cyan-100", text: "text-cyan-650" },
+              { name: "Workshops", icon: BookOpen, bg: "bg-purple-50/65", border: "border-purple-100", text: "text-purple-650" },
+              { name: "Corporate", icon: Briefcase, bg: "bg-indigo-50/65", border: "border-indigo-100", text: "text-indigo-650" },
+              { name: "School & College", icon: GraduationCap, bg: "bg-emerald-50/65", border: "border-emerald-100", text: "text-emerald-650" },
+              { name: "Business Networking", icon: Globe, bg: "bg-orange-50/65", border: "border-orange-100", text: "text-orange-650" }
             ].map((seg) => {
               const Icon = seg.icon;
-              const isSelected = activeSegment === seg.name;
               return (
-                <button
+                <Link
                   key={seg.name}
-                  onClick={() => {
-                    setActiveSegment(seg.name);
-                    setTimeout(() => {
-                      document.getElementById("spotlight-section")?.scrollIntoView({ behavior: "smooth" });
-                    }, 50);
-                  }}
-                  className={`glass-panel p-4 rounded-2xl flex items-center gap-3 border transition-all duration-300 text-left group relative min-h-[84px] overflow-hidden cursor-pointer ${seg.color} ${
-                    isSelected ? "ring-2 ring-pink-500 ring-offset-2 ring-offset-slate-950 border-pink-500/60 bg-[#0e1424]" : "bg-[#070b13]/60"
-                  }`}
+                  href={`/events?category=${seg.name}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full border ${seg.bg} ${seg.border} ${seg.text} text-xs font-bold hover:scale-102 transition-transform duration-200`}
                 >
-                  {/* Neon Left Accent Indicator */}
-                  <div 
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-r transition-all duration-300 ${
-                      isSelected ? "h-12 bg-pink-500" : "h-0 bg-cyan-400 group-hover:h-8"
-                    }`}
-                  ></div>
-
-                  {/* Left Column: Styled Icon Wrapper */}
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-900/80 border border-gray-800 shrink-0 group-hover:scale-105 transition-transform duration-300">
-                    <Icon size={16} />
-                  </div>
-
-                  {/* Right Column: Stacked text details */}
-                  <div className="flex flex-col gap-0.5 text-left pr-4">
-                    <span className="text-[11px] text-white font-extrabold font-primary uppercase tracking-tight leading-tight group-hover:text-cyan-400 transition-colors">
-                      {seg.name}
-                    </span>
-                    <span className="text-[7px] text-gray-500 font-mono tracking-widest font-bold uppercase leading-none">
-                      {seg.label}
-                    </span>
-                  </div>
-
-                  {/* Absolute Top Right Count Badge - Highly Visible Neon Style */}
-                  <span className="absolute top-2.5 right-2.5 text-[9.5px] font-mono font-black text-pink-400 bg-pink-500/10 px-1.5 py-0.5 rounded border border-pink-500/20 shadow-[0_0_8px_rgba(236,72,153,0.15)] group-hover:text-cyan-400 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/20 transition-all duration-300">
-                    {seg.count}
-                  </span>
-                </button>
+                  <Icon size={12} />
+                  <span>{seg.name}</span>
+                </Link>
               );
             })}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
       {/* 4. DISCOVER NATIONAL HUBS */}
-      <section className="section-dark-2 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="border-b border-gray-800 pb-5 mb-10 text-left">
-            <h2 className="text-2xl font-black tracking-tight text-white font-primary uppercase">DISCOVER NATIONAL HUBS</h2>
-            <p className="text-gray-500 text-xs mt-1.5">Nationwide physical infrastructures housing Recharge audits & trade expo spaces.</p>
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 mb-8">
+            <div>
+              <h2 className="text-[20px] font-black tracking-tight text-slate-900 font-primary uppercase">DISCOVER NATIONAL HUBS</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Explore specialized arenas across the country. Tap a card to enter.</p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             {[
-              { title: "North Hub (Delhi)", icon: MapPin, desc: "Managing national events at Pragati Maidan and JNS arenas." },
-              { title: "West Corridor (Mumbai)", icon: Briefcase, desc: "Focusing on corporate conventions and youth couture shows." },
-              { title: "South Axis (Bengaluru)", icon: Laptop, desc: "The tech startup trade corridors and food carnivals core." },
-              { title: "Cultural Hub (Kolkata)", icon: Music, desc: "Core base for music talent hunts and theater programs." },
-              { title: "Central Hub (Hyderabad)", icon: Trophy, desc: "Houses the premier classical and modern dance battle arenas." },
-              { title: "Coastal Axis (Goa)", icon: Flame, desc: "Directing summer fusion music carnivals and beach networks." },
-              { title: "Educational Hub (Chennai)", icon: GraduationCap, desc: "Directing school & college national brainiac quiz contests." }
+              { title: "Festivals", icon: Flame, desc: "Grand cultural beats & live stage arts.", bg: "bg-red-50/80", text: "text-red-500", border: "border-red-100/50" },
+              { title: "Competitions", icon: Trophy, desc: "National pageants & skill face-offs.", bg: "bg-amber-50/80", text: "text-amber-500", border: "border-amber-100/50" },
+              { title: "Expos", icon: Laptop, desc: "Smart city tech, gadgets & showcases.", bg: "bg-cyan-50/80", text: "text-cyan-500", border: "border-cyan-100/50" },
+              { title: "Workshops", icon: BookOpen, desc: "Masterclasses & interactive craft jams.", bg: "bg-purple-50/80", text: "text-purple-500", border: "border-purple-100/50" },
+              { title: "Corporate", icon: Briefcase, desc: "Strategic leadership summits & panels.", bg: "bg-indigo-50/80", text: "text-indigo-500", border: "border-indigo-100/50" },
+              { title: "School & College", icon: GraduationCap, desc: "Inter-collegiate fests & youth talent.", bg: "bg-emerald-50/80", text: "text-emerald-500", border: "border-emerald-100/50" },
+              { title: "Business Networking", icon: Globe, desc: "High-tier connections & founder mixers.", bg: "bg-orange-50/80", text: "text-orange-500", border: "border-orange-100/50" }
             ].map((hub, idx) => {
               const Icon = hub.icon;
               return (
-                <div key={idx} className="glass-panel p-6 rounded-2xl border-[rgba(255,255,255,0.06)] hover-neon-violet flex flex-col gap-3 bg-gray-900/10">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                    <Icon size={18} />
+                <Link 
+                  key={idx} 
+                  href={`/events?category=${hub.title}`}
+                  className="bg-white p-5 rounded-[22px] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center justify-center text-center min-h-[210px] group"
+                >
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${hub.bg} border ${hub.border} group-hover:scale-105 transition-transform duration-300`}>
+                    <Icon size={18} className={hub.text} />
                   </div>
-                  <h4 className="font-bold text-white text-sm font-primary uppercase tracking-tight">{hub.title}</h4>
-                  <p className="text-gray-400 text-xs leading-relaxed font-secondary">{hub.desc}</p>
-                </div>
+                  <h4 className="font-extrabold text-slate-900 text-[12.5px] font-primary uppercase tracking-wider mt-4">{hub.title}</h4>
+                  <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-2.5 max-w-[130px] mx-auto">{hub.desc}</p>
+                </Link>
               );
             })}
           </div>
@@ -478,183 +510,90 @@ export default function HomePage() {
       </section>
 
       {/* 5. SPOTLIGHT HEADLINERS */}
-      <section id="spotlight-section" className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="flex items-end justify-between gap-4 mb-10">
+          <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
             <div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase">SPOTLIGHT HEADLINERS</h2>
-              <p className="text-gray-500 text-xs mt-1.5">High-demand trending programs with limited VIP availability.</p>
+              <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">SPOTLIGHT HEADLINERS</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Our highest-rated national highlights. Slide left or right to explore.</p>
             </div>
-            <Link href="/events" className="text-xs font-bold text-pink-400 hover:text-white transition-colors uppercase tracking-wider">
-              See All →
+            <Link href="/events" className="text-xs font-bold text-pink-500 hover:text-pink-650 transition-colors uppercase tracking-wider flex items-center gap-1">
+              <span>See All</span>
+              <ChevronRight size={12} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredHeadliners.map((slide) => (
-              <div 
-                key={slide.id}
-                className="glass-panel overflow-hidden flex flex-col justify-between border-[rgba(255,255,255,0.06)] bg-[#0c1222]/80 rounded-2xl hover-neon-pink group"
-              >
-                {/* Image banner with tags */}
-                <div className="h-48 relative overflow-hidden">
-                  <img src={slide.bannerUrl} alt={slide.name} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-                  {/* Dual Tags top-left */}
-                  <div className="absolute top-3.5 left-3.5 flex gap-2">
-                    <span className="bg-pink-600/90 text-white font-mono text-[8px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                      SELLING FAST
-                    </span>
-                    <span className="bg-gray-950/80 backdrop-blur-sm text-cyan-400 font-mono text-[8px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                      {slide.category.toUpperCase().split(" ")[0]}
-                    </span>
-                  </div>
-                  {/* Location Overlay bottom-left */}
-                  <div className="absolute bottom-3.5 left-3.5 flex items-center gap-1.5 bg-gray-950/70 backdrop-blur-xs px-2.5 py-1 rounded text-[9px] text-gray-300 font-medium">
-                    <MapPin size={10} className="text-cyan-400" />
-                    <span>{slide.venue.split(",")[0]}</span>
-                  </div>
-                </div>
-
-                {/* Below Image details */}
-                <div className="p-6 flex flex-col gap-3">
-                  <div className="flex items-center gap-1.5 text-xs text-amber-400">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => <Star key={i} size={11} fill="currentColor" />)}
-                    </div>
-                    <span className="text-[10px] text-gray-500 font-bold font-mono">(95 reviews)</span>
-                  </div>
-
-                  <h3 className="font-extrabold text-white text-base font-primary line-clamp-1 group-hover:text-cyan-400 transition-colors">
-                    {slide.name}
-                  </h3>
-                  <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed font-secondary">
-                    {slide.summary}
-                  </p>
-
-                  <div className="pt-4 border-t border-gray-800 flex items-center justify-between mt-2">
-                    <div>
-                      <span className="text-[8px] text-gray-500 block font-mono">ADMISSION FROM</span>
-                      <span className="text-white font-black text-sm font-primary">
-                        ₹{slide.ticketPrices.length > 0 ? slide.ticketPrices[0].price : "Free"}
-                      </span>
-                    </div>
-                    <Link href={`/events/${slide.slug}`} className="text-xs font-bold text-pink-400 hover:text-white transition-colors flex items-center gap-1.5">
-                      Book Now <ChevronRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {HOMEPAGE_EVENTS.map((evt) => (
+              <EventCard key={evt.id} {...evt} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* 6. NATIONAL ARENAS (COMPETITIONS) */}
-      <section className="section-dark-2 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      {/* 6. NATIONAL ARENAS */}
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="flex items-end justify-between gap-4 mb-10">
+          <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
             <div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase">NATIONAL ARENAS</h2>
-              <p className="text-gray-500 text-xs mt-1.5">Claim your crown. Register as a participant to win major prize pools.</p>
+              <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">NATIONAL ARENAS</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Claim your crown. Register as a participant to win major prize pools.</p>
             </div>
-            <Link href="/competitions" className="text-xs font-bold text-purple-400 hover:text-white transition-colors uppercase tracking-wider">
-              See All Competitions →
+            <Link href="/competitions" className="text-xs font-bold text-indigo-500 hover:text-indigo-650 transition-colors uppercase tracking-wider flex items-center gap-1">
+              <span>See All Competitions</span>
+              <ChevronRight size={12} />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {nationalArenas.map((arena) => (
-              <div key={arena.id} className="glass-panel overflow-hidden relative h-72 rounded-3xl group border-[rgba(255,255,255,0.06)] hover-neon-violet">
-                <img src={arena.bannerUrl} alt={arena.name} className="w-full h-full object-cover filter brightness-[0.35] group-hover:scale-102 transition-transform duration-700" />
-                
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                
-                {/* Badges top-left */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  <span className="bg-purple-900/80 border border-purple-500/30 text-purple-300 font-mono text-[9px] font-bold px-3 py-1 rounded uppercase tracking-wider">
-                    PRIZE POOL: ₹1,50,000+
-                  </span>
-                  <span className="text-pink-400 font-mono text-[8px] font-bold tracking-widest uppercase text-left">
-                    {arena.city.toUpperCase()} AUDITIONS
-                  </span>
-                </div>
-
-                {/* Bottom details content */}
-                <div className="absolute bottom-5 left-5 right-5 flex justify-between items-end gap-6">
-                  <div className="max-w-[200px] sm:max-w-xs text-left">
-                    <span className="text-[9px] text-gray-500 font-mono font-bold uppercase tracking-wider">{arena.category}</span>
-                    <h3 className="text-lg sm:text-xl font-bold text-white font-primary mt-1 line-clamp-1">{arena.name}</h3>
-                  </div>
-
-                  <div className="shrink-0 flex items-center gap-3">
-                    <div className="text-right">
-                      <span className="text-[8px] text-gray-500 block uppercase leading-none font-mono">ENTRY FEE</span>
-                      <span className="font-bold text-white text-sm">₹{arena.registrationFee}</span>
-                    </div>
-                    <Link 
-                      href={`/events/${arena.slug}`}
-                      className="btn bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-neon-violet transition-all"
-                    >
-                      Register
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {ARENAS.map((arena) => (
+              <CompetitionCard key={arena.id} {...arena} />
             ))}
           </div>
         </div>
       </section>
 
       {/* 7. MEGA CARNIVALS */}
-      <section className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="flex items-end justify-between gap-4 mb-10">
+          <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
             <div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase">MEGA CARNIVALS</h2>
-              <p className="text-gray-500 text-xs mt-1.5">Massive weekend food and heritage festivals open for families and visitors.</p>
+              <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">MEGA CARNIVALS</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Elite cultural spectacles, heavy concert setups, and Navratri dance arenas.</p>
             </div>
-            <Link href="/events" className="text-xs font-bold text-cyan-400 hover:text-white transition-colors uppercase tracking-wider">
-              Explore Festivals →
+            <Link href="/events" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider flex items-center gap-1">
+              <span>Explore Festivals</span>
+              <ChevronRight size={12} />
             </Link>
           </div>
 
-          <div className="flex flex-col gap-5">
-            {megaCarnivals.map((fest) => (
-              <div 
-                key={fest.id}
-                className="glass-panel overflow-hidden grid grid-cols-1 md:grid-cols-12 rounded-2xl hover:border-gray-800 hover-neon-cyan md:h-[220px] bg-slate-950/20"
-              >
-                {/* Image Left */}
-                <div className="md:col-span-4 h-48 md:h-full relative overflow-hidden">
-                  <img src={fest.bannerUrl} alt={fest.name} className="w-full h-full object-cover" />
-                  <div className="absolute top-3.5 left-3.5 bg-red-600 text-white font-mono text-[8px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                    MEGA FEST
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {CARNIVALS.map((fest) => (
+              <div key={fest.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
+                <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
+                  <img src={fest.bannerUrl} alt={fest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                  <span className="absolute top-3 left-3 bg-red-650 text-white font-mono text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">MEGA FEST</span>
                 </div>
 
-                {/* Content Right */}
-                <div className="md:col-span-8 p-6 md:p-8 flex flex-col justify-between gap-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3 text-[10px] text-gray-500 font-semibold uppercase">
-                      <span className="flex items-center gap-1"><MapPin size={10} className="text-cyan-400" /> {fest.venue.split(",")[0]}, {fest.city}</span>
-                      <span>•</span>
-                      <span>{fest.date}</span>
+                <div className="p-5 flex flex-col justify-between flex-grow sm:pl-[228px]">
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <div className="flex items-center gap-2 text-[9px] text-slate-400 font-mono tracking-wider">
+                      <span className="flex items-center gap-1 text-pink-500 font-bold"><MapPin size={9} /> {fest.city}</span>
+                      <span>|</span>
+                      <span className="font-semibold">{fest.date}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-white font-primary">{fest.name}</h3>
-                    <p className="text-gray-400 text-xs leading-relaxed font-secondary">
-                      {fest.summary}
-                    </p>
+                    <Link href={`/events/${fest.slug}`}>
+                      <h3 className="font-extrabold text-slate-800 text-[13.5px] font-primary uppercase tracking-tight line-clamp-1 hover:text-pink-500 transition-colors mt-0.5">{fest.name}</h3>
+                    </Link>
+                    <p className="text-slate-500 text-[10.5px] leading-relaxed line-clamp-2 font-secondary mt-1.5">Immerse yourself in India's most vibrant folk dance celebration. Experience three consecutive nights of live music, awards, and premium catering.</p>
                   </div>
 
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-900 mt-2">
-                    <div>
-                      <span className="text-[8px] text-gray-500 block uppercase leading-none font-mono">TICKET FROM</span>
-                      <span className="font-bold text-white text-sm">₹{fest.ticketPrices[0]?.price || 150}</span>
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
+                    <div className="text-left">
+                      <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">Starts</span>
+                      <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹350</span>
                     </div>
-                    <Link 
-                      href={`/events/${fest.slug}`}
-                      className="btn bg-gray-900 border border-gray-800 hover:bg-slate-950 text-white text-xs font-bold px-6 py-3 rounded-xl transition-all"
-                    >
+                    <Link href={`/events/${fest.slug}`} className="bg-slate-900 text-white font-mono text-[9.5px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
                       Get Badge
                     </Link>
                   </div>
@@ -666,48 +605,44 @@ export default function HomePage() {
       </section>
 
       {/* 8. INNOVATION TRADE EXPOS */}
-      <section className="section-dark-2 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="flex items-end justify-between gap-4 mb-10">
+          <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
             <div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase">INNOVATION TRADE EXPOS</h2>
-              <p className="text-gray-500 text-xs mt-1.5">Setting platforms for corporate business networking, pitch arenas, and product exhibitions.</p>
+              <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">INNOVATION TRADE EXPOS</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Trade exhibits, engineering summits, future clean mobility galleries.</p>
             </div>
-            <Link href="/events" className="text-xs font-bold text-cyan-400 hover:text-white transition-colors uppercase tracking-wider">
-              See All Expos →
+            <Link href="/events" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider flex items-center gap-1">
+              <span>See All Expos</span>
+              <ChevronRight size={12} />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {innovationExpos.map((expo) => (
-              <div 
-                key={expo.id}
-                className="glass-panel p-6 rounded-2xl border-[rgba(255,255,255,0.06)] hover-neon-pink grid grid-cols-1 sm:grid-cols-12 gap-5 bg-gray-900/10"
-              >
-                <div className="sm:col-span-4 h-32 rounded-xl overflow-hidden shrink-0">
-                  <img src={expo.bannerUrl} alt={expo.name} className="w-full h-full object-cover" />
+            {EXPOS.map((expo) => (
+              <div key={expo.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
+                <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
+                  <img src={expo.bannerUrl} alt={expo.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                  <span className="absolute top-3 left-3 bg-indigo-600 text-white font-mono text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">TRADE EXPO</span>
                 </div>
-                
-                <div className="sm:col-span-8 flex flex-col justify-between gap-3 text-left">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex gap-2 text-[8px] font-mono font-bold tracking-widest text-cyan-400 uppercase">
-                      <span>{expo.category.toUpperCase()}</span>
-                      <span>•</span>
-                      <span>{expo.city.toUpperCase()}</span>
+
+                <div className="p-5 flex flex-col justify-between flex-grow sm:pl-[228px]">
+                  <div className="flex flex-col gap-1.5 text-left">
+                    <div className="flex items-center gap-2 text-[9px] text-slate-400 font-mono tracking-wider">
+                      <span className="flex items-center gap-1 text-pink-500 font-bold"><MapPin size={9} /> {expo.city}</span>
                     </div>
-                    <h4 className="font-bold text-white text-sm font-primary line-clamp-1">{expo.name}</h4>
-                    <p className="text-gray-400 text-[11px] leading-relaxed font-secondary line-clamp-2">{expo.summary}</p>
+                    <Link href={`/events/${expo.slug}`}>
+                      <h3 className="font-extrabold text-slate-800 text-[13.5px] font-primary uppercase tracking-tight line-clamp-1 hover:text-pink-500 transition-colors mt-0.5">{expo.name}</h3>
+                    </Link>
+                    <p className="text-slate-500 text-[10.5px] leading-relaxed line-clamp-2 font-secondary mt-1.5">The definitive gathering of engineering marvels, IoT, AI integration hubs, sustainable infrastructure models, and next-gen clean mobility.</p>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-gray-950 pt-3 mt-1">
-                    <div>
-                      <span className="text-[8px] text-gray-500 block uppercase leading-none font-mono">ADMISSION</span>
-                      <span className="font-bold text-white text-xs">₹{expo.ticketPrices[0]?.price || "Free"}</span>
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
+                    <div className="text-left">
+                      <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">Admission</span>
+                      <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹199</span>
                     </div>
-                    <Link 
-                      href={`/events/${expo.slug}`}
-                      className="btn bg-gray-950 hover:bg-slate-900 border border-gray-800 text-white text-[10px] font-bold px-4.5 py-2.5 rounded-xl"
-                    >
+                    <Link href={`/events/${expo.slug}`} className="bg-slate-900 text-white font-mono text-[9.5px] font-bold px-4.5 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
                       Register
                     </Link>
                   </div>
@@ -719,25 +654,25 @@ export default function HomePage() {
       </section>
 
       {/* 9. TRENDING NEAR YOU (WHAT'S HOT IN CITY) */}
-      <section className="section-dark-1 section-padding-large border-y border-[rgba(255,255,255,0.04)] px-4">
+      <section className="bg-[#0b0f19] dark-bg py-16 px-4">
         <div className="container flex flex-col gap-10">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <span className="text-xs font-mono tracking-widest text-pink-500 font-bold uppercase">🔥 TRENDING NEAR YOU</span>
-              <h2 className="text-3xl md:text-4xl font-black text-white font-primary uppercase mt-1">
+            <div className="text-left">
+              <span className="text-[9px] font-mono tracking-widest text-pink-500 font-bold uppercase">🔥 TRENDING NEAR YOU</span>
+              <h2 className="text-[22px] font-black text-white font-primary uppercase mt-1">
                 WHAT'S HOT IN <span className="text-pink-500">{trendingCity.toUpperCase()}</span>
               </h2>
             </div>
 
             {/* City Selector Tabs */}
-            <div className="flex bg-gray-900/60 border border-gray-800 p-1.5 rounded-xl overflow-x-auto max-w-full shrink-0">
+            <div className="flex bg-[#0f172a] border border-gray-800 p-1 rounded-xl overflow-x-auto max-w-full shrink-0">
               {["New Delhi", "Mumbai", "Bengaluru", "Chennai"].map((city) => (
                 <button 
                   key={city}
                   onClick={() => setTrendingCity(city)}
-                  className={`px-4.5 py-2 text-xs font-bold rounded-lg transition-all shrink-0 ${
-                    trendingCity === city ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-white"
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all shrink-0 cursor-pointer ${
+                    trendingCity === city ? "bg-[#4f46e5] text-white" : "text-gray-400 hover:text-white"
                   }`}
                 >
                   {city}
@@ -751,7 +686,7 @@ export default function HomePage() {
             {trendingEvents[trendingCity as keyof typeof trendingEvents].map((evt) => (
               <div 
                 key={evt.id} 
-                className="glass-panel overflow-hidden flex flex-col h-full bg-[#0a0f1e]/60 hover-neon-pink group"
+                className="bg-[#0f172a] dark-bg border border-gray-800 rounded-3xl overflow-hidden flex flex-col h-full hover:border-pink-500/40 transition-colors duration-300 group"
               >
                 <div className="h-44 relative overflow-hidden">
                   <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
@@ -765,19 +700,21 @@ export default function HomePage() {
 
                 <div className="p-6 flex flex-col justify-between flex-grow gap-4 text-left">
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[8px] text-cyan-400 font-mono font-bold uppercase tracking-wider">{evt.category}</span>
-                    <h3 className="font-bold text-white text-base font-primary line-clamp-1">{evt.title}</h3>
+                    <span className="text-[8px] text-pink-500 font-mono font-bold uppercase tracking-wider">{evt.category}</span>
+                    <Link href="/events">
+                      <h3 className="font-extrabold text-white text-[13.5px] font-primary line-clamp-1 hover:text-pink-500 transition-colors cursor-pointer mt-0.5">{evt.title}</h3>
+                    </Link>
                     <p className="text-gray-400 text-xs font-secondary line-clamp-2 leading-relaxed">{evt.desc}</p>
                   </div>
 
-                  <div className="pt-4 border-t border-gray-900 flex justify-between items-center mt-1">
+                  <div className="pt-4 border-t border-gray-800/60 flex justify-between items-center mt-1">
                     <div>
                       <span className="text-[8px] text-gray-500 block uppercase leading-none font-mono">VENUE PRICE</span>
                       <span className="font-bold text-white text-xs">₹{evt.price}</span>
                     </div>
                     <Link 
                       href={`/events`}
-                      className="btn bg-pink-500 hover:bg-pink-600 text-slate-950 text-[10px] font-black px-4.5 py-2.5 rounded-lg shadow-md hover:shadow-neon-pink"
+                      className="bg-pink-500 hover:bg-pink-600 text-slate-950 text-[9.5px] font-mono font-black px-4.5 py-2.5 rounded-lg transition-colors duration-200"
                     >
                       Get Badge
                     </Link>
@@ -791,37 +728,36 @@ export default function HomePage() {
       </section>
 
       {/* 10. SEASON SNAPSHOTS (GALLERY PREVIEW) */}
-      <section className="section-dark-2 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="flex items-end justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase">SEASON SNAPSHOTS</h2>
-              <p className="text-gray-500 text-xs mt-1.5">Archived passholder snapshots captured across metropolitan arenas.</p>
+          <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
+            <div className="text-left">
+              <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">SEASON SNAPSHOTS</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Archived passholder snapshots captured across metropolitan arenas.</p>
             </div>
-            <Link href="/gallery" className="text-xs font-bold text-indigo-400 hover:text-white transition-colors uppercase tracking-wider">
+            <Link href="/gallery" className="text-xs font-bold text-indigo-500 hover:text-indigo-650 transition-colors uppercase tracking-wider">
               View Full Gallery →
             </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             {[
-              { title: "Odyssey Arena", category: "CULTURAL", image: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80" },
-              { title: "Sufi Symphony", category: "MUSIC", image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80" },
-              { title: "Dance Solo", category: "DANCE CLASH", image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80" },
-              { title: "Startup Expo", category: "TRADE STALL", image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80" },
-              { title: "Couture Walk", category: "FASHION SHOW", image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=400&q=80" },
-              { title: "Street Eats", category: "FOOD FEST", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80" }
+              { title: "ABHYUDAYA Arena", category: "CULTURAL", image: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80" },
+              { title: "MISS TRADITIONAL Final", category: "MUSIC", image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80" },
+              { title: "CONFERENCES Keynote", category: "DANCE CLASH", image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80" },
+              { title: "EXPOS IoT Lab", category: "TRADE STALL", image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80" },
+              { title: "COMPETITIONS Stage", category: "FASHION SHOW", image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=400&q=80" },
+              { title: "ABHYUDAYA Crowd", category: "FOOD FEST", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80" }
             ].map((item, idx) => (
               <div 
                 key={idx}
-                className="relative h-44 rounded-xl overflow-hidden group glass-panel border-[rgba(255,255,255,0.06)] hover-neon-violet"
+                className="relative h-44 rounded-xl overflow-hidden group border border-slate-100 shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:-translate-y-0.5 transition-transform duration-350"
               >
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-transparent"></div>
                 
-                {/* Category label overlay bottom-left */}
-                <div className="absolute bottom-3 left-3 flex flex-col gap-0.5 text-left">
-                  <span className="text-[7px] text-cyan-400 font-mono font-bold tracking-widest uppercase">{item.category}</span>
+                <div className="absolute bottom-3 left-3 flex flex-col gap-0.5 text-left z-10">
+                  <span className="text-[7px] text-pink-400 font-mono font-bold tracking-widest uppercase">{item.category}</span>
                   <span className="text-white font-bold text-[9px] line-clamp-1">{item.title}</span>
                 </div>
               </div>
@@ -831,96 +767,140 @@ export default function HomePage() {
       </section>
 
       {/* 11. TRUSTED BRAND PARTNERS & ALLIANCE PATRONS */}
-      <section className="border-y border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.01)] py-12">
-        <div className="container">
-          <p className="text-center text-[10px] font-mono tracking-widest text-gray-500 font-bold uppercase mb-8">
+      <section className="border-y border-slate-100 bg-[#fbfcfd] py-10 overflow-hidden relative">
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#fbfcfd] to-transparent z-10 pointer-events-none"></div>
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#fbfcfd] to-transparent z-10 pointer-events-none"></div>
+
+        <div className="container relative">
+          <p className="text-center text-[10px] font-mono tracking-widest text-slate-400 font-bold uppercase mb-8">
             TRUSTED BRAND PARTNERS & ALLIANCE PATRONS
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-35 hover:opacity-75 transition-opacity duration-300">
-            {["TATA", "Airtel", "Paytm", "Reliance", "Bisleri", "BookMyShow"].map((logo) => (
-              <div 
-                key={logo} 
-                className="font-black text-lg sm:text-2xl text-white font-primary tracking-tight"
-              >
-                {logo.toUpperCase()}
-              </div>
-            ))}
+          <div className="overflow-hidden w-full flex">
+            <div className="flex gap-16 items-center animate-marquee whitespace-nowrap">
+              {[
+                "TATA", "Airtel", "Paytm", "Reliance", "Bisleri", "BookMyShow",
+                "TATA", "Airtel", "Paytm", "Reliance", "Bisleri", "BookMyShow"
+              ].map((logo, idx) => (
+                <div 
+                  key={idx} 
+                  className="font-black text-lg sm:text-2xl text-slate-400/60 font-primary tracking-tight hover:text-indigo-600 transition-colors duration-300 select-none shrink-0"
+                >
+                  {logo.toUpperCase()}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* 12. TRUSTED BY THOUSANDS (TESTIMONIALS) */}
-      <section className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-20 bg-white border-t border-slate-100 overflow-hidden">
         <div className="container">
-          <div className="text-center max-w-2xl mx-auto mb-12 flex flex-col gap-2">
-            <span className="text-[10px] font-mono tracking-widest text-gray-500 font-bold uppercase">VERIFIED BADGE HOLDERS</span>
-            <h2 className="text-3xl font-black text-white font-primary uppercase">TRUSTED BY THOUSANDS</h2>
+          <div className="text-center max-w-2xl mx-auto mb-16 flex flex-col gap-2">
+            <span className="text-[10px] font-mono tracking-widest text-slate-400 font-bold uppercase">VERIFIED BADGE HOLDERS</span>
+            <h2 className="text-2xl font-black text-slate-900 font-primary uppercase">TRUSTED BY THOUSANDS</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { quote: "Securing my Paddock Exhibitor VIP pass was incredibly simple. The Razorpay checkout was fast and scanning the NFC chip at BIC Noida turnstiles worked instantly.", author: "Rajesh Malhotra", role: "Auto Expo Sponsor" },
-              { quote: "Registering for Nataraja Dance Battle was seamless. The verification code simulation cleared email doubts and generating my participant ID pass took under 3 minutes.", author: "Divya Nair", role: "Contestant Dancer" },
-              { quote: "Recharge Nation is the central directory event platform. Booking a food fest ticket in Bengaluru was secure and downloading the printable PDF pass was very convenient.", author: "Karthik Subramaniam", role: "General Badge Holder" }
-            ].map((t, idx) => (
-              <div key={idx} className="glass-panel p-8 flex flex-col justify-between gap-6 hover-neon-violet bg-gray-900/5">
-                <div className="flex flex-col gap-4 text-left">
-                  <div className="flex items-center gap-0.5 text-amber-500">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={13} fill="currentColor" />)}
+          <div className="h-[480px] overflow-hidden relative grid grid-cols-1 md:grid-cols-3 gap-6 select-none">
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div>
+
+            {/* Column 1 (Scroll Up) */}
+            <div className="flex flex-col gap-6 animate-scroll-vertical">
+              {[...TESTIMONIALS.slice(0, 3), ...TESTIMONIALS.slice(0, 3)].map((t, idx) => (
+                <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col justify-between gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left shrink-0">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-0.5 text-amber-500">
+                      {[...Array(5)].map((_, i) => <Star key={i} size={11} fill="currentColor" className="text-amber-500" />)}
+                    </div>
+                    <p className="text-slate-600 italic text-[10.5px] leading-relaxed font-secondary">"{t.quote}"</p>
                   </div>
-                  <p className="text-gray-400 italic text-xs leading-relaxed font-secondary">"{t.quote}"</p>
+                  <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
+                    <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
+                    <p className="text-slate-400 text-[8.5px] uppercase font-mono font-medium">{t.role}</p>
+                  </div>
                 </div>
-                <div className="border-t border-gray-800 pt-4 flex flex-col gap-0.5 text-left">
-                  <h4 className="font-bold text-white text-xs font-primary uppercase tracking-tight">{t.author}</h4>
-                  <p className="text-gray-500 text-[10px] uppercase font-mono font-medium">{t.role}</p>
+              ))}
+            </div>
+
+            {/* Column 2 (Scroll Down) */}
+            <div className="flex flex-col gap-6 animate-scroll-vertical-down">
+              {[...TESTIMONIALS.slice(3, 6), ...TESTIMONIALS.slice(3, 6)].map((t, idx) => (
+                <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col justify-between gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left shrink-0">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-0.5 text-amber-500">
+                      {[...Array(5)].map((_, i) => <Star key={i} size={11} fill="currentColor" className="text-amber-500" />)}
+                    </div>
+                    <p className="text-slate-600 italic text-[10.5px] leading-relaxed font-secondary">"{t.quote}"</p>
+                  </div>
+                  <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
+                    <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
+                    <p className="text-slate-400 text-[8.5px] uppercase font-mono font-medium">{t.role}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Column 3 (Scroll Up) */}
+            <div className="flex flex-col gap-6 animate-scroll-vertical">
+              {[...TESTIMONIALS.slice(6, 9), ...TESTIMONIALS.slice(6, 9)].map((t, idx) => (
+                <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col justify-between gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left shrink-0">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-0.5 text-amber-500">
+                      {[...Array(5)].map((_, i) => <Star key={i} size={11} fill="currentColor" className="text-amber-500" />)}
+                    </div>
+                    <p className="text-slate-600 italic text-[10.5px] leading-relaxed font-secondary">"{t.quote}"</p>
+                  </div>
+                  <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
+                    <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
+                    <p className="text-slate-400 text-[8.5px] uppercase font-mono font-medium">{t.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       </section>
 
       {/* 13. RECHARGE CHRONICLE (BLOG PREVIEW) */}
-      <section className="section-dark-2 section-padding-medium border-t border-[rgba(255,255,255,0.02)]">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="flex items-end justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-2xl font-black text-white font-primary uppercase">RECHARGE CHRONICLE</h2>
-              <p className="text-gray-500 text-xs mt-1.5">Exclusives, design guides, and announcement essays from our staff editors.</p>
+          <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
+            <div className="text-left">
+              <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">RECHARGE CHRONICLE</h2>
+              <p className="text-slate-500 text-xs mt-1 font-secondary">Editorial briefings on handloom couture, event tech scaling, and crowd design.</p>
             </div>
-            <Link href="/blogs" className="text-xs font-bold text-pink-400 hover:text-white transition-colors uppercase tracking-wider">
-              Read Chronicle →
+            <Link href="/blogs" className="text-xs font-bold text-pink-500 hover:text-pink-650 transition-colors uppercase tracking-wider">
+              Read Chronicle &gt;
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              { title: "Sustainable Fabric Runways: sustainable fashion week", author: "Rhea Kapoor", role: "Style Bureau lead", date: "July 12, 2026", excerpt: "Analyzing sustainable ethno-weaves, handloom khadi crossovers, and modeling audition timelines for Taj Lands End Ballroom week.", image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80" },
-              { title: "Mastering Stage Auditions: Choreo battle checklist", author: "Vikram Bose", role: "Jury Coordinator", date: "June 28, 2026", excerpt: "From prop clearances to acoustics sound prep, here is the complete guide for contesting crews ahead of the Hyderabad cup.", image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80" }
-            ].map((essay, idx) => (
-              <div key={idx} className="glass-panel overflow-hidden flex flex-col justify-between hover-neon-cyan group">
-                <div>
-                  <div className="h-56 overflow-hidden relative">
-                    <img src={essay.image} alt={essay.title} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            {ESSAYS.map((essay, idx) => (
+              <div key={idx} className="bg-white border border-slate-200 rounded-[20px] p-5 flex flex-col justify-between shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:-translate-y-0.5 transition-transform duration-350 group">
+                <div className="flex flex-col gap-4 text-left">
+                  <div className="h-48 overflow-hidden rounded-xl bg-slate-100">
+                    <img src={essay.image} alt={essay.title} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-6 md:p-8 flex flex-col gap-3 text-left">
-                    <div className="flex flex-wrap items-center gap-3 text-[9px] font-mono text-gray-500 font-bold uppercase">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100 pb-2">
                       <span>BY {essay.author} ({essay.role})</span>
-                      <span>•</span>
                       <span>{essay.date}</span>
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold text-white font-primary line-clamp-1 group-hover:text-cyan-400 transition-colors mt-1">
+                    <h3 className="text-sm md:text-base font-black text-slate-800 font-primary uppercase mt-1 leading-snug line-clamp-2 group-hover:text-pink-500 transition-colors">
                       {essay.title}
                     </h3>
-                    <p className="text-gray-400 text-xs leading-relaxed font-secondary line-clamp-2">
+                    <p className="text-slate-450 text-[10.5px] leading-relaxed font-secondary line-clamp-2">
                       {essay.excerpt}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6 md:p-8 pt-0 flex justify-end">
-                  <Link href="/blogs" className="text-xs font-bold text-cyan-400 hover:text-white transition-colors flex items-center gap-1">
-                    Read Essay <ChevronRight size={14} />
+                <div className="pt-4 border-t border-slate-100 mt-4 flex justify-start">
+                  <Link href="/blogs" className="text-[10px] font-bold text-pink-500 hover:text-pink-600 transition-colors flex items-center gap-1.5 uppercase font-mono tracking-wider">
+                    <span>Read Essay</span>
+                    <BookOpen size={11} />
                   </Link>
                 </div>
               </div>
@@ -930,13 +910,13 @@ export default function HomePage() {
       </section>
 
       {/* 14. VIP GATEWAY NEWSLETTER BANNER */}
-      <section className="section-dark-1 section-padding-medium border-t border-[rgba(255,255,255,0.02)] bg-[#090e1a]/80">
+      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
-          <div className="p-8 md:p-12 text-center rounded-3xl bg-[#0f1629] border border-gray-800/80 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center gap-6">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-bl-full filter blur-xl"></div>
+          <div className="p-8 md:p-12 text-center rounded-[24px] bg-[#0f172a] dark-bg border border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col items-center gap-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-bl-full filter blur-xl"></div>
             
-            <span className="text-[10px] font-mono tracking-widest text-pink-500 font-bold uppercase">VIP GATEWAY</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white font-primary uppercase tracking-tight max-w-md leading-tight">
+            <span className="text-[9px] font-mono tracking-widest text-pink-500 font-bold uppercase">VIP GATEWAY</span>
+            <h2 className="text-xl sm:text-2xl font-black text-white font-primary uppercase tracking-tight max-w-md leading-tight">
               GET SECRET PRE-SALE ACCESS ALERTS
             </h2>
             <p className="text-gray-400 text-xs sm:text-sm max-w-sm font-secondary leading-relaxed">
