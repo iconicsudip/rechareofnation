@@ -104,7 +104,7 @@ export default function Navbar() {
                 <span className="text-[14px] font-black tracking-tight text-slate-800 font-primary uppercase leading-tight">
                   RECHARGE<span className="text-pink-500">NATION</span>
                 </span>
-                <span className="text-[7.5px] font-mono font-bold tracking-widest text-slate-400 uppercase mt-0.5 leading-none">
+                <span className="text-[7.5px] font-primary font-bold tracking-widest text-slate-400 uppercase mt-0.5 leading-none">
                   Experience India
                 </span>
               </div>
@@ -179,7 +179,7 @@ export default function Navbar() {
                 </Link>
 
                 <div className="flex items-center gap-2 pl-1.5 ml-1.5 border-l border-slate-200">
-                  <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-slate-750 text-xs font-bold font-mono">
+                  <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-slate-750 text-xs font-bold font-primary">
                     {user.name ? user.name[0].toUpperCase() : "U"}
                   </div>
                   <button
@@ -323,7 +323,7 @@ export default function Navbar() {
       {/* Search Modal Overlay */}
       {showSearchModal && (
         <div 
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] flex items-start justify-center pt-24 md:pt-32 px-4 transition-all duration-300"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] flex items-start justify-center pt-24 md:pt-32 px-4 transition-all duration-300 h-[100vh]"
           onClick={() => setShowSearchModal(false)}
         >
           <div 
@@ -343,7 +343,7 @@ export default function Navbar() {
               />
               <button 
                 onClick={() => setShowSearchModal(false)}
-                className="text-[10px] font-mono font-bold text-slate-400 border border-slate-200 hover:border-slate-300 rounded px-1.5 py-0.5 bg-slate-50 transition-colors uppercase cursor-pointer"
+                className="text-[10px] font-primary font-bold text-slate-400 border border-slate-200 hover:border-slate-300 rounded px-1.5 py-0.5 bg-slate-50 transition-colors uppercase cursor-pointer"
               >
                 Esc
               </button>
@@ -361,9 +361,9 @@ export default function Navbar() {
                       className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group text-left"
                     >
                       <div className="flex flex-col gap-1">
-                        <span className="text-xs font-mono font-bold text-pink-500 uppercase tracking-wide">{evt.category}</span>
+                        <span className="text-xs font-primary font-bold text-pink-500 uppercase tracking-wide">{evt.category}</span>
                         <h4 className="text-[13px] font-extrabold text-slate-800 group-hover:text-pink-500 transition-colors font-primary line-clamp-1">{evt.name}</h4>
-                        <span className="text-[10px] text-slate-400 font-mono uppercase">{evt.city}</span>
+                        <span className="text-[10px] text-slate-400 font-primary uppercase">{evt.city}</span>
                       </div>
                       <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
@@ -375,7 +375,7 @@ export default function Navbar() {
                 )
               ) : (
                 <div className="p-3 flex flex-col gap-2.5">
-                  <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest block">Trending Searches</span>
+                  <span className="text-[9px] font-primary font-bold text-slate-400 uppercase tracking-widest block">Trending Searches</span>
                   <div className="flex flex-col gap-1.5">
                     {[
                       { name: "Miss & Mr Traditional India 2026", href: "/competitions" },
@@ -397,7 +397,7 @@ export default function Navbar() {
             </div>
 
             {/* Footer */}
-            <div className="bg-slate-50/80 border-t border-slate-100 py-2.5 px-4 flex items-center justify-between text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">
+            <div className="bg-slate-50/80 border-t border-slate-100 py-2.5 px-4 flex items-center justify-between text-[10px] font-primary text-slate-400 font-bold uppercase tracking-wider">
               <span>Type query to search</span>
               <Link 
                 href={`/events?q=${searchQuery}`} 

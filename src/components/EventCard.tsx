@@ -31,18 +31,18 @@ export default function EventCard(evt: EventCardProps) {
         
         {/* Category & Status Badges */}
         <div className="absolute top-3.5 left-3.5 flex gap-1.5 z-10">
-          <span className="bg-pink-600/90 text-white font-mono text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+          <span className="bg-pink-600/90 text-white font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
             {evt.category}
           </span>
           {evt.tag && (
-            <span className="bg-amber-500 text-slate-950 font-mono text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+            <span className="bg-amber-500 text-slate-950 font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
               {evt.tag}
             </span>
           )}
         </div>
 
         {/* Location Badge */}
-        <div className="absolute bottom-3 left-3 bg-slate-950/70 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8.5px] font-extrabold text-white tracking-widest font-mono uppercase z-10">
+        <div className="absolute bottom-3 left-3 bg-slate-950/70 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8.5px] font-extrabold text-white tracking-widest font-primary uppercase z-10">
           <MapPin size={10} className="text-pink-500 shrink-0" />
           <span>{evt.city}</span>
         </div>
@@ -74,12 +74,12 @@ export default function EventCard(evt: EventCardProps) {
         {/* Footer Pricing & Button */}
         <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
           <div>
-            <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">STARTING FROM</span>
+            <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">STARTING FROM</span>
             <span className="text-slate-800 font-extrabold text-[13.5px] font-primary mt-0.5 block">₹{evt.price}</span>
           </div>
           <Link 
             href={`/events/${evt.id}`} 
-            className="bg-slate-950 hover:bg-pink-500 text-white font-mono text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase transition-colors duration-300"
+            className="bg-slate-950 hover:bg-pink-500 text-white font-primary text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase transition-colors duration-300"
           >
             Book Ticket
           </Link>

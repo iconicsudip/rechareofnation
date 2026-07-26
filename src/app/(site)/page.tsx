@@ -12,6 +12,7 @@ import { ApiClient, Sponsor, GalleryItem } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import CompetitionCard from "@/components/CompetitionCard";
+import BlogCard from "@/components/BlogCard";
 
 // Carousel slides seed with high-end digital styling specs
 const HERO_SLIDES = [
@@ -224,6 +225,7 @@ const EXPOS = [
 const ESSAYS = [
   {
     title: "THE REVIVAL OF TRADITIONAL HANDLOOM IN MODERN INDIAN PAGEANTRY",
+    slug: "luxury-stays-mewar-lakefront-havelis",
     author: "SUNITA MEHRA",
     role: "FASHION LEAD",
     date: "Jun 28, 2026",
@@ -232,11 +234,30 @@ const ESSAYS = [
   },
   {
     title: "DESIGNING HIGHLY FRICTIONLESS EVENT TICKETING SYSTEMS FOR SCALE",
+    slug: "navigating-kumbalgarh-fort-mountain-passes",
     author: "RAJIV MALHOTRA",
     role: "LEAD ARCHITECT",
     date: "May 14, 2026",
     excerpt: "Inside the engineering patterns that handle high-concurrency ticket surges during multi-city festival announcements in India.",
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    title: "TECHNICAL DRIVING: MASTER THE TIGHT HAIRPINS OF MOUNT ABU",
+    slug: "technical-driving-hairpins-mount-abu",
+    author: "AMIT SHARMA",
+    role: "DRIVING COORDINATOR",
+    date: "Apr 19, 2026",
+    excerpt: "Master the Mount Abu winding passes with expert engine braking techniques, lines of entry for blind curves, and traction protocols.",
+    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80"
+  },
+  {
+    title: "HERITAGE RETREATS OF JAIPUR: LIVING AMONG ROYAL CONSERVERS",
+    slug: "heritage-retreats-jaipur-royal-conservers",
+    author: "PRIYA CHOUDHARY",
+    role: "ARCHITECTURAL HISTORIAN",
+    date: "Mar 30, 2026",
+    excerpt: "Discover Jaipur's ancestral homes converted into luxury boutique hotels and meet royal descendants preserving these properties.",
+    image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80"
   }
 ];
 
@@ -345,7 +366,7 @@ export default function HomePage() {
 
         <div className="container relative z-10">
           <div className="max-w-4xl text-left flex flex-col gap-6">
-            <span className="text-pink-500 font-mono text-xs font-black tracking-widest uppercase">
+            <span className="text-pink-500 font-primary text-xs font-black tracking-widest uppercase">
               {activeHero.badge}
             </span>
             <h1 className="text-4xl sm:text-6xl lg:text-7xl tracking-tighter leading-none font-primary text-white shadow-text-glow uppercase">
@@ -443,16 +464,16 @@ export default function HomePage() {
       {/* 3. BROWSE SEGMENT FAST-TRACKS */}
       <section className="py-12 bg-[#fbfcfd]">
         <div className="container">
-          <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Browse Segment Fast-Tracks</span>
+          <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Browse Segment Fast-Tracks</span>
           <div className="flex flex-wrap gap-2.5 mt-3">
             {[
-              { name: "Festivals", icon: Flame, bg: "bg-red-50/65", border: "border-red-100", text: "text-red-650" },
-              { name: "Competitions", icon: Trophy, bg: "bg-amber-50/65", border: "border-amber-100", text: "text-amber-650" },
-              { name: "Expos", icon: Laptop, bg: "bg-cyan-50/65", border: "border-cyan-100", text: "text-cyan-650" },
-              { name: "Workshops", icon: BookOpen, bg: "bg-purple-50/65", border: "border-purple-100", text: "text-purple-650" },
-              { name: "Corporate", icon: Briefcase, bg: "bg-indigo-50/65", border: "border-indigo-100", text: "text-indigo-650" },
-              { name: "School & College", icon: GraduationCap, bg: "bg-emerald-50/65", border: "border-emerald-100", text: "text-emerald-650" },
-              { name: "Business Networking", icon: Globe, bg: "bg-orange-50/65", border: "border-orange-100", text: "text-orange-650" }
+              { name: "Festivals", icon: Flame, bg: "bg-red-50/65", border: "border-red-100", text: "text-red-600" },
+              { name: "Competitions", icon: Trophy, bg: "bg-amber-50/65", border: "border-amber-100", text: "text-amber-600" },
+              { name: "Expos", icon: Laptop, bg: "bg-cyan-50/65", border: "border-cyan-100", text: "text-cyan-600" },
+              { name: "Workshops", icon: BookOpen, bg: "bg-purple-50/65", border: "border-purple-100", text: "text-purple-600" },
+              { name: "Corporate", icon: Briefcase, bg: "bg-indigo-50/65", border: "border-indigo-100", text: "text-indigo-600" },
+              { name: "School & College", icon: GraduationCap, bg: "bg-emerald-50/65", border: "border-emerald-100", text: "text-emerald-600" },
+              { name: "Business Networking", icon: Globe, bg: "bg-orange-50/65", border: "border-orange-100", text: "text-orange-600" }
             ].map((seg) => {
               const Icon = seg.icon;
               return (
@@ -539,7 +560,7 @@ export default function HomePage() {
               <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">NATIONAL ARENAS</h2>
               <p className="text-slate-500 text-xs mt-1 font-secondary">Claim your crown. Register as a participant to win major prize pools.</p>
             </div>
-            <Link href="/competitions" className="text-xs font-bold text-indigo-500 hover:text-indigo-650 transition-colors uppercase tracking-wider flex items-center gap-1">
+            <Link href="/competitions" className="text-xs font-bold text-indigo-500 hover:text-indigo-600 transition-colors uppercase tracking-wider flex items-center gap-1">
               <span>See All Competitions</span>
               <ChevronRight size={12} />
             </Link>
@@ -572,12 +593,12 @@ export default function HomePage() {
               <div key={fest.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
                 <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
                   <img src={fest.bannerUrl} alt={fest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
-                  <span className="absolute top-3 left-3 bg-red-650 text-white font-mono text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">MEGA FEST</span>
+                  <span className="absolute top-3 left-3 bg-rose-500 text-white font-primary text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">MEGA FEST</span>
                 </div>
 
                 <div className="p-5 flex flex-col justify-between flex-grow sm:pl-[228px]">
                   <div className="flex flex-col gap-1.5 text-left">
-                    <div className="flex items-center gap-2 text-[9px] text-slate-400 font-mono tracking-wider">
+                    <div className="flex items-center gap-2 text-[9px] text-slate-400 font-primary tracking-wider">
                       <span className="flex items-center gap-1 text-pink-500 font-bold"><MapPin size={9} /> {fest.city}</span>
                       <span>|</span>
                       <span className="font-semibold">{fest.date}</span>
@@ -590,10 +611,10 @@ export default function HomePage() {
 
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
                     <div className="text-left">
-                      <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">Starts</span>
+                      <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">Starts</span>
                       <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹350</span>
                     </div>
-                    <Link href={`/events/${fest.slug}`} className="bg-slate-900 text-white font-mono text-[9.5px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
+                    <Link href={`/events/${fest.slug}`} className="bg-slate-900 text-white font-primary text-[9.5px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
                       Get Badge
                     </Link>
                   </div>
@@ -623,12 +644,12 @@ export default function HomePage() {
               <div key={expo.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
                 <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
                   <img src={expo.bannerUrl} alt={expo.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
-                  <span className="absolute top-3 left-3 bg-indigo-600 text-white font-mono text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">TRADE EXPO</span>
+                  <span className="absolute top-3 left-3 bg-indigo-600 text-white font-primary text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">TRADE EXPO</span>
                 </div>
 
                 <div className="p-5 flex flex-col justify-between flex-grow sm:pl-[228px]">
                   <div className="flex flex-col gap-1.5 text-left">
-                    <div className="flex items-center gap-2 text-[9px] text-slate-400 font-mono tracking-wider">
+                    <div className="flex items-center gap-2 text-[9px] text-slate-400 font-primary tracking-wider">
                       <span className="flex items-center gap-1 text-pink-500 font-bold"><MapPin size={9} /> {expo.city}</span>
                     </div>
                     <Link href={`/events/${expo.slug}`}>
@@ -639,10 +660,10 @@ export default function HomePage() {
 
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
                     <div className="text-left">
-                      <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">Admission</span>
+                      <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">Admission</span>
                       <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹199</span>
                     </div>
-                    <Link href={`/events/${expo.slug}`} className="bg-slate-900 text-white font-mono text-[9.5px] font-bold px-4.5 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
+                    <Link href={`/events/${expo.slug}`} className="bg-slate-900 text-white font-primary text-[9.5px] font-bold px-4.5 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
                       Register
                     </Link>
                   </div>
@@ -659,7 +680,7 @@ export default function HomePage() {
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="text-left">
-              <span className="text-[9px] font-mono tracking-widest text-pink-500 font-bold uppercase">🔥 TRENDING NEAR YOU</span>
+              <span className="text-[9px] font-primary tracking-widest text-pink-500 font-bold uppercase">🔥 TRENDING NEAR YOU</span>
               <h2 className="text-[22px] font-black text-white font-primary uppercase mt-1">
                 WHAT'S HOT IN <span className="text-pink-500">{trendingCity.toUpperCase()}</span>
               </h2>
@@ -692,7 +713,7 @@ export default function HomePage() {
                   <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
                   
                   {/* Rating Badge Overlay */}
-                  <div className="absolute top-3.5 left-3.5 bg-gray-950/80 backdrop-blur-sm px-2.5 py-1 rounded flex items-center gap-1.5 text-[10px] text-amber-400 font-bold font-mono">
+                  <div className="absolute top-3.5 left-3.5 bg-gray-950/80 backdrop-blur-sm px-2.5 py-1 rounded flex items-center gap-1.5 text-[10px] text-amber-400 font-bold font-primary">
                     <Star size={11} fill="currentColor" />
                     <span>{evt.rating}</span>
                   </div>
@@ -700,7 +721,7 @@ export default function HomePage() {
 
                 <div className="p-6 flex flex-col justify-between flex-grow gap-4 text-left">
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[8px] text-pink-500 font-mono font-bold uppercase tracking-wider">{evt.category}</span>
+                    <span className="text-[8px] text-pink-500 font-primary font-bold uppercase tracking-wider">{evt.category}</span>
                     <Link href="/events">
                       <h3 className="font-extrabold text-white text-[13.5px] font-primary line-clamp-1 hover:text-pink-500 transition-colors cursor-pointer mt-0.5">{evt.title}</h3>
                     </Link>
@@ -709,12 +730,12 @@ export default function HomePage() {
 
                   <div className="pt-4 border-t border-gray-800/60 flex justify-between items-center mt-1">
                     <div>
-                      <span className="text-[8px] text-gray-500 block uppercase leading-none font-mono">VENUE PRICE</span>
+                      <span className="text-[8px] text-gray-500 block uppercase leading-none font-primary">VENUE PRICE</span>
                       <span className="font-bold text-white text-xs">₹{evt.price}</span>
                     </div>
                     <Link 
                       href={`/events`}
-                      className="bg-pink-500 hover:bg-pink-600 text-slate-950 text-[9.5px] font-mono font-black px-4.5 py-2.5 rounded-lg transition-colors duration-200"
+                      className="bg-pink-500 hover:bg-pink-600 text-slate-950 text-[9.5px] font-primary font-black px-4.5 py-2.5 rounded-lg transition-colors duration-200"
                     >
                       Get Badge
                     </Link>
@@ -735,7 +756,7 @@ export default function HomePage() {
               <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">SEASON SNAPSHOTS</h2>
               <p className="text-slate-500 text-xs mt-1 font-secondary">Archived passholder snapshots captured across metropolitan arenas.</p>
             </div>
-            <Link href="/gallery" className="text-xs font-bold text-indigo-500 hover:text-indigo-650 transition-colors uppercase tracking-wider">
+            <Link href="/gallery" className="text-xs font-bold text-indigo-500 hover:text-indigo-600 transition-colors uppercase tracking-wider">
               View Full Gallery →
             </Link>
           </div>
@@ -757,7 +778,7 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-transparent"></div>
                 
                 <div className="absolute bottom-3 left-3 flex flex-col gap-0.5 text-left z-10">
-                  <span className="text-[7px] text-pink-400 font-mono font-bold tracking-widest uppercase">{item.category}</span>
+                  <span className="text-[7px] text-pink-400 font-primary font-bold tracking-widest uppercase">{item.category}</span>
                   <span className="text-white font-bold text-[9px] line-clamp-1">{item.title}</span>
                 </div>
               </div>
@@ -772,7 +793,7 @@ export default function HomePage() {
         <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#fbfcfd] to-transparent z-10 pointer-events-none"></div>
 
         <div className="container relative">
-          <p className="text-center text-[10px] font-mono tracking-widest text-slate-400 font-bold uppercase mb-8">
+          <p className="text-center text-[10px] font-primary tracking-widest text-slate-400 font-bold uppercase mb-8">
             TRUSTED BRAND PARTNERS & ALLIANCE PATRONS
           </p>
           <div className="overflow-hidden w-full flex">
@@ -797,7 +818,7 @@ export default function HomePage() {
       <section className="py-20 bg-white border-t border-slate-100 overflow-hidden">
         <div className="container">
           <div className="text-center max-w-2xl mx-auto mb-16 flex flex-col gap-2">
-            <span className="text-[10px] font-mono tracking-widest text-slate-400 font-bold uppercase">VERIFIED BADGE HOLDERS</span>
+            <span className="text-[10px] font-primary tracking-widest text-slate-400 font-bold uppercase">VERIFIED BADGE HOLDERS</span>
             <h2 className="text-2xl font-black text-slate-900 font-primary uppercase">TRUSTED BY THOUSANDS</h2>
           </div>
 
@@ -817,7 +838,7 @@ export default function HomePage() {
                   </div>
                   <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
                     <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
-                    <p className="text-slate-400 text-[8.5px] uppercase font-mono font-medium">{t.role}</p>
+                    <p className="text-slate-400 text-[8.5px] uppercase font-primary font-medium">{t.role}</p>
                   </div>
                 </div>
               ))}
@@ -835,7 +856,7 @@ export default function HomePage() {
                   </div>
                   <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
                     <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
-                    <p className="text-slate-400 text-[8.5px] uppercase font-mono font-medium">{t.role}</p>
+                    <p className="text-slate-400 text-[8.5px] uppercase font-primary font-medium">{t.role}</p>
                   </div>
                 </div>
               ))}
@@ -853,7 +874,7 @@ export default function HomePage() {
                   </div>
                   <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
                     <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
-                    <p className="text-slate-400 text-[8.5px] uppercase font-mono font-medium">{t.role}</p>
+                    <p className="text-slate-400 text-[8.5px] uppercase font-primary font-medium">{t.role}</p>
                   </div>
                 </div>
               ))}
@@ -876,34 +897,18 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {ESSAYS.map((essay, idx) => (
-              <div key={idx} className="bg-white border border-slate-200 rounded-[20px] p-5 flex flex-col justify-between shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:-translate-y-0.5 transition-transform duration-350 group">
-                <div className="flex flex-col gap-4 text-left">
-                  <div className="h-48 overflow-hidden rounded-xl bg-slate-100">
-                    <img src={essay.image} alt={essay.title} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-[8px] font-mono text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100 pb-2">
-                      <span>BY {essay.author} ({essay.role})</span>
-                      <span>{essay.date}</span>
-                    </div>
-                    <h3 className="text-sm md:text-base font-black text-slate-800 font-primary uppercase mt-1 leading-snug line-clamp-2 group-hover:text-pink-500 transition-colors">
-                      {essay.title}
-                    </h3>
-                    <p className="text-slate-450 text-[10.5px] leading-relaxed font-secondary line-clamp-2">
-                      {essay.excerpt}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 mt-4 flex justify-start">
-                  <Link href="/blogs" className="text-[10px] font-bold text-pink-500 hover:text-pink-600 transition-colors flex items-center gap-1.5 uppercase font-mono tracking-wider">
-                    <span>Read Essay</span>
-                    <BookOpen size={11} />
-                  </Link>
-                </div>
-              </div>
+              <BlogCard
+                key={idx}
+                title={essay.title}
+                slug={essay.slug}
+                summary={essay.excerpt}
+                imageUrl={essay.image}
+                category="Editorial"
+                publishedAt={essay.date}
+                aspectRatio="aspect-[16/9]"
+              />
             ))}
           </div>
         </div>
@@ -915,7 +920,7 @@ export default function HomePage() {
           <div className="p-8 md:p-12 text-center rounded-[24px] bg-[#0f172a] dark-bg border border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col items-center gap-4 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-bl-full filter blur-xl"></div>
             
-            <span className="text-[9px] font-mono tracking-widest text-pink-500 font-bold uppercase">VIP GATEWAY</span>
+            <span className="text-[9px] font-primary tracking-widest text-pink-500 font-bold uppercase">VIP GATEWAY</span>
             <h2 className="text-xl sm:text-2xl font-black text-white font-primary uppercase tracking-tight max-w-md leading-tight">
               GET SECRET PRE-SALE ACCESS ALERTS
             </h2>

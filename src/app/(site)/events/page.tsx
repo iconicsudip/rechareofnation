@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Search, Calendar, MapPin, Sliders, Star, X, Check } from "lucide-react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 interface UIEvent {
   id: string;
@@ -147,6 +148,10 @@ function EventsContent() {
   const [events, setEvents] = useState<UIEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<UIEvent[]>([]);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   // Filter states
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -154,6 +159,45 @@ function EventsContent() {
   const [dateTimeline, setDateTimeline] = useState("all"); // all, today, weekend, next30
   const [priceFilter, setPriceFilter] = useState("all"); // all, free, under500, under1500, premium
   const [sortBy, setSortBy] = useState("rating-desc");
+
+  // Helper to update URL params
+  const updateUrlParam = (key: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "All" && value !== "all") {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // Sync state with URL params
+  useEffect(() => {
+    const segmentParam = searchParams.get("segment");
+    const cityParam = searchParams.get("city");
+    const dateParam = searchParams.get("date");
+    const searchParam = searchParams.get("search");
+    const priceParam = searchParams.get("price");
+    const sortParam = searchParams.get("sort");
+
+    if (segmentParam) setCategory(segmentParam);
+    else setCategory("All");
+
+    if (cityParam) setLocation(cityParam);
+    else setLocation("All");
+
+    if (dateParam) setDateTimeline(dateParam);
+    else setDateTimeline("all");
+
+    if (searchParam) setSearch(searchParam);
+    else setSearch("");
+
+    if (priceParam) setPriceFilter(priceParam);
+    else setPriceFilter("all");
+
+    if (sortParam) setSortBy(sortParam);
+    else setSortBy("rating-desc");
+  }, [searchParams]);
 
   // Load events & calculate dynamic filter dates so mock data remains relevant in real-time
   useEffect(() => {
@@ -279,6 +323,7 @@ function EventsContent() {
     setDateTimeline("all");
     setPriceFilter("all");
     setSortBy("rating-desc");
+    router.push(pathname, { scroll: false });
   };
 
   // Tag color selector helper
@@ -311,7 +356,7 @@ function EventsContent() {
           <h1 className="text-[25px] font-black text-slate-900 font-primary uppercase tracking-tight">
             NATIONAL EVENT DIRECTORY
           </h1>
-          <p className="text-slate-400 font-mono text-[9px] font-bold tracking-widest uppercase mt-0.5">
+          <p className="text-slate-400 font-primary text-[9px] font-bold tracking-widest uppercase mt-0.5">
             Real-time gate passes & contender registration checkout.
           </p>
         </div>
@@ -331,7 +376,7 @@ function EventsContent() {
               {(search || category !== "All" || location !== "All" || dateTimeline !== "all" || priceFilter !== "all") && (
                 <button 
                   onClick={clearFilters}
-                  className="text-[9.5px] font-mono font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider cursor-pointer"
+                  className="text-[9.5px] font-primary font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider cursor-pointer"
                 >
                   Clear
                 </button>
@@ -340,7 +385,7 @@ function EventsContent() {
 
             {/* Keyword Search */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Keyword Search</span>
+              <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Keyword Search</span>
               <div className="relative">
                 <Search className="absolute left-3 top-3 text-slate-400" size={13} />
                 <input 
@@ -348,14 +393,14 @@ function EventsContent() {
                   placeholder="Event name, city, tag..." 
                   className="w-full text-xs rounded-xl bg-slate-50 border border-slate-200/80 pl-9 pr-4 py-2.5 text-slate-800 placeholder-slate-400 outline-none focus:border-slate-350 focus:ring-1 focus:ring-slate-300"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => { setSearch(e.target.value); updateUrlParam("search", e.target.value); }}
                 />
               </div>
             </div>
 
             {/* Select Segment */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Select Segment</span>
+              <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Select Segment</span>
               <div className="flex flex-col gap-0.5">
                 {[
                   "All",
@@ -372,7 +417,7 @@ function EventsContent() {
                   return (
                     <button
                       key={cat}
-                      onClick={() => setCategory(cat)}
+                      onClick={() => { setCategory(cat); updateUrlParam("segment", cat); }}
                       className={`w-full text-left py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         isActive 
                           ? "text-pink-500 bg-pink-500/5" 
@@ -388,14 +433,14 @@ function EventsContent() {
 
             {/* City Location */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">City Location</span>
+              <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">City Location</span>
               <div className="flex flex-wrap gap-1.5">
                 {["All", "New Delhi", "Mumbai", "Bengaluru", "Chennai", "Kolkata"].map((cityOpt) => {
                   const isActive = location === cityOpt;
                   return (
                     <button
                       key={cityOpt}
-                      onClick={() => setLocation(cityOpt)}
+                      onClick={() => { setLocation(cityOpt); updateUrlParam("city", cityOpt); }}
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
                         isActive 
                           ? "text-indigo-600 bg-indigo-50 border-indigo-200" 
@@ -411,7 +456,7 @@ function EventsContent() {
 
             {/* Date Timeline */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Date Timeline</span>
+              <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Date Timeline</span>
               <div className="flex flex-wrap gap-1.5">
                 {[
                   { label: "Any Date", value: "all" },
@@ -423,10 +468,10 @@ function EventsContent() {
                   return (
                     <button
                       key={timeOpt.value}
-                      onClick={() => setDateTimeline(timeOpt.value)}
+                      onClick={() => { setDateTimeline(timeOpt.value); updateUrlParam("date", timeOpt.value); }}
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
                         isActive 
-                          ? "text-pink-500 bg-pink-50 border-pink-200" 
+                          ? "text-pink-500 bg-pink-55 border-pink-200" 
                           : "text-slate-600 bg-white border-slate-200 hover:border-slate-350"
                       }`}
                     >
@@ -439,7 +484,7 @@ function EventsContent() {
 
             {/* Price Point */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Price Point</span>
+              <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Price Point</span>
               <div className="flex flex-col gap-0.5">
                 {[
                   { label: "All Price Ranges", value: "all" },
@@ -452,10 +497,10 @@ function EventsContent() {
                   return (
                     <button
                       key={priceOpt.value}
-                      onClick={() => setPriceFilter(priceOpt.value)}
+                      onClick={() => { setPriceFilter(priceOpt.value); updateUrlParam("price", priceOpt.value); }}
                       className={`w-full text-left py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         isActive 
-                          ? "text-pink-500 bg-pink-500/5" 
+                          ? "text-pink-500 bg-pink-55/5" 
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                       }`}
                     >
@@ -468,10 +513,10 @@ function EventsContent() {
 
             {/* Sort Results */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-slate-400 font-bold uppercase">Sort Results</span>
+              <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Sort Results</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => { setSortBy(e.target.value); updateUrlParam("sort", e.target.value); }}
                 className="w-full text-xs rounded-xl bg-slate-50 border border-slate-200/85 px-3 py-2.5 text-slate-700 outline-none focus:border-slate-350 focus:ring-1 focus:ring-slate-300"
               >
                 <option value="rating-desc">Rating: Highest to Lowest</option>
@@ -487,7 +532,7 @@ function EventsContent() {
           <div className="flex-grow w-full">
             
             {/* Show results metadata */}
-            <div className="text-[9.5px] font-mono tracking-widest text-slate-400 font-bold uppercase mb-4 text-left">
+            <div className="text-[9.5px] font-primary tracking-widest text-slate-400 font-bold uppercase mb-4 text-left">
               SHOWING {filteredEvents.length} EVENTS MATCHING YOUR FILTERS
             </div>
 
@@ -513,18 +558,18 @@ function EventsContent() {
 
                       {/* Tag Labels floating */}
                       <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5 z-10">
-                        <span className={`${getCategoryColor(evt.category)} text-white font-mono text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider`}>
+                        <span className={`${getCategoryColor(evt.category)} text-white font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider`}>
                           {evt.category}
                         </span>
                         {evt.tag && (
-                          <span className="bg-amber-500 text-slate-950 font-mono text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+                          <span className="bg-amber-500 text-slate-950 font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
                             {evt.tag}
                           </span>
                         )}
                       </div>
 
                       {/* Location details */}
-                      <div className="absolute bottom-3 left-3.5 flex items-center gap-1 text-[9.5px] font-extrabold text-white tracking-widest font-mono uppercase z-10">
+                      <div className="absolute bottom-3 left-3.5 flex items-center gap-1 text-[9.5px] font-extrabold text-white tracking-widest font-primary uppercase z-10">
                         <MapPin size={10} className="text-pink-500 shrink-0" />
                         <span>{evt.city}</span>
                       </div>
@@ -555,7 +600,7 @@ function EventsContent() {
                         </p>
 
                         {/* Date */}
-                        <span className="text-[9.5px] font-mono text-slate-400 font-semibold tracking-wider mt-2.5 block">
+                        <span className="text-[9.5px] font-primary text-slate-400 font-semibold tracking-wider mt-2.5 block">
                           {evt.date}
                         </span>
                       </div>
@@ -563,7 +608,7 @@ function EventsContent() {
                       {/* Footer border with Action */}
                       <div className="pt-4 border-t border-slate-100 mt-4 flex items-center justify-between gap-2">
                         <div>
-                          <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">Starting from</span>
+                          <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">Starting from</span>
                           <span className="text-slate-800 font-extrabold text-[13.5px] font-primary mt-0.5">
                             {evt.price > 0 ? `₹${evt.price}` : "Complimentary"}
                           </span>
@@ -571,7 +616,7 @@ function EventsContent() {
 
                         <Link 
                           href={`/events/${evt.slug}`} 
-                          className="bg-[#0c1222] border border-dashed border-[#0c1222]/80 text-white font-mono text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 hover:border-pink-500 hover:text-white transition-all duration-300"
+                          className="bg-[#0c1222] border border-dashed border-[#0c1222]/80 text-white font-primary text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 hover:border-pink-500 hover:text-white transition-all duration-300"
                         >
                           Book Badge
                         </Link>
@@ -589,7 +634,7 @@ function EventsContent() {
                 <p className="text-slate-500 text-xs max-w-xs font-secondary">We couldn't find any events matching your selected filter guidelines. Try clearing your filters.</p>
                 <button 
                   onClick={clearFilters} 
-                  className="bg-[#0c1222] text-white text-[10px] font-mono font-bold tracking-widest px-6 py-3 rounded-xl uppercase hover:bg-pink-500 hover:text-white transition-all cursor-pointer"
+                  className="bg-[#0c1222] text-white text-[10px] font-primary font-bold tracking-widest px-6 py-3 rounded-xl uppercase hover:bg-pink-500 hover:text-white transition-all cursor-pointer"
                 >
                   Reset Filter Matrix
                 </button>

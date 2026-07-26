@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { 
   Calendar, MapPin, Phone, Mail, User, Shield, Share2, 
   ArrowLeft, Check, Ticket, Trophy, Upload, ShieldCheck, 
-  AlertCircle, DollarSign, ExternalLink, Printer, X 
+  AlertCircle, DollarSign, ExternalLink, Printer, X,
+  Info, Volume2, VolumeX, Clock, ArrowRight, ChevronDown, ChevronUp, Music, Sliders, Star, HelpCircle
 } from "lucide-react";
 import { ApiClient, Event, TicketType, TicketPriceInfo, TicketBooking, CompetitionRegistration } from "@/lib/api-client";
 
@@ -22,16 +23,28 @@ export default function EventDetailPage({ params }: PageProps) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modals visibility
+  // Modal and share states
   const [activeWizard, setActiveWizard] = useState<"booking" | "registration" | null>(null);
-
-  // Share Event state
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Interactive page states
+  const [selectedZone, setSelectedZone] = useState<"vvip" | "vip" | "general" | "student">("vvip");
+  const [passholderName, setPassholderName] = useState("AMIT RAJ");
+  const [badgeGlow, setBadgeGlow] = useState<"purple" | "pink" | "orange" | "green">("purple");
+  const [scheduleTab, setScheduleTab] = useState<"day1" | "day2">("day1");
+  const [playingTrack, setPlayingTrack] = useState<string | null>(null);
+  const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  
+  // Curator bot states
+  const [chatHistory, setChatHistory] = useState<Array<{ sender: "user" | "curator"; text: string }>>([
+    { sender: "curator", text: "Hello! Ask me anything about Abhyudaya festival entry rules, F&B passes, or transport arrangements." }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   // Unified Fetch
   useEffect(() => {
     const fetchEventData = async () => {
-      // Find event by slug or ID
       const allEvents = await ApiClient.getEvents();
       const found = allEvents.find(e => e.slug === eventId || e.id === eventId);
       
@@ -52,9 +65,85 @@ export default function EventDetailPage({ params }: PageProps) {
     }
   };
 
+  // Synthesize Web Audio API sound sweeps for live acoustic preview
+  const playMockAcoustic = (trackName: string) => {
+    if (typeof window === "undefined") return;
+    if (playingTrack === trackName) {
+      setPlayingTrack(null);
+      return;
+    }
+    setPlayingTrack(trackName);
+
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      
+      // Pitch arrays mapping to track themes
+      const notes = trackName.toLowerCase().includes("jugalbandi")
+        ? [293.66, 329.63, 440.0, 523.25] // Acoustic Sitar sequence (D4, E4, A4, C5)
+        : trackName.toLowerCase().includes("bass")
+        ? [82.41, 110.0, 73.42, 55.0]     // EDM Heavy Bass drops (E2, A2, D2, G1)
+        : [329.63, 392.0, 440.0, 587.33]; // Runway Theme (E4, G4, A4, D5)
+
+      let time = ctx.currentTime;
+      notes.forEach((freq) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0.12, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
+        
+        osc.start(time);
+        osc.stop(time + 0.5);
+        time += 0.15;
+      });
+
+      setTimeout(() => {
+        setPlayingTrack(null);
+      }, 800);
+    } catch (err) {
+      console.log("AudioContext blocked:", err);
+    }
+  };
+
+  const handleCuratorAsk = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const userMsg = chatInput.trim();
+    setChatHistory(prev => [...prev, { sender: "user", text: userMsg }]);
+    setChatInput("");
+    setIsTyping(true);
+
+    setTimeout(() => {
+      let reply = "Our team of curators is reviewing your query. We will send an SMS alert once confirmed!";
+      const q = userMsg.toLowerCase();
+      
+      if (q.includes("transport") || q.includes("metro") || q.includes("shuttle") || q.includes("bus") || q.includes("reach")) {
+        reply = "Yes! High-frequency air-conditioned shuttle coaches depart every 15 minutes from Botanical Garden Metro Station (Noida) directly to Buddh Circuit Gate 3 from 8:00 AM onwards.";
+      } else if (q.includes("camera") || q.includes("recording") || q.includes("video") || q.includes("photo")) {
+        reply = "Only non-professional smartphones and compact action cameras are allowed. Professional SLRs and recording gimbals require prior press accreditation.";
+      } else if (q.includes("food") || q.includes("drink") || q.includes("beverage") || q.includes("coupon")) {
+        reply = "F&B credentials can be scanned at the main registration kiosk to claim physical coupon books before entering the food bazaar.";
+      } else if (q.includes("re-entry") || q.includes("exit") || q.includes("leave")) {
+        reply = "Yes, re-entry is permitted as long as your smart QR wristband remains active and untampered.";
+      } else if (q.includes("parking") || q.includes("car") || q.includes("vehicle")) {
+        reply = "Free vehicle parking is available at Zone C. Ground curators will guide you from the main boulevard.";
+      }
+
+      setChatHistory(prev => [...prev, { sender: "curator", text: reply }]);
+      setIsTyping(false);
+    }, 850);
+  };
+
   if (isLoading) {
     return (
-      <div className="container py-20 text-center text-gray-400 text-sm">
+      <div className="container py-20 text-center text-slate-400 text-sm font-secondary">
         Loading Event Specifications...
       </div>
     );
@@ -64,17 +153,69 @@ export default function EventDetailPage({ params }: PageProps) {
     return (
       <div className="container py-20 text-center flex flex-col items-center gap-4">
         <span className="text-4xl">⚠️</span>
-        <h3 className="text-xl font-bold text-white">Event Not Found</h3>
-        <p className="text-gray-400 text-sm">The event you are looking for does not exist or has been removed.</p>
-        <Link href="/events" className="btn btn-primary py-2 px-6 text-xs rounded-full">
+        <h3 className="text-xl font-bold text-slate-800">Event Not Found</h3>
+        <p className="text-slate-500 text-sm">The event you are looking for does not exist or has been removed.</p>
+        <Link href="/events" className="bg-[#0c1222] text-white text-xs px-6 py-2 rounded-full uppercase font-primary font-bold tracking-wider hover:bg-pink-500 transition-all">
           Back to Events Listing
         </Link>
       </div>
     );
   }
 
+  // Seating Zones Configuration
+  const basePrice = event.ticketPrices.length > 0 ? event.ticketPrices[0].price : 499;
+  const eventTag = event.isFeatured ? "SELLING OUT FAST" : undefined;
+  const eventRating = event.slug.includes("odyssey") ? 4.9 : 4.7;
+  const eventReviews = event.slug.includes("odyssey") ? 1420 : 310;
+
+  const zones = {
+    vvip: {
+      name: "VVIP Paddock Box",
+      price: Math.round(basePrice * 6),
+      perks: ["Ultra luxury lounge", "Meet and Greet with Amit Trivedi", "Front row viewing bay", "Free-flow gourmet dining"],
+      ref: "RN-AB-101",
+      capacity: "96% BOOKED"
+    },
+    vip: {
+      name: "VIP Front Stage",
+      price: Math.round(basePrice * 3),
+      perks: ["Priority front stage access", "Complementary beverage pass", "Exclusive artist merchandise kit", "Fast-track security entry"],
+      ref: "RN-AB-102",
+      capacity: "88% BOOKED"
+    },
+    general: {
+      name: "General Arena Main",
+      price: Math.round(basePrice),
+      perks: ["Stadium entry access", "Curated food court access", "Standing area entry", "General security gate scanning"],
+      ref: "RN-AB-103",
+      capacity: "62% BOOKED"
+    },
+    student: {
+      name: "Student Grass Zone",
+      price: Math.round(basePrice * 0.7),
+      perks: ["Discounted student access", "Free lawn seating area", "Bring your own blanket access", "Standard check-in credentials"],
+      ref: "RN-AB-104",
+      capacity: "ALMOST GONE!"
+    }
+  };
+
+  // Holographic Glow themes helper
+  const getGlowStyles = (color: string) => {
+    switch (color) {
+      case "pink":
+        return "bg-gradient-to-tr from-pink-600 via-rose-500 to-orange-400 text-white shadow-[0_0_25px_rgba(244,63,94,0.3)]";
+      case "orange":
+        return "bg-gradient-to-tr from-amber-500 via-orange-600 to-red-500 text-white shadow-[0_0_25px_rgba(245,158,11,0.3)]";
+      case "green":
+        return "bg-gradient-to-tr from-emerald-500 via-teal-600 to-cyan-500 text-white shadow-[0_0_25px_rgba(16,185,129,0.3)]";
+      default:
+        return "bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 text-white shadow-[0_0_25px_rgba(139,92,246,0.35)]";
+    }
+  };
+
   return (
-    <div className="pb-20">
+    <div className="min-h-screen bg-[#f8fafc] py-8 pb-20 font-secondary text-slate-800">
+      
       {/* Dynamic Wizard Overlays */}
       {activeWizard === "booking" && (
         <TicketBookingWizard 
@@ -92,156 +233,683 @@ export default function EventDetailPage({ params }: PageProps) {
         />
       )}
 
-      {/* Hero Banner Area */}
-      <section className="relative h-[45vh] lg:h-[55vh] overflow-hidden">
-        <img 
-          src={event.bannerUrl} 
-          alt={event.name} 
-          className="w-full h-full object-cover filter brightness-[0.4]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-transparent to-transparent"></div>
+      {/* Main Container */}
+      <div className="container max-w-7xl mx-auto px-4 flex flex-col gap-8">
         
         {/* Back Link */}
-        <div className="absolute top-6 left-6 z-10">
-          <Link href="/events" className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white font-semibold bg-gray-950/40 backdrop-blur px-4 py-2 rounded-full border border-white/5 transition-all">
-            <ArrowLeft size={14} /> Back to Events
+        <div className="flex justify-start">
+          <Link href="/events" className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-900 font-primary font-bold uppercase tracking-widest transition-colors">
+            <ArrowLeft size={8.5} /> Back to Directory
           </Link>
         </div>
-      </section>
 
-      {/* Main Grid Content */}
-      <section className="container -mt-24 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Details */}
-        <div className="lg:col-span-8 flex flex-col gap-10">
+        {/* Dynamic Dark Hero Banner */}
+        <section className="relative rounded-[32px] overflow-hidden p-8 lg:p-12 bg-gradient-to-r from-slate-950 via-[#0a0f1e] to-slate-900 shadow-lg min-h-[340px] flex flex-col justify-end text-left border border-slate-950">
+          {/* Subtle starry overlay backdrop */}
+          <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
           
-          {/* Main Headline card */}
-          <div className="glass-panel p-8 rounded-2xl border-indigo-500/10">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">{event.category}</span>
-            <h1 className="text-3xl md:text-5xl font-black mt-2 leading-tight text-white font-primary">{event.name}</h1>
+          <div className="relative z-10 flex flex-col gap-4 max-w-3xl">
+            {/* Tag Badges */}
+            <div className="flex flex-wrap gap-2">
+              <span className="bg-indigo-600/90 text-white text-[8px] font-bold tracking-widest uppercase rounded px-2.5 py-1 inline-block border border-indigo-400/20 font-primary">
+                ★ FLAGSHIP CULTURAL FESTIVAL ★
+              </span>
+              {eventTag && (
+                <span className="bg-rose-500/90 text-white text-[8px] font-bold tracking-widest uppercase rounded px-2.5 py-1 inline-block border border-rose-400/20 font-primary">
+                  {eventTag}
+                </span>
+              )}
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-black text-white font-primary uppercase tracking-tight leading-none mt-1">
+              {event.name}
+            </h1>
+
+            {/* Description */}
+            <p className="text-slate-300 text-xs sm:text-sm font-secondary leading-relaxed max-w-2xl mt-1">
+              {event.description}
+            </p>
+
+            {/* Info Badges Row */}
+            <div className="flex flex-wrap gap-y-2 gap-x-6 mt-4 pt-4 border-t border-slate-800/80 text-[10px] sm:text-xs font-primary font-bold text-slate-400 tracking-wider">
+              <span className="flex items-center gap-1.5 uppercase">
+                <MapPin size={13} className="text-pink-500 shrink-0" />
+                {event.venue}, {event.city}
+              </span>
+              <span className="flex items-center gap-1.5 uppercase">
+                <Calendar size={13} className="text-pink-500 shrink-0" />
+                {event.date}
+              </span>
+              <span className="flex items-center gap-1.5 uppercase text-amber-400">
+                <Star size={13} className="fill-amber-400 text-amber-400 shrink-0" />
+                {eventRating} RATING ({eventReviews} REVIEWS)
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* 2-Column Grid Details Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column Panels */}
+          <div className="lg:col-span-8 flex flex-col gap-8">
             
-            <div className="flex flex-wrap gap-6 mt-6 pt-6 border-t border-[rgba(255,255,255,0.06)] text-sm text-gray-400">
-              <span className="flex items-center gap-2"><Calendar size={18} className="text-cyan-400" /> {event.date} at {event.time}</span>
-              <span className="flex items-center gap-2"><MapPin size={18} className="text-cyan-400" /> {event.venue}, {event.city}</span>
+            {/* Card 1: THE EXPERIENCE */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-4 text-left">
+              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                <Info size={16} className="text-indigo-600" />
+                <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                  The {event.name.replace("RECHARGE ", "").replace(" 2026", "")} Experience
+                </h3>
+              </div>
+              <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-secondary">
+                Abhyudaya represents India's largest youth-driven synchronization of acoustic heritage and state-of-the-art concert production. Hosted at the monumental Buddh International Circuit, our festival integrates high-speed laser mapping projections with a massive traditional food bazaar, featuring over 80 organic rural culinary artisans. Expect two days of uncompromised sensory excellence.
+              </p>
             </div>
-          </div>
 
-          {/* Description */}
-          <div className="glass-panel p-8 rounded-2xl flex flex-col gap-4">
-            <h3 className="text-xl font-bold font-primary text-white">About the Event</h3>
-            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line font-secondary">{event.description}</p>
-          </div>
+            {/* Card 2: ACOUSTICS PREVIEW */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-4 text-left">
+              <div className="flex flex-col gap-1 border-b border-slate-100 pb-3">
+                <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
+                  Interactive Soundscape Preview
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <Volume2 size={16} className="text-indigo-600 animate-pulse" />
+                  <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                    Simulate Stage Acoustics
+                  </h3>
+                </div>
+              </div>
+              
+              <p className="text-slate-500 text-xs leading-relaxed font-secondary">
+                Click any live track preview button below to test stage equalizers, 3D spatial mixing, and audio sync configurations.
+              </p>
 
-          {/* Guidelines / Rules */}
-          {event.rules && event.rules.length > 0 && (
-            <div className="glass-panel p-8 rounded-2xl flex flex-col gap-4">
-              <h3 className="text-xl font-bold font-primary text-white">Guidelines & Rules</h3>
-              <ul className="flex flex-col gap-3">
-                {event.rules.map((rule, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-xs text-gray-400 leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 mt-1.5"></span>
-                    <span>{rule}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                {[
+                  { title: "Amit Folk Jugalbandi", desc: "Acoustic Folk / Sitar", duration: "2:15m Preview" },
+                  { title: "Nucleya Bass Drop", desc: "Electronic / Bass", duration: "1:50m Preview" },
+                  { title: "Sartorial Runway Theme", desc: "Classical Instrumental", duration: "3:05m Preview" }
+                ].map((track) => {
+                  const isCurrent = playingTrack === track.title;
+                  return (
+                    <button
+                      key={track.title}
+                      onClick={() => playMockAcoustic(track.title)}
+                      className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 relative overflow-hidden group cursor-pointer ${
+                        isCurrent 
+                          ? "border-pink-500 bg-pink-500/5 shadow-sm" 
+                          : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100/50"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-1 z-10">
+                        <span className="text-[8px] font-primary tracking-wider text-slate-400 font-bold uppercase group-hover:text-pink-500 transition-colors">
+                          Soundboard Preview
+                        </span>
+                        <h4 className="text-[11px] font-black text-slate-800 uppercase font-primary mt-1 line-clamp-1">
+                          {track.title}
+                        </h4>
+                        <p className="text-slate-400 text-[9px] font-secondary mt-0.5 line-clamp-1">
+                          {track.desc}
+                        </p>
+                      </div>
 
-          {/* Map & Venue Area */}
-          {event.googleMapEmbedUrl && (
-            <div className="glass-panel p-8 rounded-2xl flex flex-col gap-4">
-              <h3 className="text-xl font-bold font-primary text-white">Event Venue Map</h3>
-              <div className="h-72 rounded-xl overflow-hidden border border-[rgba(255,255,255,0.06)]">
-                <iframe 
-                  src={event.googleMapEmbedUrl}
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  allowFullScreen={false} 
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
+                      <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-200/60 z-10 w-full">
+                        <span className="text-[8px] font-primary text-slate-400">{track.duration}</span>
+                        {isCurrent ? (
+                          <div className="flex gap-0.5 items-end h-3">
+                            <span className="w-0.5 bg-pink-500 animate-[bounce_0.8s_infinite_100ms]" style={{ height: '100%' }}></span>
+                            <span className="w-0.5 bg-pink-500 animate-[bounce_0.8s_infinite_300ms]" style={{ height: '60%' }}></span>
+                            <span className="w-0.5 bg-pink-500 animate-[bounce_0.8s_infinite_200ms]" style={{ height: '80%' }}></span>
+                          </div>
+                        ) : (
+                          <Music size={10} className="text-slate-400 group-hover:text-pink-500 transition-colors" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          )}
 
-          {/* Photo Gallery Grid */}
-          {event.galleryUrls && event.galleryUrls.length > 0 && (
-            <div className="glass-panel p-8 rounded-2xl flex flex-col gap-4">
-              <h3 className="text-xl font-bold font-primary text-white">Past Event Gallery</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {event.galleryUrls.map((url, idx) => (
-                  <div key={idx} className="h-44 rounded-xl overflow-hidden">
-                    <img src={url} alt="Gallery" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+            {/* Card 3: PROGRAM SCHEDULE */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-5 text-left">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
+                    Festival Timetable
+                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <Clock size={16} className="text-indigo-600" />
+                    <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                      Festival Program Schedule
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Day Tab Pills */}
+                <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
+                  <button
+                    onClick={() => setScheduleTab("day1")}
+                    className={`px-4 py-1.5 rounded-lg text-[9px] font-primary font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      scheduleTab === "day1" 
+                        ? "bg-white text-slate-900 shadow-sm" 
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    Day 1: Oct 24
+                  </button>
+                  <button
+                    onClick={() => setScheduleTab("day2")}
+                    className={`px-4 py-1.5 rounded-lg text-[9px] font-primary font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      scheduleTab === "day2" 
+                        ? "bg-white text-slate-900 shadow-sm" 
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    Day 2: Oct 25
+                  </button>
+                </div>
+              </div>
+
+              {/* Day 1 Schedule Timeline */}
+              {scheduleTab === "day1" && (
+                <div className="flex flex-col gap-6 pl-1 mt-2">
+                  {[
+                    { time: "10:00 AM", title: "Gates Opening & Welcome Dhol", desc: "Opening of the curated traditional food bazaars and craft exhibitions." },
+                    { time: "12:30 PM", title: "Fusion Jugalbandi Ensemble", desc: "North-South instrumental dialogue featuring classical sitar and electric violin." },
+                    { time: "04:00 PM", title: "Handloom Runway Showcases", desc: "Regional weaver weavers presentation with live performance by classical folk singers." },
+                    { time: "07:30 PM", title: "Amit Trivedi & Folk Crew Concert", desc: "The blockbuster 2.5-hour live musical set. Expect majestic visual mapping projection." }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex gap-4 sm:gap-6 items-start relative group">
+                      <span className="w-16 sm:w-20 shrink-0 text-[10px] font-primary font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-center border border-indigo-100">
+                        {item.time}
+                      </span>
+                      <div className="flex flex-col text-left">
+                        <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase font-primary">
+                          {item.title}
+                        </h4>
+                        <p className="text-slate-400 text-[10.5px] sm:text-xs leading-relaxed font-secondary mt-1">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Day 2 Schedule Timeline */}
+              {scheduleTab === "day2" && (
+                <div className="flex flex-col gap-6 pl-1 mt-2">
+                  {[
+                    { time: "11:00 AM", title: "Craft Innovation Workshops", desc: "Interactive sessions with artisanal weavers and designers exploring eco-dyeing." },
+                    { time: "02:00 PM", title: "Theatre Audits & Street Dance", desc: "Live street plays, flash mobs, and cultural expressions across the boulevard." },
+                    { time: "05:00 PM", title: "EDM Fusion Beats Showcase", desc: "Electronic DJs mixing classical tracks with heavy synth loops." },
+                    { time: "08:00 PM", title: "Nucleya Bass Drop Finale", desc: "High-energy concluding performance with projection mapping and laser display." }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex gap-4 sm:gap-6 items-start relative group">
+                      <span className="w-16 sm:w-20 shrink-0 text-[10px] font-primary font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-center border border-indigo-100">
+                        {item.time}
+                      </span>
+                      <div className="flex flex-col text-left">
+                        <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase font-primary">
+                          {item.title}
+                        </h4>
+                        <p className="text-slate-400 text-[10.5px] sm:text-xs leading-relaxed font-secondary mt-1">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Card 4: SEATING ZONES SELECTOR */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-5 text-left">
+              <div className="flex flex-col gap-1 border-b border-slate-100 pb-3">
+                <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
+                  Interactive Stadium Arena Map
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <Sliders size={16} className="text-indigo-600" />
+                  <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                    Select Seating Zone & Perks
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-slate-500 text-xs leading-relaxed font-secondary">
+                Click any stadium zone card below to preview pricing, capacity, and premium catering perks.
+              </p>
+
+              {/* Seating zones grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                {(Object.keys(zones) as Array<keyof typeof zones>).map((key) => {
+                  const zone = zones[key];
+                  const isSelected = selectedZone === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedZone(key)}
+                      className={`p-5 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 relative group cursor-pointer ${
+                        isSelected 
+                          ? "border-indigo-600 bg-slate-950 text-white shadow-md scale-[1.01]" 
+                          : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100/60 text-slate-800"
+                      }`}
+                    >
+                      {/* Checkmark indicator */}
+                      {isSelected && (
+                        <span className="absolute top-4 right-4 bg-indigo-600 text-white w-4 h-4 rounded-full flex items-center justify-center">
+                          <Check size={9} strokeWidth={3} />
+                        </span>
+                      )}
+                      
+                      <div className="flex flex-col text-left gap-1">
+                        <span className={`text-[8.5px] font-primary tracking-wider uppercase font-bold ${isSelected ? "text-indigo-400" : "text-slate-400"}`}>
+                          Stadium Tier
+                        </span>
+                        <h4 className="text-xs sm:text-sm font-black uppercase font-primary mt-1">
+                          {zone.name}
+                        </h4>
+                      </div>
+
+                      <div className="flex items-end justify-between mt-6 pt-3 border-t border-slate-200/50 w-full">
+                        <span className={`text-base font-black font-primary ${isSelected ? "text-white" : "text-slate-900"}`}>
+                          ₹{zone.price.toLocaleString()}
+                        </span>
+                        <span className={`text-[8px] font-primary tracking-wider font-bold ${
+                          zone.capacity.includes("ALMOST") 
+                            ? "text-rose-500" 
+                            : isSelected ? "text-indigo-400" : "text-emerald-600"
+                        }`}>
+                          ● {zone.capacity}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Dynamic perks list */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mt-2 text-left">
+                <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase block mb-3">
+                  Included Credentials for {zones[selectedZone].name}:
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                  {zones[selectedZone].perks.map((perk, i) => (
+                    <div key={i} className="flex items-center gap-2 text-[10.5px] sm:text-xs text-slate-600">
+                      <span className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-150 flex items-center justify-center shrink-0">
+                        <Check size={9} strokeWidth={3.5} />
+                      </span>
+                      <span className="font-secondary font-bold text-slate-700">{perk}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Card 5: HEADLINERS CIRCLES */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-6 text-left">
+              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                <User size={16} className="text-indigo-600" />
+                <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                  National & Global Headliners
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-1">
+                {[
+                  { name: "Amit Trivedi", role: "Folk Headliner", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" },
+                  { name: "Nucleya Live", role: "EDM Sensation", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" },
+                  { name: "Meenakshi Iyer", role: "Classical Violinist", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" },
+                  { name: "Shiva & Drums", role: "Fusion Percussionist", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" }
+                ].map((artist, idx) => (
+                  <div key={idx} className="flex flex-col items-center text-center gap-2 group">
+                    <div className="w-20 h-20 rounded-full overflow-hidden shadow border border-slate-200 relative">
+                      <img 
+                        src={artist.img} 
+                        alt={artist.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-0.5 mt-1">
+                      <h4 className="text-[11px] font-black text-slate-900 uppercase font-primary tracking-tight">
+                        {artist.name}
+                      </h4>
+                      <span className="text-[8px] font-primary tracking-wider font-bold text-indigo-600 uppercase">
+                        {artist.role}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Right Column: CTA Panel */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          
-          {/* Action Card */}
-          <div className="glass-panel p-6 rounded-2xl border-indigo-500/15 sticky top-24 flex flex-col gap-6 bg-gradient-to-b from-gray-900 to-indigo-950/40">
-            <div>
-              <span className="text-xs text-gray-500 uppercase block font-semibold">TICKETS & REGISTRATION</span>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">
-                  {event.ticketPrices.length > 0 ? `₹${event.ticketPrices[0].price}` : "Free"}
+            {/* Card 6: FREQUENTLY ASKED QUESTIONS & CURATOR CHAT */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-6 text-left">
+              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                <HelpCircle size={16} className="text-indigo-600" />
+                <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                  Frequently Asked Questions
+                </h3>
+              </div>
+
+              {/* Accordion FAQ items */}
+              <div className="flex flex-col gap-3 mt-1">
+                {[
+                  { q: "Is transport or shuttle buses arranged for Buddh Circuit?", a: "Yes! High-frequency air-conditioned shuttle coaches depart every 15 minutes from Botanical Garden Metro Station (Noida) directly to Buddh Circuit Gate 3 from 8:00 AM onwards." },
+                  { q: "Are professional cameras or recording rigs allowed?", a: "Only non-professional smartphones and compact action cameras are allowed. Professional SLRs and recording gimbals require prior press accreditation." },
+                  { q: "How do I redeem food and beverage coupon passes?", a: "F&B credentials can be scanned at the main registration kiosk to claim physical coupon books before entering the food bazaar." },
+                  { q: "Is re-entry permitted during the two-day festival?", a: "Yes, re-entry is permitted as long as your smart QR wristband remains active and untampered." }
+                ].map((faq, i) => {
+                  const isOpen = faqOpen === i;
+                  return (
+                    <div key={i} className="border border-slate-200/80 rounded-xl overflow-hidden bg-slate-50 transition-colors">
+                      <button
+                        onClick={() => setFaqOpen(isOpen ? null : i)}
+                        className="w-full px-4 py-3.5 flex items-center justify-between text-left text-xs font-bold font-primary uppercase text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                      >
+                        <span>{faq.q}</span>
+                        {isOpen ? <ChevronUp size={14} className="text-indigo-600" /> : <ChevronDown size={14} className="text-slate-400" />}
+                      </button>
+                      
+                      {isOpen && (
+                        <div className="px-4 pb-4 pt-1 text-[11px] sm:text-xs leading-relaxed text-slate-500 font-secondary border-t border-slate-200/50 mt-1">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Interactive Curator Chatbot box */}
+              <div className="border border-slate-200 rounded-2xl p-4 md:p-5 mt-3 bg-slate-50/50 flex flex-col gap-4 text-left">
+                <span className="text-[8px] font-primary tracking-widest text-slate-400 font-bold uppercase block">
+                  Helpdesk Hub
                 </span>
-                <span className="text-xs text-gray-400">Starting Price</span>
-              </div>
-            </div>
+                
+                {/* Chat screen */}
+                <div className="flex flex-col gap-3 max-h-48 overflow-y-auto bg-white border border-slate-200/60 p-3 rounded-xl">
+                  {chatHistory.map((chat, idx) => (
+                    <div key={idx} className={`flex flex-col max-w-[85%] text-xs rounded-xl p-3 leading-relaxed font-secondary ${
+                      chat.sender === "user" 
+                        ? "bg-indigo-600 text-white self-end text-right" 
+                        : "bg-slate-100 text-slate-700 self-start text-left border border-slate-200/40"
+                    }`}>
+                      <span className={`text-[7px] font-primary font-bold uppercase mb-1 block ${
+                        chat.sender === "user" ? "text-indigo-200" : "text-slate-400"
+                      }`}>
+                        {chat.sender === "user" ? "You" : "Curator Curator"}
+                      </span>
+                      <span>{chat.text}</span>
+                    </div>
+                  ))}
+                  {isTyping && (
+                    <div className="bg-slate-105 text-slate-500 self-start text-xs rounded-xl p-2 px-3 border border-slate-200/40 animate-pulse font-primary font-bold text-[8.5px]">
+                      Curator is typing...
+                    </div>
+                  )}
+                </div>
 
-            {/* CTAs */}
-            <div className="flex flex-col gap-3">
-              {event.isUpcoming ? (
-                <>
-                  <button 
-                    onClick={() => setActiveWizard("booking")}
-                    className="btn btn-primary w-full py-3.5 font-bold flex items-center justify-center gap-2"
+                {/* Input form */}
+                <form onSubmit={handleCuratorAsk} className="flex gap-2 w-full mt-1">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask about gate access, locker spaces, VIP catering..."
+                    className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-slate-950 text-white text-[10px] font-primary font-bold tracking-widest px-5 py-2.5 rounded-xl uppercase hover:bg-indigo-600 transition-all cursor-pointer shadow-sm"
                   >
-                    <Ticket size={18} /> Book Audience Tickets
+                    Ask
                   </button>
-                  
-                  {event.category.includes("Competitions") || event.registrationFee ? (
-                    <button 
-                      onClick={() => setActiveWizard("registration")}
-                      className="btn btn-secondary w-full py-3.5 font-bold border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/5 hover:text-white"
-                    >
-                      <Trophy size={18} /> Register as Participant
-                    </button>
-                  ) : null}
-                </>
-              ) : (
-                <button className="btn btn-disabled w-full py-3.5 font-bold" disabled>
-                  Event Concluded
-                </button>
-              )}
+                </form>
+              </div>
 
-              <button 
-                onClick={handleShare}
-                className="btn btn-secondary w-full py-3 text-xs font-semibold flex items-center justify-center gap-1.5"
-              >
-                <Share2 size={14} /> 
-                {copiedLink ? "Copied Link!" : "Share Event Link"}
-              </button>
             </div>
 
-            {/* Organizer Info */}
-            <div className="border-t border-[rgba(255,255,255,0.06)] pt-5 flex flex-col gap-3 text-xs text-gray-400">
-              <span className="font-semibold text-white uppercase text-[10px]">Managed By</span>
-              <div className="flex flex-col gap-2">
-                <span className="font-bold text-gray-300">{event.organizer.name}</span>
-                <span className="flex items-center gap-1.5"><Mail size={12} className="text-cyan-400" /> {event.organizer.email}</span>
-                <span className="flex items-center gap-1.5"><Phone size={12} className="text-cyan-400" /> {event.organizer.phone}</span>
+          </div>
+
+          {/* Right Column Panels (Sidebar) */}
+          <div className="lg:col-span-4 flex flex-col gap-6 sticky top-24">
+            
+            {/* Card 1: LIVE TICKET BADGE CUSTOMIZER */}
+            <div className="bg-[#0a0f1d] text-white border border-slate-900 rounded-[32px] p-6 shadow-xl flex flex-col gap-5 text-left relative overflow-hidden">
+              {/* Star details layout backdrop decoration */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full filter blur-2xl"></div>
+              
+              <div className="flex flex-col gap-1 border-b border-slate-800/80 pb-3 relative z-10">
+                <span className="text-[8px] font-primary tracking-widest text-indigo-400 font-bold uppercase">
+                  Live Badge Customizer Studio
+                </span>
+                <h3 className="text-sm font-bold font-primary text-white uppercase tracking-wider">
+                  Watch Your Ticket Form Live
+                </h3>
+                <span className="text-[9.5px] text-slate-400 mt-1 font-secondary">
+                  Customize your name and color palette before booking.
+                </span>
+              </div>
+
+              {/* Pass Holder name input */}
+              <div className="flex flex-col gap-1.5 relative z-10 mt-1">
+                <label className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">
+                  Pass-Holder Name
+                </label>
+                <input
+                  type="text"
+                  value={passholderName}
+                  onChange={(e) => setPassholderName(e.target.value.toUpperCase())}
+                  placeholder="Enter Holder Name"
+                  maxLength={22}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 font-primary tracking-wide"
+                />
+              </div>
+
+              {/* Holographic Glow selector dots */}
+              <div className="flex flex-col gap-1.5 relative z-10">
+                <label className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">
+                  Badge Holographic Glow
+                </label>
+                <div className="flex gap-2.5 mt-1">
+                  {[
+                    { color: "purple", class: "bg-indigo-600" },
+                    { color: "pink", class: "bg-rose-500" },
+                    { color: "orange", class: "bg-amber-500" },
+                    { color: "green", class: "bg-emerald-500" }
+                  ].map((item) => {
+                    const isSelected = badgeGlow === item.color;
+                    return (
+                      <button
+                        key={item.color}
+                        onClick={() => setBadgeGlow(item.color as any)}
+                        className={`w-6 h-6 rounded-full ${item.class} transition-all relative flex items-center justify-center cursor-pointer hover:scale-105 shadow-md`}
+                      >
+                        {isSelected && (
+                          <span className="w-2 h-2 rounded-full bg-white animate-scale"></span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Real-time Ticket Badge Preview Card */}
+              <div className={`rounded-2xl p-5 flex flex-col gap-6 text-left relative overflow-hidden transition-all duration-500 border border-white/5 ${getGlowStyles(badgeGlow)}`}>
+                
+                {/* Header credentials */}
+                <div className="flex items-start justify-between w-full relative z-10 border-b border-white/10 pb-3">
+                  <div className="flex flex-col text-left">
+                    <h4 className="text-[13px] font-black font-primary tracking-tight leading-none">
+                      {event.name}
+                    </h4>
+                    <span className="text-[7.5px] font-primary font-bold tracking-widest text-white/70 uppercase mt-1">
+                      Gate Access Credentials
+                    </span>
+                  </div>
+                  
+                  {/* Dynamic mock QR icon */}
+                  <div className="w-8 h-8 shrink-0 bg-white/10 border border-white/20 rounded p-1 flex items-center justify-center">
+                    <div className="grid grid-cols-2 gap-0.5 w-full h-full opacity-90">
+                      <div className="bg-white rounded-[1px]"></div>
+                      <div className="bg-white rounded-[1px]"></div>
+                      <div className="bg-white rounded-[1px]"></div>
+                      <div className="border border-white border-dashed rounded-[1px]"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle details tier */}
+                <div className="flex flex-col text-left relative z-10">
+                  <span className="text-[6.5px] font-primary tracking-widest text-white/60 font-bold uppercase">
+                    Stadium Tier
+                  </span>
+                  <h3 className="text-sm font-black font-primary uppercase tracking-wide mt-0.5 line-clamp-1">
+                    {zones[selectedZone].name}
+                  </h3>
+                </div>
+
+                {/* Bottom passholder name */}
+                <div className="flex flex-col text-left relative z-10">
+                  <span className="text-[6.5px] font-primary tracking-widest text-white/60 font-bold uppercase">
+                    Delegate Enrolled
+                  </span>
+                  <h3 className="text-base font-black font-primary tracking-wider mt-0.5 line-clamp-1">
+                    {passholderName || "DELEGATE HOLDER"}
+                  </h3>
+                </div>
+
+                {/* Card footer details metadata */}
+                <div className="flex items-center justify-between border-t border-white/15 pt-3 mt-1 relative z-10 text-[8.5px] font-primary font-bold tracking-wider text-white/80">
+                  <div className="flex flex-col text-left">
+                    <span className="text-white/50 text-[6.5px] uppercase">City Hub</span>
+                    <span className="uppercase">{event.city}</span>
+                  </div>
+                  <div className="flex flex-col text-right">
+                    <span className="text-white/50 text-[6.5px] uppercase">Pass Ref No</span>
+                    <span className="uppercase">{zones[selectedZone].ref}</span>
+                  </div>
+                </div>
+
+                {/* Subfooter status bar with blinking green dot */}
+                <div className="flex items-center justify-between relative z-10 pt-2 text-[7.5px] font-primary font-bold tracking-widest text-white/60 uppercase">
+                  <span>Holographic Festival Pass</span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>Live_Ticket_Gen</span>
+                  </span>
+                </div>
+
+                {/* Holographic scanning diagonal lights layout backdrop */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000 ease-out skew-x-12"></div>
+              </div>
+
+              {/* Book ticket CTA */}
+              <div className="flex flex-col gap-2 mt-2 relative z-10">
+                <button
+                  onClick={() => setActiveWizard("booking")}
+                  className="bg-indigo-600 text-white text-[10.5px] font-primary font-bold tracking-widest py-3.5 w-full rounded-2xl uppercase hover:bg-indigo-700 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md"
+                >
+                  Book This Custom Badge <ArrowRight size={12} />
+                </button>
+                <span className="text-[7.5px] font-primary font-bold tracking-widest text-slate-500 uppercase text-center mt-1">
+                  100% SECURE GATE CHECKOUTS VIA UPI & NETBANKING
+                </span>
               </div>
             </div>
+
+            {/* Card 2: WEATHER & TRAVEL PLANNER */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 shadow-sm flex flex-col gap-4 text-left">
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <MapPin size={15} className="text-indigo-600" />
+                <h4 className="text-xs font-bold font-primary text-slate-900 uppercase tracking-wider">
+                  Weather & Travel Planner
+                </h4>
+              </div>
+
+              {/* Weather info */}
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-200/60 p-4 rounded-xl text-left">
+                <div className="flex flex-col gap-0.5 border-r border-slate-200/60 pr-2">
+                  <span className="text-[7px] font-primary font-bold tracking-wider text-slate-400 uppercase">
+                    Current Weather
+                  </span>
+                  <span className="text-base font-black text-slate-900 uppercase font-primary mt-1">
+                    25°C
+                  </span>
+                  <span className="text-[9px] text-slate-500 font-secondary mt-0.5 line-clamp-1">
+                    Clear Cool Evening
+                  </span>
+                </div>
+                
+                <div className="flex flex-col gap-0.5 pl-1">
+                  <span className="text-[7px] font-primary font-bold tracking-wider text-slate-400 uppercase">
+                    Atmosphere AQI
+                  </span>
+                  <span className="text-base font-black text-rose-600 uppercase font-primary mt-1">
+                    AQI 110
+                  </span>
+                  <span className="text-[9px] text-rose-500 font-secondary mt-0.5 font-bold line-clamp-1">
+                    Moderate Haze
+                  </span>
+                </div>
+              </div>
+
+              {/* Secure checklist details instructions */}
+              <div className="flex flex-col gap-2.5 text-[10.5px] leading-relaxed text-slate-500 font-secondary mt-1">
+                <div className="flex items-start gap-1.5">
+                  <span className="font-bold text-slate-700">1.</span>
+                  <span>Security checkpoints open exactly at <strong className="text-slate-800">9:00 AM</strong> both days. Please carry a valid digital student ID card if booking the student stand ticket.</span>
+                </div>
+                <div className="flex items-start gap-1.5">
+                  <span className="font-bold text-slate-700">2.</span>
+                  <span>Safe luggage cloakroom lockers are fully operational inside the Gate 3 stadium premises for a nominal maintenance fee of ₹50.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: EVENT CUSTODIANS */}
+            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 shadow-sm flex flex-col gap-4 text-left">
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <ShieldCheck size={15} className="text-indigo-600" />
+                <h4 className="text-xs font-bold font-primary text-slate-900 uppercase tracking-wider">
+                  Event Custodians
+                </h4>
+              </div>
+
+              <div className="flex flex-col gap-3 text-left">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[7.5px] font-primary font-bold text-slate-400 uppercase">Organizer</span>
+                  <span className="text-[11.5px] font-black text-slate-800 uppercase font-primary leading-tight mt-0.5">
+                    {event.organizer.name}
+                  </span>
+                  <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-1">
+                    Dedicated to showcasing the sublime synthesis of traditional Indian heritage and contemporary expressions.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-100 text-[10px] font-primary font-bold tracking-wider text-slate-500">
+                  <span className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+                    <Mail size={12} className="text-indigo-600 shrink-0" />
+                    {event.organizer.email}
+                  </span>
+                  <span className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
+                    <Phone size={12} className="text-indigo-600 shrink-0" />
+                    {event.organizer.phone}
+                  </span>
+                </div>
+              </div>
+            </div>
+
           </div>
+
         </div>
-      </section>
+
+      </div>
     </div>
   );
 }
@@ -586,7 +1254,7 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
                   </div>
                   <div className="text-right">
                     <span className="text-[8px] text-gray-500 block uppercase font-bold">REF NUMBER</span>
-                    <span className="font-mono text-xs font-bold text-white">{completedBooking.bookingRef}</span>
+                    <span className="font-primary text-xs font-bold text-white">{completedBooking.bookingRef}</span>
                   </div>
                 </div>
 
@@ -1049,7 +1717,7 @@ function CompetitionRegistrationWizard({ event, user, onClose }: WizardProps) {
 
               {/* Log Code for Testing */}
               {verificationCode && (
-                <div className="p-3 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 rounded-lg text-[10px] font-mono">
+                <div className="p-3 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 rounded-lg text-[10px] font-primary">
                   DEV MODE - Code generated is: <strong>{verificationCode}</strong>
                 </div>
               )}
@@ -1151,7 +1819,7 @@ function CompetitionRegistrationWizard({ event, user, onClose }: WizardProps) {
                   </div>
                   <div className="text-right">
                     <span className="text-[8px] text-gray-500 block uppercase font-bold">PARTICIPANT ID</span>
-                    <span className="font-mono text-xs font-bold text-white">{completedReg.participantId}</span>
+                    <span className="font-primary text-xs font-bold text-white">{completedReg.participantId}</span>
                   </div>
                 </div>
 

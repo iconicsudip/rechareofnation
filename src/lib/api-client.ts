@@ -158,6 +158,9 @@ export interface Blog {
   category: string;
   author: string;
   publishedAt: string;
+  readTime?: string;
+  subheading?: string;
+  bullets?: string[];
 }
 
 export interface GalleryItem {
@@ -504,25 +507,105 @@ const MOCK_SPONSORS: Sponsor[] = [
 const MOCK_BLOGS: Blog[] = [
   {
     id: 'bl-1',
-    title: 'Top 5 Highlights to Expect at Recharge Odyssey 2026',
-    slug: 'top-5-highlights-odyssey-2026',
-    summary: 'From classical ensembles to local cuisine stalls, here is everything you need to map out for Delhi\'s premium event.',
-    content: 'Recharge Cultural Odyssey 2026 is around the corner. To make sure you do not miss the finest experiences, we have curated the ultimate check-list. Number one is the opening night Classical Fusion performance featuring world-renowned sitarists. Second, explore the Crafts Pavilion showcasing lost art forms from rural India. Third, check out the specialized kids workshop arena. Fourth, indulge in authentic native street foods from 20 different states. Lastly, grab the official merchandise before they sell out.',
-    imageUrl: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=800&q=80',
-    category: 'Event Guides',
-    author: 'Sunita Roy',
-    publishedAt: '2026-07-10'
+    title: 'LUXURY STAYS IN MEWAR: THE DEFINITIVE GUIDE TO LAKEFRONT HAVELIS',
+    slug: 'luxury-stays-mewar-lakefront-havelis',
+    summary: 'Unveiling Mew\'s Finest Stays Rajasthan is known for its incredible heritage, and Udaipur stands as the jewel of Mewar....',
+    content: 'Rajasthan is known for its incredible heritage, and Udaipur stands as the jewel of Mewar. Experiencing it from a lakefront haveli is a bucket-list journey.',
+    imageUrl: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
+    category: 'Luxury Stays',
+    author: 'GoRidez Editorial Team',
+    publishedAt: 'July 12, 2026',
+    readTime: '1 min read',
+    subheading: 'UNVEILING MEWAR\'S FINEST STAYS',
+    bullets: [
+      'Aravalli Grande Palace: Infinity pool and helipad capabilities.',
+      'Blue City Haveli Estate: Nestled under Mehrangarh\'s shadows in Jodhpur.'
+    ]
   },
   {
     id: 'bl-2',
-    title: 'How to Prepare Your Dance Crew for National Competitions',
-    slug: 'prepare-dance-crew-national-competitions',
-    summary: 'Expert choreography, prop checks, and breathing hacks to keep your team stage-ready under high pressure.',
-    content: 'Competing in the Vibe & Rhythm Dance Cup is an exciting milestone. Preparation requires careful discipline. Ensure your sound cues are perfectly edited. Standardize costumes to avoid wardrobe slips. Keep stage sizes in mind while pacing movements. Practice with full props to gain spatial confidence. Finally, support each member and maintain a healthy physical routine leading up to the main day.',
-    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
-    category: 'Tips & Tricks',
-    author: 'Vikram Bose',
-    publishedAt: '2026-07-01'
+    title: 'NAVIGATING KUMBALGARH FORT VIA SCENIC MOUNTAIN PASSES IN BREZZA',
+    slug: 'navigating-kumbalgarh-fort-mountain-passes',
+    summary: 'Discover Kumbalgarh Fort via scenic mountain roads, mapping driving speeds, vistas, and timing details....',
+    content: 'Map out your next road trip to the second-longest wall in the world. This route guide details driving speeds, mountain road conditions, scenic vistas, and the best time of year to visit Kumbalgarh Fort.',
+    imageUrl: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80',
+    category: 'Travel Guide',
+    author: 'GoRidez Editorial Team',
+    publishedAt: 'July 15, 2026',
+    readTime: '2 min read',
+    subheading: 'EXPLORING SCENIC PASSES',
+    bullets: [
+      'Brezza Performance: Excellent low-end torque for mountain loops.',
+      'Kumbalgarh Fort Wall: Walk the historic 36km battlements.'
+    ]
+  },
+  {
+    id: 'bl-3',
+    title: 'TECHNICAL DRIVING: MASTER THE TIGHT HAIRPINS OF MOUNT ABU',
+    slug: 'technical-driving-hairpins-mount-abu',
+    summary: 'Master the Mount Abu passes with expert braking, steering lines, and engine cooling guides....',
+    content: 'Mount Abu\'s winding passes demand strict vehicle preparation. Learn engine brake techniques, lines of entry for blind curves, and suspension settings required for a smooth mountain driving experience.',
+    imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
+    category: 'Technical Driving',
+    author: 'GoRidez Editorial Team',
+    publishedAt: 'July 18, 2026',
+    readTime: '3 min read',
+    subheading: 'MOUNTAIN TRACTION PROTOCOLS',
+    bullets: [
+      'Lower Gears: Maintain 2nd gear for descent control.',
+      'Brake Cooling: Stop at mid-way points to avoid disc fading.'
+    ]
+  },
+  {
+    id: 'bl-4',
+    title: 'HERITAGE RETREATS OF JAIPUR: LIVING AMONG ROYAL CONSERVERS',
+    slug: 'heritage-retreats-jaipur-royal-conservers',
+    summary: 'A guide to staying in private heritage suites managed directly by the royal descendants of Jaipur.',
+    content: 'Discover Jaipur\'s finest ancestral homes and city palaces converted into luxury boutique hotels. Meet the royal families preserving these architectures and enjoy hand-cooked royal recipes passed down through generations.',
+    imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80',
+    category: 'Luxury Stays',
+    author: 'GoRidez Editorial Team',
+    publishedAt: 'July 20, 2026',
+    readTime: '2 min read',
+    subheading: 'ROYAL HOMESTAYS',
+    bullets: [
+      'City Palace Suite: Private access to historical arms galleries.',
+      'Mewari Cuisine: Family-hosted dinners with royal stories.'
+    ]
+  },
+  {
+    id: 'bl-5',
+    title: 'SCENIC DESERT SAFARI: UNVEILING THE SAND DUNES OF JAISALMER',
+    slug: 'scenic-desert-safari-jaisalmer-dunes',
+    summary: 'Navigating local routes through the Thar desert to catch golden hour sunsets over sand dunes.',
+    content: 'Prepare your off-road vehicles for a journey into the heart of the Thar Desert. This guide details Sam Sand Dunes entry regulations, dune-bashing safety protocols, and premium luxury camp recommendations.',
+    imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5edd0cd9?auto=format&fit=crop&w=800&q=80',
+    category: 'Travel Guide',
+    author: 'GoRidez Editorial Team',
+    publishedAt: 'July 22, 2026',
+    readTime: '3 min read',
+    subheading: 'THAR ROAD TRIP GUIDES',
+    bullets: [
+      'Sam Dunes Entry: Pre-register vehicles at Jaisalmer checkpost.',
+      'Luxury Camp Tent: Star-gazing over active sand dunes.'
+    ]
+  },
+  {
+    id: 'bl-6',
+    title: 'OFF-ROAD TRAIL GUIDE: NAVIGATION STRATEGIES FOR THE THAR DUNES',
+    slug: 'off-road-trail-guide-thar-dunes',
+    summary: 'Understanding tire deflation, traction gear, and sand recovery tracks for sand dune exploration.',
+    content: 'Off-road driving on loose desert sand requires specialised techniques. Learn the proper tyre pressure adjustments, sand entry speeds, and recovery shovel setups to ensure a safe sand-duning trail run.',
+    imageUrl: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
+    category: 'Technical Driving',
+    author: 'GoRidez Editorial Team',
+    publishedAt: 'July 24, 2026',
+    readTime: '4 min read',
+    subheading: 'OFF-ROAD TACTICS',
+    bullets: [
+      'Tyre Deflation: Maintain 15 PSI for sand flotation.',
+      'Recovery Tracks: Carry sand boards and heavy-duty tow ropes.'
+    ]
   }
 ];
 

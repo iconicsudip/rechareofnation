@@ -64,7 +64,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
     setStep(4);
   };
 
-  const labelClass = "text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500";
+  const labelClass = "text-[11px] font-primary font-bold uppercase tracking-wider text-slate-500";
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
@@ -75,7 +75,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
         {/* Header */}
         <div className="flex items-start justify-between px-6 sm:px-8 pt-7 pb-5 border-b border-slate-100 shrink-0">
           <div>
-            <span className="text-indigo-600 font-mono text-[11px] font-bold tracking-widest uppercase">Competitor Boarding</span>
+            <span className="text-indigo-600 font-primary text-[11px] font-bold tracking-widest uppercase">Competitor Boarding</span>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-primary mt-1">Miss & Mr. Traditional India 2026</h2>
           </div>
           <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors cursor-pointer shrink-0">
@@ -88,7 +88,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
           {STEPS.map((label, idx) => (
             <div
               key={label}
-              className={`px-3 sm:px-4 py-3.5 text-xs sm:text-sm font-mono font-bold whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              className={`px-3 sm:px-4 py-3.5 text-xs sm:text-sm font-primary font-bold whitespace-nowrap border-b-2 -mb-px transition-colors ${
                 idx === step ? "text-indigo-600 border-indigo-600" : idx < step ? "text-slate-500 border-transparent" : "text-slate-300 border-transparent"
               }`}
             >
@@ -126,7 +126,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col gap-1.5">
-                <span className="text-indigo-600 font-mono text-[11px] font-bold tracking-widest uppercase">Prize Pool Valuation</span>
+                <span className="text-indigo-600 font-primary text-[11px] font-bold tracking-widest uppercase">Prize Pool Valuation</span>
                 <span className="text-xl font-black text-slate-900">₹25,00,000 + Modelling Contracts</span>
                 <p className="text-slate-500 text-xs">Includes modeling contracts, live stage exposure, performance certificates, and mentorship fellowships.</p>
               </div>
@@ -261,7 +261,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
           {step === 3 && (
             <div className="flex flex-col gap-6">
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col gap-4">
-                <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-slate-400">Participant Settlement Details</span>
+                <span className="text-[11px] font-primary font-bold uppercase tracking-widest text-slate-400">Participant Settlement Details</span>
                 <div className="flex justify-between text-sm text-slate-800">
                   <span className="font-normal text-slate-600">Competition Boarding Registration Fee</span>
                   <span className="font-bold">₹{REGISTRATION_FEE}</span>
@@ -325,7 +325,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
 
                   <span className="text-white font-black text-lg uppercase tracking-tight mt-1 break-words max-w-full">{fullName}</span>
                   <span className="text-indigo-400 font-bold text-[11px] uppercase tracking-wide -mt-2">{trackLabel}</span>
-                  <span className="text-slate-500 text-[10px] font-mono">REG ID: {participantId}</span>
+                  <span className="text-slate-500 text-[10px] font-primary">REG ID: {participantId}</span>
 
                   {/* Mock QR */}
                   <div className="w-24 h-24 bg-white p-2 rounded-lg mt-1">
@@ -342,11 +342,11 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
 
                   <div className="w-full border-t border-slate-700 mt-2 pt-3 flex flex-col gap-1.5">
                     <div className="flex justify-between text-[10px]">
-                      <span className="text-slate-500 font-mono uppercase">Audit Date:</span>
+                      <span className="text-slate-500 font-primary uppercase">Audit Date:</span>
                       <span className="text-white font-bold">{FINALS_DATE}</span>
                     </div>
                     <div className="flex justify-between text-[10px]">
-                      <span className="text-slate-500 font-mono uppercase">ID Verified:</span>
+                      <span className="text-slate-500 font-primary uppercase">ID Verified:</span>
                       <span className="text-emerald-400 font-bold flex items-center gap-1">
                         <Check size={10} /> Yes
                       </span>
@@ -354,7 +354,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                   </div>
                 </div>
                 <div className="bg-slate-950/60 border-t border-slate-800 py-2.5 text-center">
-                  <span className="text-indigo-400 text-[9px] font-mono font-bold uppercase tracking-widest">Recharge Nation Official Talent Register</span>
+                  <span className="text-indigo-400 text-[9px] font-primary font-bold uppercase tracking-widest">Recharge Nation Official Talent Register</span>
                 </div>
               </div>
             </div>
@@ -389,7 +389,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                 type="button"
                 onClick={handleBack}
                 disabled={step === 0}
-                className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed hover:text-slate-600 transition-colors cursor-pointer"
+                className="text-xs font-primary font-bold uppercase tracking-wider text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed hover:text-slate-600 transition-colors cursor-pointer"
               >
                 Back
               </button>

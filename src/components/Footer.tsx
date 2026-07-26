@@ -45,7 +45,7 @@ export default function Footer() {
 
             {/* Mini Newsletter form: JOIN THE ALERT CREW */}
             <div className="flex flex-col gap-3 mt-2">
-              <span className="text-[10px] font-mono tracking-widest text-cyan-400 font-bold uppercase">JOIN THE ALERT CREW</span>
+              <span className="text-[10px] font-primary tracking-widest text-cyan-400 font-bold uppercase">JOIN THE ALERT CREW</span>
               {subscribed ? (
                 <span className="text-xs text-emerald-400 font-medium">Successfully subscribed to presale alerts!</span>
               ) : (
@@ -113,7 +113,7 @@ export default function Footer() {
         </div>
 
         {/* Footer Bottom bar */}
-        <div className="border-t border-[rgba(255,255,255,0.06)] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
+        <div className="border-t border-[rgba(255,255,255,0.06)] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-primary">
           <p>&copy; {currentYear} Recharge Nation. All rights reserved.</p>
 
           <div className="flex items-center gap-6">

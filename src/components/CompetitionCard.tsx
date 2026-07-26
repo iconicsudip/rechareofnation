@@ -27,12 +27,12 @@ export default function CompetitionCard(arena: CompetitionCardProps) {
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/40 to-transparent pointer-events-none"></div>
         
         {/* Prize Pool Badge Overlay */}
-        <span className="absolute top-4 left-4 bg-indigo-600 text-white font-mono text-[8px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-md shadow-indigo-600/10 flex items-center gap-1">
+        <span className="absolute top-4 left-4 bg-indigo-600 text-white font-primary text-[8px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-md shadow-indigo-600/10 flex items-center gap-1">
           <Trophy size={10} className="shrink-0" /> PRIZE POOL: ₹{arena.prizePool}
         </span>
 
         {/* Audition Spot Badge Overlay */}
-        <div className="absolute bottom-3.5 left-3.5 bg-slate-950/70 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8px] text-white font-bold font-mono tracking-wider uppercase z-10">
+        <div className="absolute bottom-3.5 left-3.5 bg-slate-950/70 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8px] text-white font-bold font-primary tracking-wider uppercase z-10">
           📍 {arena.city} AUDITION SPOT
         </div>
       </div>
@@ -56,12 +56,12 @@ export default function CompetitionCard(arena: CompetitionCardProps) {
         {/* Footer Billing Row */}
         <div className="pt-4 mt-auto border-t border-slate-100 flex items-center justify-between gap-2">
           <div>
-            <span className="text-[8px] text-slate-400 font-mono uppercase block tracking-wider">BOARDING FEE</span>
+            <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">BOARDING FEE</span>
             <span className="text-slate-800 font-extrabold text-[13.5px] font-primary mt-0.5 block">₹{arena.registrationFee}</span>
           </div>
           <Link 
             href="/competitions" 
-            className="bg-[#4f46e5] hover:bg-[#4338ca] text-white font-mono text-[9px] font-bold px-4.5 py-2.5 rounded-lg tracking-widest uppercase transition-all duration-300 shadow-md shadow-indigo-500/10"
+            className="bg-[#4f46e5] hover:bg-[#4338ca] text-white font-primary text-[9px] font-bold px-4.5 py-2.5 rounded-lg tracking-widest uppercase transition-all duration-300 shadow-md shadow-indigo-500/10"
           >
             Register Contestant
           </Link>
