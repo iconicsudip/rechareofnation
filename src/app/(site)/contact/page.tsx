@@ -1,8 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle, ShieldCheck } from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
+
+interface ContactInfoContent {
+  eyebrow: string;
+  heading: string;
+  subheading: string;
+  address: string;
+  phone: string;
+  phoneHours: string;
+  supportEmail: string;
+  salesEmail: string;
+  mapEmbedUrl: string;
+  formHeading: string;
+  formHelperText: string;
+  successHeading: string;
+  successBody: string;
+}
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -10,13 +26,23 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  
+
   // Spam verification (reCAPTCHA simulator)
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
-  
+
   // Submit states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [content, setContent] = useState<ContactInfoContent | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      const data = await ApiClient.getSiteContent<ContactInfoContent>("contact_info");
+      setContent(data);
+    };
+    fetchContent();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +71,9 @@ export default function ContactPage() {
     <div className="container py-12 flex flex-col gap-16">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto flex flex-col gap-3">
-        <span className="text-sm font-semibold uppercase tracking-widest text-cyan-400">Communication</span>
-        <h1 className="text-4xl md:text-5xl font-black font-primary text-white">Get in Touch</h1>
-        <p className="text-gray-400 text-sm mt-2">Have a question or request? Submit your message and we'll reply shortly.</p>
+        <span className="text-sm font-semibold uppercase tracking-widest text-cyan-400">{content?.eyebrow}</span>
+        <h1 className="text-4xl md:text-5xl font-black font-primary text-white">{content?.heading}</h1>
+        <p className="text-gray-400 text-sm mt-2">{content?.subheading}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -59,7 +85,7 @@ export default function ContactPage() {
             <div>
               <h4 className="font-bold text-white text-sm font-primary">Office Address</h4>
               <p className="text-gray-500 text-xs mt-1.5 leading-relaxed">
-                Level 4, Corporate Towers, MG Road, Bengaluru, Karnataka - 560001
+                {content?.address}
               </p>
             </div>
           </div>
@@ -69,8 +95,8 @@ export default function ContactPage() {
             <div>
               <h4 className="font-bold text-white text-sm font-primary">Calling Helpline</h4>
               <p className="text-gray-500 text-xs mt-1.5 leading-relaxed">
-                +91 98765 43210 <br />
-                Mon - Sat: 9:00 AM to 6:00 PM
+                {content?.phone} <br />
+                {content?.phoneHours}
               </p>
             </div>
           </div>
@@ -80,17 +106,17 @@ export default function ContactPage() {
             <div>
               <h4 className="font-bold text-white text-sm font-primary">Email Support</h4>
               <p className="text-gray-500 text-xs mt-1.5 leading-relaxed">
-                info@rechargenation.in <br />
-                support@rechargenation.in
+                {content?.salesEmail} <br />
+                {content?.supportEmail}
               </p>
             </div>
           </div>
 
           {/* Map Embed */}
           <div className="h-60 rounded-xl overflow-hidden border border-[rgba(255,255,255,0.06)] glass-panel">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.9734335503835!2d77.6083818!3d12.9735417!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1684c30c8ef3%3A0xe5413346cd6848e4!2sMG%20Road%20Bengaluru!5e0!3m2!1sen!2sin!4v1689250000004!5m2!1sen!2sin"
-              width="100%" 
+            <iframe
+              src={content?.mapEmbedUrl}
+              width="100%"
               height="100%" 
               style={{ border: 0 }} 
               allowFullScreen={false} 
@@ -101,14 +127,14 @@ export default function ContactPage() {
 
         {/* Right Column: Form (8 cols) */}
         <div className="lg:col-span-8 glass-panel p-8 md:p-10 rounded-2xl border-indigo-500/15 bg-gradient-to-b from-gray-900 to-indigo-950/20">
-          <h3 className="text-xl font-bold text-white font-primary mb-2">Send Enquiry Message</h3>
-          <p className="text-gray-400 text-xs mb-8">Fill the fields and pass the captcha validation check to trigger submission.</p>
+          <h3 className="text-xl font-bold text-white font-primary mb-2">{content?.formHeading}</h3>
+          <p className="text-gray-400 text-xs mb-8">{content?.formHelperText}</p>
 
           {isSubmitted ? (
             <div className="py-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-center flex flex-col items-center gap-3">
               <CheckCircle size={36} />
-              <h4 className="font-bold font-primary text-base">Message Sent Successfully!</h4>
-              <p className="text-xs max-w-sm">A simulated auto-acknowledgement response notification email has been triggered via SMTP.</p>
+              <h4 className="font-bold font-primary text-base">{content?.successHeading}</h4>
+              <p className="text-xs max-w-sm">{content?.successBody}</p>
               <button 
                 onClick={() => setIsSubmitted(false)}
                 className="btn btn-secondary py-2 px-6 text-xs font-semibold rounded-full mt-4"

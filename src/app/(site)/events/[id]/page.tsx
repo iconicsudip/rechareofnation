@@ -165,8 +165,8 @@ export default function EventDetailPage({ params }: PageProps) {
   // Seating Zones Configuration
   const basePrice = event.ticketPrices.length > 0 ? event.ticketPrices[0].price : 499;
   const eventTag = event.isFeatured ? "SELLING OUT FAST" : undefined;
-  const eventRating = event.slug.includes("odyssey") ? 4.9 : 4.7;
-  const eventReviews = event.slug.includes("odyssey") ? 1420 : 310;
+  const eventRating = event.rating;
+  const eventReviews = event.reviewCount;
 
   const zones = {
     vvip: {

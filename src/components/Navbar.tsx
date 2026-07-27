@@ -10,11 +10,45 @@ import {
 } from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
 
+interface NavContent {
+  brandName: string;
+  brandTagline: string;
+  items: { name: string; href: string }[];
+}
+
+// Literal defaults mirror the current hardcoded links/tagline so there's no
+// visible flash on load; the fetch overwrites this if it returns data.
+const defaultNavContent: NavContent = {
+  brandName: "RECHARGENATION",
+  brandTagline: "Experience India",
+  items: [
+    { name: "Explore Events", href: "/events" },
+    { name: "Mr/Miss Traditional", href: "/competitions" },
+    { name: "Sponsors", href: "/sponsors" },
+    { name: "Gallery", href: "/gallery" },
+    { name: "Blogs", href: "/blogs" },
+  ],
+};
+
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [navContent, setNavContent] = useState<NavContent>(defaultNavContent);
+
+  // Fetch CMS-editable nav links / brand tagline (lightweight, fallback-seeded to avoid flash)
+  useEffect(() => {
+    let cancelled = false;
+    const fetchNavContent = async () => {
+      const data = await ApiClient.getSiteContent<NavContent>("nav_links");
+      if (!cancelled && data) setNavContent(data);
+    };
+    fetchNavContent();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Sync auth state
   useEffect(() => {
@@ -78,14 +112,6 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const navLinks = [
-    { name: "Explore Events", href: "/events" },
-    { name: "Mr/Miss Traditional", href: "/competitions" },
-    { name: "Sponsors", href: "/sponsors" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Blogs", href: "/blogs" }
-  ];
-
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
       {/* Top accent gradient stripe */}
@@ -105,7 +131,7 @@ export default function Navbar() {
                   RECHARGE<span className="text-pink-500">NATION</span>
                 </span>
                 <span className="text-[7.5px] font-primary font-bold tracking-widest text-slate-400 uppercase mt-0.5 leading-none">
-                  Experience India
+                  {navContent.brandTagline}
                 </span>
               </div>
             </Link>
@@ -125,7 +151,7 @@ export default function Navbar() {
               Home
             </Link>
 
-            {navLinks.map((link) => {
+            {navContent.items.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
@@ -243,7 +269,7 @@ export default function Navbar() {
               <Home size={16} />
               <span>Home</span>
             </Link>
-            {navLinks.map((link) => {
+            {navContent.items.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link

@@ -2,12 +2,72 @@
 
 import Link from "next/link";
 import { Ticket, ArrowUp, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ApiClient } from "@/lib/api-client";
+
+interface FooterColumn {
+  title: string;
+  links: { label: string; href: string }[];
+}
+
+interface FooterContent {
+  brandName: string;
+  brandTagline: string;
+  brandDescription: string;
+  newsletterHeading: string;
+  newsletterPlaceholder: string;
+  columns: FooterColumn[];
+}
+
+// Literal defaults mirror the current hardcoded copy so there's no visible
+// flash while the CMS fetch resolves; the fetch overwrites this if it returns data.
+const defaultFooterContent: FooterContent = {
+  brandName: "RECHARGENATION",
+  brandTagline: "",
+  brandDescription:
+    "Recharge Nation is the central portal for premium cultural programs, nationwide dance and singing clashes, style showcases, culinary festivals, and industrial exhibitions across India.",
+  newsletterHeading: "JOIN THE ALERT CREW",
+  newsletterPlaceholder: "Enter email for secret drop alerts",
+  columns: [
+    {
+      title: "For Audiences",
+      links: [
+        { label: "All Live Events", href: "/events" },
+        { label: "Abhyudaya Mega Fest", href: "/events/recharge-cultural-odyssey-2026" },
+        { label: "Exhibitions & Expos", href: "/events?category=Trade%20Expos" },
+        { label: "My Ticket Badges", href: "/dashboard" },
+      ],
+    },
+    {
+      title: "For Participants",
+      links: [
+        { label: "Mr/Miss Traditional 2026", href: "/competitions" },
+        { label: "Nataraja Dance Clash", href: "/events/national-vibe-rhythm-dance-cup" },
+        { label: "Become a Sponsor", href: "/sponsors" },
+        { label: "Download Participant ID", href: "/dashboard" },
+        { label: "Admin Portal Access", href: "/admin/login" },
+      ],
+    },
+  ],
+};
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [content, setContent] = useState<FooterContent>(defaultFooterContent);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchContent = async () => {
+      const data = await ApiClient.getSiteContent<FooterContent>("footer");
+      if (!cancelled && data) setContent(data);
+    };
+    fetchContent();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -40,19 +100,19 @@ export default function Footer() {
             </Link>
 
             <p className="leading-relaxed text-xs max-w-sm font-secondary">
-              Recharge Nation is the central portal for premium cultural programs, nationwide dance and singing clashes, style showcases, culinary festivals, and industrial exhibitions across India.
+              {content.brandDescription}
             </p>
 
             {/* Mini Newsletter form: JOIN THE ALERT CREW */}
             <div className="flex flex-col gap-3 mt-2">
-              <span className="text-[10px] font-primary tracking-widest text-cyan-400 font-bold uppercase">JOIN THE ALERT CREW</span>
+              <span className="text-[10px] font-primary tracking-widest text-cyan-400 font-bold uppercase">{content.newsletterHeading}</span>
               {subscribed ? (
                 <span className="text-xs text-emerald-400 font-medium">Successfully subscribed to presale alerts!</span>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex gap-2 max-w-sm">
                   <input
                     type="email"
-                    placeholder="Enter email for secret drop alerts"
+                    placeholder={content.newsletterPlaceholder}
                     className="bg-gray-900 border border-gray-800 text-xs px-3.5 py-2.5 rounded-xl text-white outline-none focus:border-pink-500 w-full font-secondary"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -69,46 +129,30 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: For Audiences */}
-          <div>
-            <h4 className="text-white font-primary font-semibold text-xs uppercase tracking-wider mb-5">For Audiences</h4>
-            <div className="flex flex-col gap-3 text-xs">
-              <Link href="/events" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-pink-500" /> All Live Events
-              </Link>
-              <Link href="/events/recharge-cultural-odyssey-2026" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-pink-500" /> Abhyudaya Mega Fest
-              </Link>
-              <Link href="/events?category=Trade%20Expos" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-pink-500" /> Exhibitions & Expos
-              </Link>
-              <Link href="/dashboard" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-pink-500" /> My Ticket Badges
-              </Link>
+          {/* Columns 2 & 3: For Audiences / For Participants (data-driven) */}
+          {content.columns.map((column, colIdx) => (
+            <div key={column.title}>
+              <h4 className="text-white font-primary font-semibold text-xs uppercase tracking-wider mb-5">{column.title}</h4>
+              <div className="flex flex-col gap-3 text-xs">
+                {column.links.map((link) => {
+                  // Preserve the existing per-column bullet color (pink for the
+                  // first column, purple for the second) and the special
+                  // divider/amber styling on the Admin Portal Access link.
+                  const isAdminLink = link.href === "/admin/login";
+                  const iconColorClass = isAdminLink ? "text-amber-500" : colIdx === 0 ? "text-pink-500" : "text-purple-400";
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`hover:text-white transition-colors flex items-center gap-1${isAdminLink ? " mt-1 border-t border-white/5 pt-1" : ""}`}
+                    >
+                      <ChevronRight size={12} className={iconColorClass} /> {link.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Column 3: For Participants */}
-          <div>
-            <h4 className="text-white font-primary font-semibold text-xs uppercase tracking-wider mb-5">For Participants</h4>
-            <div className="flex flex-col gap-3 text-xs">
-              <Link href="/competitions" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-purple-400" /> Mr/Miss Traditional 2026
-              </Link>
-              <Link href="/events/national-vibe-rhythm-dance-cup" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-purple-400" /> Nataraja Dance Clash
-              </Link>
-              <Link href="/sponsors" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-purple-400" /> Become a Sponsor
-              </Link>
-              <Link href="/dashboard" className="hover:text-white transition-colors flex items-center gap-1">
-                <ChevronRight size={12} className="text-purple-400" /> Download Participant ID
-              </Link>
-              <Link href="/dashboard" className="hover:text-white transition-colors flex items-center gap-1 mt-1 border-t border-white/5 pt-1">
-                <ChevronRight size={12} className="text-amber-500" /> Admin Portal Access
-              </Link>
-            </div>
-          </div>
+          ))}
 
         </div>
 

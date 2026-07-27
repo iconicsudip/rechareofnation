@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Form, Input, Upload, message } from "antd";
-import { X, Upload as UploadIcon, Video, FileText, CreditCard, Check, User, ArrowRight } from "lucide-react";
+import { X, Upload as UploadIcon, Video, FileText, CreditCard, Check, User, ArrowRight, AlertCircle } from "lucide-react";
+import { ApiClient, CompetitionRecord } from "@/lib/api-client";
 
 const STEPS = ["Track", "Profile", "Uploads", "Fee", "ID Card"];
-const REGISTRATION_FEE = 1500;
-const FINALS_DATE = "2026-11-28";
 
 interface CompetitorBoardingModalProps {
+  competition: CompetitionRecord;
   onClose: () => void;
   initialName?: string;
   initialTrack?: string;
@@ -26,17 +27,43 @@ interface UploadsFormValues {
   portfolioLink?: string;
 }
 
-export default function CompetitorBoardingModal({ onClose, initialName = "", initialTrack }: CompetitorBoardingModalProps) {
+// Pick the category whose name best matches the initialTrack hint (e.g. "Mr Traditional India" -> "Mr. Traditional India (Male)")
+const resolveInitialCategory = (competition: CompetitionRecord, initialTrack?: string): string => {
+  if (!competition.categories.length) return "";
+  if (initialTrack) {
+    const hint = initialTrack.toLowerCase();
+    const match = competition.categories.find((c) => {
+      const name = c.name.toLowerCase();
+      if (hint.includes("mr") && name.includes("mr")) return true;
+      if (hint.includes("miss") && name.includes("miss")) return true;
+      return false;
+    });
+    if (match) return match.name;
+  }
+  return competition.categories[0].name;
+};
+
+export default function CompetitorBoardingModal({ competition, onClose, initialName = "", initialTrack }: CompetitorBoardingModalProps) {
+  const router = useRouter();
   const [profileForm] = Form.useForm<ProfileFormValues>();
   const [uploadsForm] = Form.useForm<UploadsFormValues>();
   const [step, setStep] = useState(0);
-  const [track, setTrack] = useState<"female" | "male">(initialTrack === "Mr Traditional India" ? "male" : "female");
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => resolveInitialCategory(competition, initialTrack));
   const [fullName, setFullName] = useState(initialName);
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [idProof, setIdProof] = useState("");
+  const [videoLink, setVideoLink] = useState("");
+  const [portfolioLink, setPortfolioLink] = useState("");
   const [headshotFile, setHeadshotFile] = useState<File | null>(null);
   const [headshotPreview, setHeadshotPreview] = useState("");
   const [participantId, setParticipantId] = useState("");
+  const [qrCodeValue, setQrCodeValue] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const trackLabel = track === "female" ? "Miss Traditional India (Female)" : "Mr. Traditional India (Male)";
+  const registrationFee = competition.registrationFee || 0;
 
   const handleBack = () => setStep((s) => Math.max(s - 1, 0));
 
@@ -45,12 +72,17 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
       try {
         const values = await profileForm.validateFields();
         setFullName(values.fullName);
+        setEmail(values.email);
+        setPhone(values.phone);
+        setIdProof(values.idProof);
       } catch {
         return;
       }
     } else if (step === 2) {
       try {
-        await uploadsForm.validateFields();
+        const values = await uploadsForm.validateFields();
+        setVideoLink(values.videoLink || "");
+        setPortfolioLink(values.portfolioLink || "");
       } catch {
         return;
       }
@@ -58,10 +90,59 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
 
-  const handleSettlePayment = () => {
-    const randDigits = Math.floor(100000 + Math.random() * 900000);
-    setParticipantId(`RN-P-${randDigits}`);
-    setStep(4);
+  const handleSettlePayment = async () => {
+    const user = ApiClient.getCurrentUser();
+    if (!user) {
+      setAuthRequired(true);
+      setError("You need to be logged in to complete your registration.");
+      return;
+    }
+
+    setAuthRequired(false);
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const gender = /female/i.test(selectedCategory) ? "Female" : /male/i.test(selectedCategory) ? "Male" : "";
+      const paymentId = registrationFee > 0 ? `pay_rzp_comp_${Math.random().toString(36).substr(2, 9)}` : undefined;
+
+      const registration = await ApiClient.createRegistration({
+        competitionId: competition.id,
+        competitionName: competition.name,
+        competitionDate: competition.eventDate,
+        competitionVenue: competition.venue,
+        competitionBanner: competition.bannerUrl,
+        fullName,
+        dob: "",
+        age: 18,
+        gender,
+        email,
+        mobile: phone,
+        city: user.city || "",
+        state: user.state || "",
+        address: user.address || "",
+        organization: user.organization || "",
+        category: selectedCategory,
+        emergencyContact: phone,
+        uploads: {
+          photograph: headshotFile?.name || undefined,
+          govId: idProof || undefined,
+          performanceVideo: videoLink || undefined,
+          portfolio: portfolioLink || undefined,
+        },
+        paymentId,
+        paymentStatus: registrationFee > 0 ? "paid" : "waived",
+        status: "pending",
+      });
+
+      setParticipantId(registration.participantId);
+      setQrCodeValue(registration.qrCodeValue);
+      setStep(4);
+    } catch {
+      setError("We couldn't process your registration right now. Please try again in a moment.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const labelClass = "text-[11px] font-primary font-bold uppercase tracking-wider text-slate-500";
@@ -76,7 +157,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
         <div className="flex items-start justify-between px-6 sm:px-8 pt-7 pb-5 border-b border-slate-100 shrink-0">
           <div>
             <span className="text-indigo-600 font-primary text-[11px] font-bold tracking-widest uppercase">Competitor Boarding</span>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-primary mt-1">Miss & Mr. Traditional India 2026</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-primary mt-1">{competition.name}</h2>
           </div>
           <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors cursor-pointer shrink-0">
             <X size={18} />
@@ -99,42 +180,57 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-7">
+          {error && (
+            <div className="mb-5 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs flex items-start gap-2.5">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div className="flex flex-col gap-2.5 items-start">
+                <span>{error}</span>
+                {authRequired && (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/login?redirect=/competitions")}
+                    className="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-primary font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Log In to Continue
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {step === 0 && (
             <div className="flex flex-col gap-5">
               <h3 className="font-bold text-slate-900 text-base">Select Audition or Category Track:</h3>
               <div className="flex flex-col gap-3">
-                {([
-                  { key: "female", label: "Miss Traditional India (Female)" },
-                  { key: "male", label: "Mr. Traditional India (Male)" },
-                ] as const).map((opt) => (
+                {competition.categories.map((opt) => (
                   <label
-                    key={opt.key}
+                    key={opt.name}
                     className={`flex items-center justify-between gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-colors ${
-                      track === opt.key ? "border-indigo-600 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300"
+                      selectedCategory === opt.name ? "border-indigo-600 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${track === opt.key ? "border-indigo-600" : "border-slate-300"}`}>
-                        {track === opt.key && <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                      <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedCategory === opt.name ? "border-indigo-600" : "border-slate-300"}`}>
+                        {selectedCategory === opt.name && <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
                       </span>
-                      <span className="font-bold text-slate-800 text-[15px]">{opt.label}</span>
+                      <span className="font-bold text-slate-800 text-[15px]">{opt.name}</span>
                     </span>
                     <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg shrink-0">Audition Open</span>
-                    <input type="radio" name="track" className="sr-only" checked={track === opt.key} onChange={() => setTrack(opt.key)} />
+                    <input type="radio" name="track" className="sr-only" checked={selectedCategory === opt.name} onChange={() => setSelectedCategory(opt.name)} />
                   </label>
                 ))}
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col gap-1.5">
                 <span className="text-indigo-600 font-primary text-[11px] font-bold tracking-widest uppercase">Prize Pool Valuation</span>
-                <span className="text-xl font-black text-slate-900">₹25,00,000 + Modelling Contracts</span>
+                <span className="text-xl font-black text-slate-900">{competition.prizePool}</span>
                 <p className="text-slate-500 text-xs">Includes modeling contracts, live stage exposure, performance certificates, and mentorship fellowships.</p>
               </div>
             </div>
           )}
 
           {step === 1 && (
-            <Form form={profileForm} layout="vertical" requiredMark={false} initialValues={{ fullName }} className="flex flex-col gap-1">
+            <Form form={profileForm} layout="vertical" requiredMark={false} initialValues={{ fullName, email, phone, idProof }} className="flex flex-col gap-1">
               <h3 className="font-bold text-slate-900 text-base mb-4">Competitor Personal Information:</h3>
 
               <Form.Item
@@ -195,7 +291,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
           )}
 
           {step === 2 && (
-            <Form form={uploadsForm} layout="vertical" requiredMark={false} className="flex flex-col gap-5">
+            <Form form={uploadsForm} layout="vertical" requiredMark={false} initialValues={{ videoLink, portfolioLink }} className="flex flex-col gap-5">
               <h3 className="font-bold text-slate-900 text-base">Upload Portfolios & Audition Audios:</h3>
 
               <Upload.Dragger
@@ -264,7 +360,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                 <span className="text-[11px] font-primary font-bold uppercase tracking-widest text-slate-400">Participant Settlement Details</span>
                 <div className="flex justify-between text-sm text-slate-800">
                   <span className="font-normal text-slate-600">Competition Boarding Registration Fee</span>
-                  <span className="font-bold">₹{REGISTRATION_FEE}</span>
+                  <span className="font-bold">₹{registrationFee}</span>
                 </div>
                 <div className="flex justify-between text-sm text-slate-600">
                   <span>Processing & Jury Evaluation Fee</span>
@@ -272,7 +368,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                 </div>
                 <div className="border-t border-slate-200 pt-4 flex justify-between text-base font-black text-slate-900">
                   <span>Payable Amount</span>
-                  <span className="text-indigo-600">₹{REGISTRATION_FEE}</span>
+                  <span className="text-indigo-600">₹{registrationFee}</span>
                 </div>
               </div>
 
@@ -284,9 +380,10 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                 <button
                   type="button"
                   onClick={handleSettlePayment}
-                  className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  ✨ Settle Registration of ₹{REGISTRATION_FEE}
+                  {isSubmitting ? "Processing..." : `✨ Settle Registration of ₹${registrationFee}`}
                 </button>
                 <span className="text-slate-400 text-[11px] text-center">By registering, you accept jury procedures, dress code parameters, and background screening codes of conduct.</span>
               </div>
@@ -312,7 +409,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                   <span className="bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
                     ★ Competitor Badge ★
                   </span>
-                  <span className="text-white font-bold text-xs uppercase tracking-wide text-center">Miss & Mr. Traditional India 2026</span>
+                  <span className="text-white font-bold text-xs uppercase tracking-wide text-center">{competition.name}</span>
 
                   <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-indigo-500/50 bg-slate-800 flex items-center justify-center relative mt-2">
                     {headshotPreview ? (
@@ -324,11 +421,11 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                   </div>
 
                   <span className="text-white font-black text-lg uppercase tracking-tight mt-1 break-words max-w-full">{fullName}</span>
-                  <span className="text-indigo-400 font-bold text-[11px] uppercase tracking-wide -mt-2">{trackLabel}</span>
+                  <span className="text-indigo-400 font-bold text-[11px] uppercase tracking-wide -mt-2">{selectedCategory}</span>
                   <span className="text-slate-500 text-[10px] font-primary">REG ID: {participantId}</span>
 
-                  {/* Mock QR */}
-                  <div className="w-24 h-24 bg-white p-2 rounded-lg mt-1">
+                  {/* QR Code (mock visual, encodes the real registration qrCodeValue) */}
+                  <div className="w-24 h-24 bg-white p-2 rounded-lg mt-1" title={qrCodeValue}>
                     <svg viewBox="0 0 100 100" className="w-full h-full text-black">
                       <rect width="25" height="25" fill="black" />
                       <rect x="75" width="25" height="25" fill="black" />
@@ -343,7 +440,7 @@ export default function CompetitorBoardingModal({ onClose, initialName = "", ini
                   <div className="w-full border-t border-slate-700 mt-2 pt-3 flex flex-col gap-1.5">
                     <div className="flex justify-between text-[10px]">
                       <span className="text-slate-500 font-primary uppercase">Audit Date:</span>
-                      <span className="text-white font-bold">{FINALS_DATE}</span>
+                      <span className="text-white font-bold">{competition.eventDate}</span>
                     </div>
                     <div className="flex justify-between text-[10px]">
                       <span className="text-slate-500 font-primary uppercase">ID Verified:</span>

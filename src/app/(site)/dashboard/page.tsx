@@ -1,381 +1,464 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { User, Ticket, Trophy, Settings, LogOut, Download, MapPin, Building, Calendar, Mail, Phone, AlertCircle, CheckCircle } from "lucide-react";
-import { ApiClient, TicketBooking, CompetitionRegistration } from "@/lib/api-client";
+import {
+  User, Ticket, Trophy, Settings, LogOut, Download,
+  MapPin, Calendar, AlertCircle, CheckCircle, QrCode,
+  X, Shield, RefreshCw,
+} from "lucide-react";
+import { ApiClient } from "@/lib/api-client";
 
+interface PassData {
+  type: "ticket" | "registration";
+  name: string;
+  ref: string;
+  ticketType?: string;
+  category?: string;
+  eventDate?: string;
+  venue?: string;
+  status: string;
+  qrHash: string;
+}
+
+type Tab = "tickets" | "registrations" | "settings";
+
+// ── Tiny QR renderer using a public API ─────────────────────────────────────
+function QRImage({ value, size = 160 }: { value: string; size?: number }) {
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=ffffff&color=000000&margin=2`;
+  return (
+    <img
+      src={url}
+      alt="QR Code"
+      width={size}
+      height={size}
+      className="rounded-xl"
+      style={{ imageRendering: "pixelated" }}
+    />
+  );
+}
+
+// ── Pass Modal ───────────────────────────────────────────────────────────────
+function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(11,15,26,0.85)", backdropFilter: "blur(12px)" }}>
+      <div className="w-full max-w-sm rounded-3xl overflow-hidden relative"
+        style={{ background: "linear-gradient(180deg, #0F1729 0%, #0B0F1A 100%)", border: "1px solid rgba(99,102,241,0.25)" }}>
+
+        {/* Header stripe */}
+        <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, #4F46E5, #DB2777, #0891B2)" }} />
+
+        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg"
+          style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
+          <X size={15} />
+        </button>
+
+        <div className="p-6 flex flex-col items-center gap-4 text-center">
+          <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full"
+            style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", color: "#22D3EE" }}>
+            {pass.type === "ticket" ? "🎫 Event Entry Pass" : "🏆 Competitor ID Pass"}
+          </span>
+
+          <div>
+            <h4 className="text-lg font-extrabold text-white" style={{ fontFamily: "var(--font-primary)" }}>{pass.name}</h4>
+            <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
+              {pass.type === "ticket" ? `Ref: ${pass.ref}` : `ID: ${pass.ref}`}
+            </p>
+          </div>
+
+          {/* Real QR Code */}
+          <div className="p-3 bg-white rounded-2xl shadow-xl">
+            <QRImage value={pass.qrHash} size={160} />
+          </div>
+
+          <div className="w-full text-xs flex flex-col gap-2.5 pt-2 border-t"
+            style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+            {[
+              ["Pass Type", pass.ticketType || pass.category || "—"],
+              ["Date", pass.eventDate || "—"],
+              ["Venue", pass.venue || "—"],
+              ["Status", pass.status],
+            ].map(([label, val]) => (
+              <div key={label} className="flex justify-between">
+                <span style={{ color: "rgba(148,163,184,0.5)" }}>{label}</span>
+                <span className={`font-bold ${label === "Status" && (val === "confirmed" || val === "approved") ? "text-emerald-400" : "text-white"}`}>
+                  {val}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button onClick={() => window.print()}
+            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+            style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff", border: "none", cursor: "pointer", fontFamily: "var(--font-primary)" }}>
+            <Download size={14} /> Download / Print Pass
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Dashboard ──────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [bookings, setBookings] = useState<TicketBooking[]>([]);
-  const [registrations, setRegistrations] = useState<CompetitionRegistration[]>([]);
-  const [activeTab, setActiveTab] = useState<"tickets" | "registrations" | "settings">("tickets");
-  
-  // Settings Form
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<Tab>("tickets");
+  const [loading, setLoading] = useState(true);
+
+  // Settings
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [stateVal, setStateVal] = useState("");
   const [organization, setOrganization] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState(false);
 
-  // Modal Pass states
-  const [selectedPass, setSelectedPass] = useState<any>(null);
-  const [passType, setPassType] = useState<"ticket" | "registration" | null>(null);
+  // Pass modal
+  const [selectedPass, setSelectedPass] = useState<PassData | null>(null);
+
+  const loadData = useCallback(async (user: any) => {
+    setLoading(true);
+    // Try Neon API first, fall back to localStorage mock
+    try {
+      const [tRes, rRes] = await Promise.all([
+        fetch(`/api/user/tickets?userId=${user.id}`),
+        fetch(`/api/user/registrations?userId=${user.id}`),
+      ]);
+      if (tRes.ok && rRes.ok) {
+        const tData = await tRes.json();
+        const rData = await rRes.json();
+        if (tData.tickets) setBookings(tData.tickets);
+        else setBookings(ApiClient.getBookings());
+        if (rData.registrations) setRegistrations(rData.registrations);
+        else setRegistrations(ApiClient.getRegistrations());
+      } else {
+        setBookings(ApiClient.getBookings());
+        setRegistrations(ApiClient.getRegistrations());
+      }
+    } catch {
+      setBookings(ApiClient.getBookings());
+      setRegistrations(ApiClient.getRegistrations());
+    }
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     const user = ApiClient.getCurrentUser();
-    if (!user) {
-      router.push("/login?redirect=/dashboard");
-      return;
-    }
+    if (!user) { router.push("/login?redirect=/dashboard"); return; }
     setCurrentUser(user);
     setName(user.name);
     setMobile(user.mobile || "");
     setCity(user.city || "");
-    setState(user.state || "");
+    setStateVal(user.state || "");
     setOrganization(user.organization || "");
-
-    // Fetch lists
-    setBookings(ApiClient.getBookings());
-    setRegistrations(ApiClient.getRegistrations());
-  }, [router]);
+    loadData(user);
+  }, [router, loadData]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
     setIsSaving(true);
-    setSettingsSuccess(false);
-
-    const res = await ApiClient.updateUserProfile(currentUser.id, {
-      name,
-      mobile,
-      city,
-      state,
-      organization
-    });
-
-    if (res.success && res.user) {
-      setCurrentUser(res.user);
-      setSettingsSuccess(true);
-      setTimeout(() => setSettingsSuccess(false), 3000);
-    }
+    const res = await ApiClient.updateUserProfile(currentUser.id, { name, mobile, city, state: stateVal, organization });
+    if (res.success && res.user) { setCurrentUser(res.user); setSettingsSuccess(true); setTimeout(() => setSettingsSuccess(false), 3000); }
     setIsSaving(false);
   };
 
-  const handleLogout = () => {
-    ApiClient.logoutUser();
-    router.push("/");
+  const openPass = (item: any, type: "ticket" | "registration") => {
+    setSelectedPass({
+      type,
+      name: type === "ticket" ? (item.event_name || item.eventName) : (item.competition_name || item.competitionName),
+      ref: type === "ticket" ? (item.booking_ref || item.bookingRef) : (item.participant_id || item.participantId),
+      ticketType: type === "ticket" ? (item.ticket_type || item.ticketType) : undefined,
+      category: type === "registration" ? item.category : undefined,
+      eventDate: type === "ticket" ? (item.event_date || item.eventDate) : (item.competition_date || item.competitionDate),
+      venue: type === "ticket" ? (item.event_venue || item.eventVenue) : (item.competition_venue || item.competitionVenue),
+      status: item.status || "confirmed",
+      qrHash: item.qr_hash || item.qrCodeValue || `RN-PASS-${item.id}`,
+    });
   };
 
-  if (!currentUser) {
-    return (
-      <div className="container py-20 text-center text-gray-400 text-sm">
-        Authenticating session...
-      </div>
-    );
-  }
+  const handleLogout = () => { ApiClient.logoutUser(); router.push("/"); };
+
+  if (!currentUser) return (
+    <div className="container py-20 text-center text-sm" style={{ color: "rgba(148,163,184,0.5)" }}>
+      Authenticating...
+    </div>
+  );
+
+  const TAB_ITEMS: { key: Tab; label: string; icon: React.ElementType; count: number }[] = [
+    { key: "tickets", label: "My Tickets", icon: Ticket, count: bookings.length },
+    { key: "registrations", label: "Registrations", icon: Trophy, count: registrations.length },
+    { key: "settings", label: "Settings", icon: Settings, count: 0 },
+  ];
 
   return (
     <div className="container py-20 md:py-24 flex flex-col lg:flex-row gap-8">
-      {/* Dynamic Pass Modal Overlay */}
-      {selectedPass && (
-        <div className="fixed inset-0 z-50 bg-[#0B0F19]/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-md glass-panel p-6 relative rounded-2xl border-indigo-500/20 text-left">
-            <button 
-              onClick={() => setSelectedPass(null)} 
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
-            
-            <div className="text-center flex flex-col items-center gap-4 py-4">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full">
-                {passType === "ticket" ? "Event Entry Pass" : "Competition ID Pass"}
-              </span>
-              
-              <h4 className="text-xl font-extrabold text-white font-primary">{selectedPass.eventName || selectedPass.competitionName}</h4>
-              <p className="text-gray-400 text-xs -mt-2">
-                {passType === "ticket" ? `Ref: ${selectedPass.bookingRef}` : `ID: ${selectedPass.participantId}`}
-              </p>
+      {selectedPass && <PassModal pass={selectedPass} onClose={() => setSelectedPass(null)} />}
 
-              {/* Mock QR */}
-              <div className="w-40 h-40 bg-white p-3 rounded-xl flex items-center justify-center shadow-lg my-2">
-                <svg viewBox="0 0 100 100" className="w-full h-full text-black">
-                  <rect width="25" height="25" fill="black"/>
-                  <rect x="75" width="25" height="25" fill="black"/>
-                  <rect y="75" width="25" height="25" fill="black"/>
-                  <rect x="35" y="35" width="30" height="30" fill="black"/>
-                  <rect x="10" y="45" width="15" height="15" fill="black"/>
-                  <rect x="45" y="10" width="15" height="15" fill="black"/>
-                  <rect x="75" y="75" width="20" height="20" fill="black"/>
-                </svg>
-              </div>
-
-              <div className="w-full border-t border-[rgba(255,255,255,0.06)] pt-4 text-xs flex flex-col gap-2.5">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Attendee / Name</span>
-                  <span className="text-white font-bold">{selectedPass.visitorName || selectedPass.fullName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Tier / Category</span>
-                  <span className="text-cyan-400 font-bold">{selectedPass.ticketType || selectedPass.category}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Date</span>
-                  <span className="text-gray-300 font-bold">{selectedPass.eventDate || selectedPass.competitionDate}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Status</span>
-                  <span className={`font-bold uppercase ${selectedPass.status === "confirmed" || selectedPass.paymentStatus === "paid" ? "text-emerald-400" : "text-yellow-500"}`}>
-                    {selectedPass.status || "Pending Verification"}
-                  </span>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => typeof window !== "undefined" && window.print()}
-                className="btn btn-primary w-full py-3 mt-4 text-xs font-bold flex items-center justify-center gap-2"
-              >
-                <Download size={14} /> Download PDF Receipt
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Left Column: Profile Card & Tabs */}
-      <div className="lg:w-1/3 flex flex-col gap-6">
-        <div className="glass-panel p-6 rounded-2xl border-indigo-500/15 flex flex-col gap-6 text-center">
-          <div className="relative w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center mx-auto text-white font-black text-2xl font-primary">
+      {/* Left: Profile + tabs */}
+      <div className="lg:w-72 flex flex-col gap-4 flex-shrink-0">
+        {/* Profile Card */}
+        <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 text-center">
+          <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center mx-auto font-black text-2xl text-white"
+            style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", fontFamily: "var(--font-primary)" }}>
             {currentUser.name.charAt(0).toUpperCase()}
+            {currentUser.isVerified && (
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                style={{ background: "#10B981" }}>
+                <CheckCircle size={11} className="text-white" />
+              </div>
+            )}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white font-primary">{currentUser.name}</h3>
-            <span className="text-xs text-gray-500 block mt-1">{currentUser.email}</span>
-            <div className="mt-2.5 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold uppercase">
-              {currentUser.isVerified ? "Verified Account" : "Unverified Account"}
+            <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-primary)" }}>{currentUser.name}</h3>
+            <span className="text-xs block mt-0.5" style={{ color: "rgba(148,163,184,0.5)" }}>{currentUser.email}</span>
+            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+              style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#34D399" }}>
+              <Shield size={9} /> {currentUser.isVerified ? "Verified" : "Unverified"}
+            </span>
+          </div>
+
+          {/* Quick stats */}
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t" style={{ borderColor: "rgba(99,102,241,0.08)" }}>
+            <div className="rounded-xl p-2.5 text-center" style={{ background: "rgba(79,70,229,0.08)", border: "1px solid rgba(99,102,241,0.12)" }}>
+              <div className="text-lg font-black text-white" style={{ fontFamily: "var(--font-primary)" }}>{bookings.length}</div>
+              <div className="text-[10px]" style={{ color: "rgba(148,163,184,0.5)" }}>Tickets</div>
+            </div>
+            <div className="rounded-xl p-2.5 text-center" style={{ background: "rgba(219,39,119,0.08)", border: "1px solid rgba(244,114,182,0.12)" }}>
+              <div className="text-lg font-black text-white" style={{ fontFamily: "var(--font-primary)" }}>{registrations.length}</div>
+              <div className="text-[10px]" style={{ color: "rgba(148,163,184,0.5)" }}>Registered</div>
             </div>
           </div>
         </div>
 
-        {/* Tab Selection */}
-        <div className="glass-panel rounded-2xl overflow-hidden p-2 border-[rgba(255,255,255,0.06)] flex flex-col">
-          <button 
-            onClick={() => setActiveTab("tickets")}
-            className={`flex items-center gap-3 p-4 text-sm font-semibold rounded-xl text-left transition-all ${
-              activeTab === "tickets" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <Ticket size={18} />
-            <span>My Tickets ({bookings.length})</span>
+        {/* Nav */}
+        <div className="glass-panel rounded-2xl p-2 flex flex-col gap-1">
+          {TAB_ITEMS.map(t => (
+            <button key={t.key} onClick={() => setActiveTab(t.key)}
+              className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all"
+              style={{
+                background: activeTab === t.key ? "linear-gradient(135deg, rgba(79,70,229,0.2), rgba(219,39,119,0.1))" : "transparent",
+                border: activeTab === t.key ? "1px solid rgba(99,102,241,0.2)" : "1px solid transparent",
+                color: activeTab === t.key ? "#fff" : "rgba(148,163,184,0.6)",
+                fontFamily: "var(--font-primary)",
+              }}>
+              <t.icon size={16} style={{ color: activeTab === t.key ? "#818CF8" : "rgba(148,163,184,0.4)" }} />
+              <span>{t.label}</span>
+              {t.count > 0 && (
+                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8" }}>{t.count}</span>
+              )}
+            </button>
+          ))}
+
+          <div className="border-t my-1" style={{ borderColor: "rgba(99,102,241,0.08)" }} />
+
+          <button onClick={loadData.bind(null, currentUser)}
+            className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all"
+            style={{ color: "rgba(148,163,184,0.5)", fontFamily: "var(--font-primary)" }}>
+            <RefreshCw size={15} style={{ color: "rgba(148,163,184,0.3)" }} />
+            Refresh Data
           </button>
-          <button 
-            onClick={() => setActiveTab("registrations")}
-            className={`flex items-center gap-3 p-4 text-sm font-semibold rounded-xl text-left transition-all ${
-              activeTab === "registrations" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <Trophy size={18} />
-            <span>My Registrations ({registrations.length})</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-3 p-4 text-sm font-semibold rounded-xl text-left transition-all ${
-              activeTab === "settings" ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <Settings size={18} />
-            <span>Account Settings</span>
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-3 p-4 text-sm font-semibold rounded-xl text-left text-pink-400 hover:bg-pink-900/10 transition-all mt-4"
-          >
-            <LogOut size={18} />
-            <span>Sign Out</span>
+
+          <button onClick={handleLogout}
+            className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all"
+            style={{ color: "rgba(248,113,113,0.7)", fontFamily: "var(--font-primary)" }}>
+            <LogOut size={15} />
+            Sign Out
           </button>
         </div>
       </div>
 
-      {/* Right Column: Dynamic Panel Content */}
-      <div className="lg:w-2/3">
-        {/* Tab 1: My Tickets List */}
+      {/* Right: Content */}
+      <div className="flex-1 min-w-0">
+
+        {/* My Tickets */}
         {activeTab === "tickets" && (
-          <div className="flex flex-col gap-6">
-            <h2 className="text-2xl font-bold font-primary text-white flex items-center gap-2">
-              <Ticket size={24} className="text-cyan-400" /> My Booked Tickets
-            </h2>
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: "var(--font-primary)" }}>
+                <Ticket size={20} style={{ color: "#22D3EE" }} /> My Booked Tickets
+              </h2>
+              <span className="text-xs px-2.5 py-1 rounded-full font-bold"
+                style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.15)", color: "#22D3EE" }}>
+                {bookings.length} passes
+              </span>
+            </div>
 
-            {bookings.length > 0 ? (
+            {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {bookings.map((booking) => (
-                  <div key={booking.id} className="glass-panel overflow-hidden flex flex-col justify-between h-full hover:border-[rgba(255,255,255,0.12)]">
-                    <div className="p-5 flex flex-col gap-3">
-                      <div className="flex justify-between items-start gap-4">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">REF: {booking.bookingRef}</span>
-                        <span className="text-[9px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded uppercase font-bold">
-                          {booking.status}
+                {[...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(99,102,241,0.06)" }} />)}
+              </div>
+            ) : bookings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {bookings.map((b) => (
+                  <div key={b.id || b.bookingRef} className="glass-panel overflow-hidden flex flex-col">
+                    <div className="p-5 flex flex-col gap-3 flex-1">
+                      <div className="flex justify-between items-start gap-3">
+                        <span className="text-[10px] font-bold uppercase tracking-wider"
+                          style={{ color: "rgba(148,163,184,0.4)" }}>
+                          REF: {b.booking_ref || b.bookingRef}
+                        </span>
+                        <span className="text-[9px] px-2 py-0.5 rounded uppercase font-bold"
+                          style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#34D399" }}>
+                          {b.status || "confirmed"}
                         </span>
                       </div>
-                      <h4 className="font-bold text-white text-base font-primary line-clamp-1">{booking.eventName}</h4>
-                      
-                      <div className="flex flex-col gap-1.5 text-xs text-gray-400 mt-2">
-                        <span className="flex items-center gap-1.5"><Calendar size={12} /> {booking.eventDate}</span>
-                        <span className="flex items-center gap-1.5"><MapPin size={12} /> {booking.eventVenue}</span>
-                        <span className="font-semibold text-cyan-400 mt-1">{booking.ticketType} x {booking.quantity}</span>
+                      <h4 className="font-bold text-white text-sm" style={{ fontFamily: "var(--font-primary)" }}>
+                        {b.event_name || b.eventName}
+                      </h4>
+                      <div className="flex flex-col gap-1.5 text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
+                        <span className="flex items-center gap-1.5"><Calendar size={11} />{b.event_date || b.eventDate}</span>
+                        <span className="flex items-center gap-1.5"><MapPin size={11} />{b.event_venue || b.eventVenue}</span>
+                        <span className="font-semibold mt-1" style={{ color: "#22D3EE" }}>
+                          {b.ticket_type || b.ticketType} × {b.quantity}
+                        </span>
                       </div>
                     </div>
-                    
-                    <button 
-                      onClick={() => {
-                        setSelectedPass(booking);
-                        setPassType("ticket");
-                      }}
-                      className="w-full bg-[rgba(255,255,255,0.02)] hover:bg-cyan-500 hover:text-white py-3 border-t border-[rgba(255,255,255,0.06)] text-xs font-bold text-center transition-all flex items-center justify-center gap-1"
-                    >
-                      <Download size={12} /> View & Download Pass
+                    <button onClick={() => openPass(b, "ticket")}
+                      className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-all border-t"
+                      style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(6,182,212,0.05)", color: "#22D3EE", cursor: "pointer" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(6,182,212,0.15)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "rgba(6,182,212,0.05)")}>
+                      <QrCode size={13} /> View QR Pass
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 glass-panel rounded-2xl border-[rgba(255,255,255,0.06)]">
-                <p className="text-gray-400 text-sm">You haven't booked any audience tickets yet.</p>
+              <div className="glass-panel py-16 text-center rounded-2xl">
+                <Ticket size={36} className="mx-auto mb-3" style={{ color: "rgba(148,163,184,0.2)" }} />
+                <p className="text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>No tickets booked yet.</p>
               </div>
             )}
           </div>
         )}
 
-        {/* Tab 2: My Registrations List */}
+        {/* My Registrations */}
         {activeTab === "registrations" && (
-          <div className="flex flex-col gap-6">
-            <h2 className="text-2xl font-bold font-primary text-white flex items-center gap-2">
-              <Trophy size={24} className="text-cyan-400" /> My Competition Registrations
-            </h2>
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: "var(--font-primary)" }}>
+                <Trophy size={20} style={{ color: "#F472B6" }} /> Competition Registrations
+              </h2>
+              <span className="text-xs px-2.5 py-1 rounded-full font-bold"
+                style={{ background: "rgba(219,39,119,0.1)", border: "1px solid rgba(244,114,182,0.15)", color: "#F472B6" }}>
+                {registrations.length} entries
+              </span>
+            </div>
 
-            {registrations.length > 0 ? (
+            {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {registrations.map((reg) => (
-                  <div key={reg.id} className="glass-panel overflow-hidden flex flex-col justify-between h-full hover:border-[rgba(255,255,255,0.12)]">
-                    <div className="p-5 flex flex-col gap-3">
-                      <div className="flex justify-between items-start gap-4">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">ID: {reg.participantId}</span>
-                        <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-bold ${
-                          reg.status === "approved" ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-yellow-500/10 border border-yellow-500/20 text-yellow-500"
-                        }`}>
-                          {reg.status}
-                        </span>
+                {[...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(219,39,119,0.06)" }} />)}
+              </div>
+            ) : registrations.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {registrations.map((reg) => {
+                  const approved = reg.status === "approved";
+                  return (
+                    <div key={reg.id || reg.participantId} className="glass-panel overflow-hidden flex flex-col">
+                      <div className="p-5 flex flex-col gap-3 flex-1">
+                        <div className="flex justify-between items-start gap-3">
+                          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(148,163,184,0.4)" }}>
+                            ID: {reg.participant_id || reg.participantId}
+                          </span>
+                          <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-bold ${
+                            approved
+                              ? "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20"
+                              : "text-yellow-400 bg-yellow-400/10 border border-yellow-400/20"
+                          }`}>
+                            {reg.status}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-white text-sm" style={{ fontFamily: "var(--font-primary)" }}>
+                          {reg.competition_name || reg.competitionName}
+                        </h4>
+                        <div className="flex flex-col gap-1.5 text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
+                          <span className="flex items-center gap-1.5"><Calendar size={11} />{reg.competition_date || reg.competitionDate}</span>
+                          <span className="flex items-center gap-1.5"><MapPin size={11} />{reg.competition_venue || reg.competitionVenue}</span>
+                          <span className="font-semibold mt-1" style={{ color: "#F472B6" }}>Category: {reg.category}</span>
+                        </div>
                       </div>
-                      <h4 className="font-bold text-white text-base font-primary line-clamp-1">{reg.competitionName}</h4>
-                      
-                      <div className="flex flex-col gap-1.5 text-xs text-gray-400 mt-2">
-                        <span className="flex items-center gap-1.5"><Calendar size={12} /> {reg.competitionDate}</span>
-                        <span className="flex items-center gap-1.5"><MapPin size={12} /> {reg.competitionVenue}</span>
-                        <span className="font-semibold text-pink-400 mt-1">Category: {reg.category}</span>
-                      </div>
+                      <button
+                        onClick={() => approved && openPass(reg, "registration")}
+                        disabled={!approved}
+                        className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-all border-t disabled:opacity-40"
+                        style={{
+                          borderColor: "rgba(255,255,255,0.06)",
+                          background: approved ? "rgba(219,39,119,0.05)" : "transparent",
+                          color: approved ? "#F472B6" : "rgba(148,163,184,0.3)",
+                          cursor: approved ? "pointer" : "not-allowed",
+                        }}>
+                        <QrCode size={13} />
+                        {approved ? "View Competitor Pass" : "Awaiting Approval"}
+                      </button>
                     </div>
-                    
-                    <button 
-                      onClick={() => {
-                        setSelectedPass(reg);
-                        setPassType("registration");
-                      }}
-                      className="w-full bg-[rgba(255,255,255,0.02)] hover:bg-cyan-500 hover:text-white py-3 border-t border-[rgba(255,255,255,0.06)] text-xs font-bold text-center transition-all flex items-center justify-center gap-1"
-                    >
-                      <Download size={12} /> View Participant Pass
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
-              <div className="text-center py-16 glass-panel rounded-2xl border-[rgba(255,255,255,0.06)]">
-                <p className="text-gray-400 text-sm">You haven't registered for any competitions yet.</p>
+              <div className="glass-panel py-16 text-center rounded-2xl">
+                <Trophy size={36} className="mx-auto mb-3" style={{ color: "rgba(148,163,184,0.2)" }} />
+                <p className="text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>No competition registrations yet.</p>
               </div>
             )}
           </div>
         )}
 
-        {/* Tab 3: Account Settings */}
+        {/* Settings */}
         {activeTab === "settings" && (
-          <div className="flex flex-col gap-6">
-            <h2 className="text-2xl font-bold font-primary text-white flex items-center gap-2">
-              <Settings size={24} className="text-cyan-400" /> Account Settings
+          <div className="flex flex-col gap-5">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: "var(--font-primary)" }}>
+              <Settings size={20} style={{ color: "#818CF8" }} /> Account Settings
             </h2>
 
-            <form onSubmit={handleProfileUpdate} className="glass-panel p-6 md:p-8 rounded-2xl border-indigo-500/10 grid grid-cols-1 md:grid-cols-2 gap-5 bg-gradient-to-b from-gray-900 to-indigo-950/20">
+            <form onSubmit={handleProfileUpdate} className="glass-panel p-6 md:p-8 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-5"
+              style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.85), rgba(248,250,252,0.9))" }}>
               {settingsSuccess && (
-                <div className="md:col-span-2 p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs flex items-center gap-2">
-                  <CheckCircle size={16} />
-                  <span>Profile settings updated successfully!</span>
+                <div className="md:col-span-2 p-3.5 rounded-xl flex items-center gap-2 text-sm"
+                  style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#059669" }}>
+                  <CheckCircle size={15} /> Profile updated successfully!
                 </div>
               )}
 
-              <div className="form-group md:col-span-2">
-                <label className="form-label">Full Name</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Mobile Number</label>
-                <input 
-                  type="tel" 
-                  className="form-input" 
-                  value={mobile} 
-                  onChange={(e) => setMobile(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">School / College / Organization</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={organization} 
-                  onChange={(e) => setOrganization(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">City</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={city} 
-                  onChange={(e) => setCity(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">State</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  value={state} 
-                  onChange={(e) => setState(e.target.value)} 
-                />
-              </div>
+              {[
+                { label: "Full Name", value: name, set: setName, type: "text", span: true },
+                { label: "Mobile Number", value: mobile, set: setMobile, type: "tel" },
+                { label: "Organization / College", value: organization, set: setOrganization, type: "text" },
+                { label: "City", value: city, set: setCity, type: "text" },
+                { label: "State", value: stateVal, set: setStateVal, type: "text" },
+              ].map(f => (
+                <div key={f.label} className={f.span ? "md:col-span-2" : ""}>
+                  <label className="form-label">{f.label}</label>
+                  <input type={f.type} className="form-input" value={f.value} onChange={e => f.set(e.target.value)} />
+                </div>
+              ))}
 
               <div className="md:col-span-2 pt-2">
-                <button 
-                  type="submit" 
-                  className="btn btn-primary px-8 py-3.5 text-sm font-bold"
-                  disabled={isSaving}
-                >
-                  {isSaving ? "Saving Settings..." : "Save Settings Changes"}
+                <button type="submit" disabled={isSaving} className="btn btn-primary px-8 py-3.5 text-sm font-bold">
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
+
+            {/* Admin quick-link if admin */}
+            <div className="glass-panel p-4 rounded-xl flex items-center gap-3"
+              style={{ background: "rgba(79,70,229,0.04)", border: "1px solid rgba(99,102,241,0.1)" }}>
+              <AlertCircle size={16} style={{ color: "#818CF8" }} />
+              <p className="text-xs" style={{ color: "rgba(100,116,139,0.8)" }}>
+                If you have admin access, visit{" "}
+                <a href="/admin" className="font-bold underline" style={{ color: "#4F46E5" }}>/admin</a>{" "}
+                to manage the platform.
+              </p>
+            </div>
           </div>
         )}
+
       </div>
     </div>
   );

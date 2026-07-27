@@ -8,8 +8,22 @@ import {
   ArrowLeft
 } from "lucide-react";
 import CompetitorBoardingModal from "@/components/CompetitorBoardingModal";
+import { ApiClient, CompetitionRecord } from "@/lib/api-client";
 
 export default function CompetitionsPage() {
+  // Fetched competition record
+  const [competition, setCompetition] = useState<CompetitionRecord | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCompetition = async () => {
+      const data = await ApiClient.getCompetitionBySlug("miss-mr-traditional-india-2026");
+      if (data) setCompetition(data);
+      setIsLoading(false);
+    };
+    fetchCompetition();
+  }, []);
+
   // Pageant Score Simulator States
   const [authenticity, setAuthenticity] = useState(88);
   const [eloquence, setEloquence] = useState(85);
@@ -70,22 +84,37 @@ export default function CompetitionsPage() {
     setShowBoardingModal(true);
   };
 
-  const regionalHubs = {
-    north: [
-      { city: "NEW DELHI AUDITIONS", venue: "Kamani Auditorium", date: "Sept 12 - 13, 2026" },
-      { city: "CHANDIGARH AUDITIONS", venue: "Tagore Theatre", date: "Sept 19, 2026" },
-      { city: "LUCKNOW AUDITIONS", venue: "Sangeet Natak Akademi", date: "Sept 26, 2026" }
-    ],
-    south: [
-      { city: "BENGALURU AUDITIONS", venue: "Grand Pavilion, Palace Grounds", date: "Oct 04 - 05, 2026" },
-      { city: "CHENNAI AUDITIONS", venue: "Music Academy Hall", date: "Oct 10, 2026" },
-      { city: "HYDERABAD AUDITIONS", venue: "Ravindra Bharathi Hall", date: "Oct 17, 2026" }
-    ],
-    eastwest: [
-      { city: "KOLKATA AUDITIONS", venue: "Rabindra Sadan", date: "Oct 24 - 25, 2026" },
-      { city: "MUMBAI AUDITIONS", venue: "Sophia Bhabha Auditorium", date: "Nov 01 - 02, 2026" },
-      { city: "GUWAHATI AUDITIONS", venue: "Pragjyotish Cultural Complex", date: "Nov 08, 2026" }
-    ]
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-[#f8fafc] py-20 text-center text-slate-400 text-sm font-secondary">
+        Loading Competition Details...
+      </div>
+    );
+  }
+
+  if (!competition) {
+    return (
+      <div className="w-full min-h-screen bg-[#f8fafc] py-20 text-center flex flex-col items-center gap-4 font-secondary">
+        <span className="text-4xl">⚠️</span>
+        <h3 className="text-xl font-bold text-slate-900 font-primary">Competition Not Found</h3>
+        <p className="text-slate-500 text-sm">The competition you are looking for does not exist or has been removed.</p>
+        <Link href="/events" className="bg-slate-900 hover:bg-slate-800 text-white font-primary font-bold text-xs uppercase px-6 py-3 rounded-full transition-colors">
+          Back to Directory
+        </Link>
+      </div>
+    );
+  }
+
+  // Split the single rules[] array into the two display sections without losing or inventing text:
+  // first 4 entries are eligibility/guideline items, the remainder are crown audition (scoring/jury) rules.
+  const eligibilityRules = competition.rules.slice(0, 4);
+  const auditionRules = competition.rules.slice(4);
+
+  // Group the flat regionalHubs[] array into the 3 regional tabs (seeded in North(3) -> South(3) -> East/West(3) order).
+  const hubGroups: Record<"north" | "south" | "eastwest", typeof competition.regionalHubs> = {
+    north: competition.regionalHubs.slice(0, 3),
+    south: competition.regionalHubs.slice(3, 6),
+    eastwest: competition.regionalHubs.slice(6, 9),
   };
 
   return (
@@ -118,18 +147,16 @@ export default function CompetitionsPage() {
             <h1 className="text-3xl sm:text-5xl font-black text-white font-primary uppercase tracking-tight leading-tight">
               MISS & MR TRADITIONAL <span className="text-amber-400">INDIA 2026</span>
             </h1>
-            <p className="text-slate-300 text-xs sm:text-sm mt-4 font-secondary leading-relaxed max-w-2xl">
-              The ultimate country-wide hunt for young icons who elegantly synthesize traditional ethnic grace,
-              linguistic eloquence, regional sartorial heritage, and cultural intellect. Organized across 28 regional
-              auditions, the grand national runway finals are the peak showcase of Indian handloom revival and
-              individual talent. More than just a pageant, this is a celebration of cultural ambassadorship.
-            </p>
+            <div
+              className="text-slate-300 text-xs sm:text-sm mt-4 font-secondary leading-relaxed max-w-2xl"
+              dangerouslySetInnerHTML={{ __html: competition.description }}
+            />
           </div>
 
           <div className="flex flex-wrap items-center gap-y-3 gap-x-6 pt-4 border-t border-gray-800 relative z-10 text-[10.5px] sm:text-xs font-primary font-bold uppercase tracking-wider text-slate-400">
-            <span className="flex items-center gap-1.5"><MapPin size={13} className="text-pink-500" /> Grand Pavilion, Palace Grounds, Bengaluru</span>
-            <span className="flex items-center gap-1.5"><Calendar size={13} className="text-indigo-400" /> 2026-11-28</span>
-            <span className="flex items-center gap-1.5 text-amber-400"><Trophy size={13} /> Prize Pool: ₹25,00,000 + Modelling Contracts</span>
+            <span className="flex items-center gap-1.5"><MapPin size={13} className="text-pink-500" /> {competition.venue}, {competition.city}</span>
+            <span className="flex items-center gap-1.5"><Calendar size={13} className="text-indigo-400" /> {competition.eventDate}</span>
+            <span className="flex items-center gap-1.5 text-amber-400"><Trophy size={13} /> Prize Pool: {competition.prizePool}</span>
           </div>
         </div>
 
@@ -279,7 +306,7 @@ export default function CompetitionsPage() {
 
               {/* Grid of locations */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {regionalHubs[activeHub].map((spot, idx) => (
+                {hubGroups[activeHub].map((spot, idx) => (
                   <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col gap-2.5">
                     <span className="text-[8px] text-amber-500 font-primary font-bold uppercase tracking-widest">AUDITION GATEWAY</span>
                     <div>
@@ -298,22 +325,12 @@ export default function CompetitionsPage() {
                 📋 ELIGIBILITY & GUIDELINES
               </h2>
               <ol className="flex flex-col gap-2.5 text-xs text-slate-600 font-secondary mt-1">
-                <li className="flex gap-2">
-                  <span className="font-primary text-indigo-500 font-bold">1.</span>
-                  <span>Age bracket: 18 - 28 years (as of Jan 1, 2026).</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-primary text-indigo-500 font-bold">2.</span>
-                  <span>Citizens of India or OCI Cardholders.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-primary text-indigo-500 font-bold">3.</span>
-                  <span>Must prepare one regional handloom-based apparel for the runway round.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-primary text-indigo-500 font-bold">4.</span>
-                  <span>Submission of 3 high-res portfolio headshots + 1-minute performance introduction video.</span>
-                </li>
+                {eligibilityRules.map((rule, idx) => (
+                  <li key={idx} className="flex gap-2">
+                    <span className="font-primary text-indigo-500 font-bold">{idx + 1}.</span>
+                    <span>{rule}</span>
+                  </li>
+                ))}
               </ol>
             </div>
 
@@ -323,18 +340,12 @@ export default function CompetitionsPage() {
                 🛡️ CROWN AUDITION RULES
               </h2>
               <ul className="flex flex-col gap-2.5 text-xs text-slate-600 font-secondary mt-1">
-                <li className="flex gap-2 items-start">
-                  <span className="text-indigo-500 mt-0.5">•</span>
-                  <span>Sartorial authenticity carries 40% weight in round 1 scoring.</span>
-                </li>
-                <li className="flex gap-2 items-start">
-                  <span className="text-indigo-500 mt-0.5">•</span>
-                  <span>Intellect & Cultural Q&A carries 40% weight in finals scoring.</span>
-                </li>
-                <li className="flex gap-2 items-start">
-                  <span className="text-indigo-500 mt-0.5">•</span>
-                  <span>Decision of the grand jury panels (consisting of top national fashion designers and cinema veterans) is final.</span>
-                </li>
+                {auditionRules.map((rule, idx) => (
+                  <li key={idx} className="flex gap-2 items-start">
+                    <span className="text-indigo-500 mt-0.5">•</span>
+                    <span>{rule}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -344,11 +355,7 @@ export default function CompetitionsPage() {
                 👥 ELITE AUDITION CURATION JURY
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { name: "DR. VASUNDHARA SEN", role: "TEXTILE HISTORIAN", desc: "Curation Curator of National Handloom Museum." },
-                  { name: "RAGHVENDRA RATHORE", role: "ROYAL COUTURIER", desc: "Pioneered traditional Indian heritage runway apparel." },
-                  { name: "PROF. ALOK CHATURVEDI", role: "LINGUISTIC SCHOLAR", desc: "Head of Classical Languages at Delhi University." }
-                ].map((j, idx) => (
+                {competition.judges.map((j, idx) => (
                   <div key={idx} className="bg-slate-50 border border-slate-200/80 rounded-xl p-5 flex flex-col items-center text-center gap-3">
                     <div className="w-12 h-12 bg-slate-250 rounded-full flex items-center justify-center text-slate-400">
                       <User size={20} />
@@ -373,11 +380,7 @@ export default function CompetitionsPage() {
               </div>
 
               <div className="flex flex-col gap-3">
-                {[
-                  { q: "WHAT DOCUMENTS MUST I UPLOAD DURING THE FORMAL APPLICATION STAGE?", a: "Contenders must upload high-resolution headshots, a scanned photocopy of age proof (18-28 bracket), and a 1-minute regional language introduction clip." },
-                  { q: "DO I HAVE TO WEAVE THE TRADITIONAL OUTFIT MYSELF?", a: "No, weaving is not required by contestants. However, the outfit must be sourced from authentic handloom clusters, and you must verify the weavers cooperative detail during review." },
-                  { q: "ARE TRAVEL AND ACCOMMODATION EXPENSES COMPENSATED?", a: "For regional auditions, travel is self-funded. For candidates selected to represent their state in the Grand Finals in Bengaluru, all lodging and boarding will be covered by the committee." }
-                ].map((faq, idx) => {
+                {competition.faqs.map((faq, idx) => {
                   const isOpen = openFaqIndex === idx;
                   return (
                     <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden">
@@ -549,7 +552,7 @@ export default function CompetitionsPage() {
                   <span className="text-lg">🏆</span>
                   <div className="flex flex-col text-left">
                     <span className="text-[10px] font-primary tracking-widest text-slate-400 font-bold uppercase leading-none">National Grand Finals</span>
-                    <span className="text-xs font-bold text-slate-800 mt-1 font-secondary">2026-11-28</span>
+                    <span className="text-xs font-bold text-slate-800 mt-1 font-secondary">{competition.eventDate}</span>
                   </div>
                 </div>
 
@@ -565,7 +568,7 @@ export default function CompetitionsPage() {
                   <span className="text-lg">📍</span>
                   <div className="flex flex-col text-left">
                     <span className="text-[10px] font-primary tracking-widest text-slate-400 font-bold uppercase leading-none">Audition Venue & City</span>
-                    <span className="text-xs font-bold text-slate-800 mt-1 font-secondary">Grand Pavilion, Palace Grounds, Bengaluru</span>
+                    <span className="text-xs font-bold text-slate-800 mt-1 font-secondary">{competition.venue}, {competition.city}</span>
                   </div>
                 </div>
               </div>
@@ -576,14 +579,14 @@ export default function CompetitionsPage() {
               <span className="text-amber-500 font-primary text-[8px] font-extrabold tracking-widest uppercase">CHAMPIONSHIP CUSTODIANS</span>
               <div>
                 <span className="text-[9.5px] font-primary text-slate-400 font-bold uppercase">ORGANIZER</span>
-                <h4 className="font-extrabold text-white text-xs font-primary mt-0.5">India Weaves & Heritage Council</h4>
+                <h4 className="font-extrabold text-white text-xs font-primary mt-0.5">{competition.organizer.name}</h4>
               </div>
               <p className="text-slate-400 text-[10px] leading-relaxed font-secondary">
-                A philanthropic trust promoting the survival of traditional weaving clusters through modern luxury exposure and pageantry.
+                {competition.organizer.contact}
               </p>
               <div className="border-t border-gray-850 pt-3 flex flex-col gap-1.5 text-[9px] font-primary font-bold text-slate-400 uppercase tracking-wider">
-                <span>✉ pageant@indiaweaves.org</span>
-                <span>📞 +91 80 3456 7890</span>
+                <span>✉ {competition.organizer.email}</span>
+                <span>📞 {competition.organizer.phone}</span>
               </div>
             </div>
 
@@ -595,6 +598,7 @@ export default function CompetitionsPage() {
 
       {showBoardingModal && (
         <CompetitorBoardingModal
+          competition={competition}
           onClose={() => setShowBoardingModal(false)}
           initialName={contenderName}
           initialTrack={coutureDivision}

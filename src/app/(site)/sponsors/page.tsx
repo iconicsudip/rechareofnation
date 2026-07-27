@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { 
-  Sparkles, 
-  Calculator, 
-  Check, 
-  Shield, 
-  Building, 
-  User, 
-  Mail, 
+import { useState, useEffect } from "react";
+import {
+  Sparkles,
+  Calculator,
+  Check,
+  Shield,
+  Building,
+  User,
+  Mail,
   CheckCircle,
   ExternalLink,
   ArrowUpRight,
   ArrowRight,
   ChevronDown
 } from "lucide-react";
-import { ApiClient } from "@/lib/api-client";
+import { ApiClient, Sponsor } from "@/lib/api-client";
 
 interface TierData {
   name: string;
@@ -27,65 +27,53 @@ interface TierData {
   placements: string;
 }
 
-const TIERS: Record<string, TierData> = {
-  TITLE: {
-    name: "Title Sponsor",
-    price: 2500000,
-    baseImpressions: 5200000,
-    space: "300 sq.ft Premium Front-Center Trackside Pavilion",
-    allotments: "40 Full Pass Badges",
-    entitlements: [
-      "Exclusive category rights (No competitor brands allowed)",
-      "Live onstage representative keynote greeting (2 mins)",
-      "Push notifications to all 2,00,000+ app users during event"
-    ],
-    placements: "All Main Stage banners, Official App Splash Screen, Co-branded National PR & Media coverage"
-  },
-  PLATINUM: {
-    name: "Platinum Partner",
-    price: 1500000,
-    baseImpressions: 3000000,
-    space: "200 sq.ft Premium Trackside Pavilion",
-    allotments: "25 Full Pass Badges",
-    entitlements: [
-      "Co-branding on official credentials and lanyards",
-      "15-second promo video broadcast during main stage transitions",
-      "Dedicated sponsor booth in high-traffic exhibition hall"
-    ],
-    placements: "Premium App Banner, Main Stage Side Banners, Co-branded PR & Media coverage"
-  },
-  GOLD: {
-    name: "Gold Partner",
-    price: 800000,
-    baseImpressions: 1500000,
-    space: "100 sq.ft Trackside Pavilion",
-    allotments: "12 Full Pass Badges",
-    entitlements: [
-      "Logo on general ticketing page and email confirmations",
-      "Social media shout-out and dedicated brand story coverage",
-      "Standard expo booth with electric & Wi-Fi support"
-    ],
-    placements: "General Category Banners, App Partner Section, Standard PR & Media coverage"
-  },
-  ASSOCIATE: {
-    name: "Associate Partner",
-    price: 400000,
-    baseImpressions: 700000,
-    space: "50 sq.ft Shared Pavilion",
-    allotments: "6 Full Pass Badges",
-    entitlements: [
-      "Logo on all official co-branded marketing materials",
-      "In-app sponsor directory inclusion",
-      "Distribution of corporate flyers in visitor goodie bags"
-    ],
-    placements: "App Partner Section, Shared Banners, Standard PR & Media coverage"
-  }
+// Sensible placeholder shown briefly while the real tier data is being fetched
+// from `site_content` (key: sponsorship_tiers). Prevents a crash/NaN flash on
+// first render, before the useEffect below resolves.
+const FALLBACK_TIER: TierData = {
+  name: "Loading...",
+  price: 0,
+  baseImpressions: 1,
+  space: "—",
+  allotments: "—",
+  entitlements: ["—", "—", "—"],
+  placements: "—"
+};
+
+const FALLBACK_TIERS: Record<string, TierData> = {
+  TITLE: FALLBACK_TIER,
+  PLATINUM: FALLBACK_TIER,
+  GOLD: FALLBACK_TIER,
+  ASSOCIATE: FALLBACK_TIER
+};
+
+// Renders a stylized text lockup in place of a broken <img> when a sponsor
+// has no logoUrl (e.g. Paytm Checkout).
+const renderLogoFallback = (name: string) => {
+  const words = name.trim().split(/\s+/);
+  const firstWord = words[0] || name;
+  const restWords = words.slice(1).join(" ");
+  return (
+    <div className="font-black text-slate-450 font-primary tracking-tighter text-md flex flex-col">
+      <span>{firstWord}</span>
+      {restWords && (
+        <span className="text-[10px] text-slate-350 tracking-wider font-secondary font-primary">
+          {restWords}
+        </span>
+      )}
+    </div>
+  );
 };
 
 export default function SponsorsPage() {
   // Forecaster state
   const [selectedTier, setSelectedTier] = useState<"TITLE" | "PLATINUM" | "GOLD" | "ASSOCIATE">("TITLE");
   const [footfallMultiplier, setFootfallMultiplier] = useState<number>(1.0); // ranges from 0.5 to 2.5
+  const [tiers, setTiers] = useState<Record<string, TierData>>(FALLBACK_TIERS);
+
+  // Allied Brand Patrons showcase state
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [isShowcaseLoading, setIsShowcaseLoading] = useState(true);
 
   // Form states
   const [companyName, setCompanyName] = useState("");
@@ -94,6 +82,28 @@ export default function SponsorsPage() {
   const [tierInterest, setTierInterest] = useState("Gold Sponsor Package");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsShowcaseLoading(true);
+      const [sponsorsData, tiersData] = await Promise.all([
+        ApiClient.getSponsors(),
+        ApiClient.getSiteContent<Record<string, TierData>>("sponsorship_tiers"),
+      ]);
+      setSponsors(sponsorsData);
+      if (tiersData) setTiers(tiersData);
+      setIsShowcaseLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  // Group the fetched sponsors by tier for the "Allied Brand Patrons" showcase.
+  // Note: the DB tier value for the lower tier is 'Partner', which maps to
+  // this page's "Associate" section.
+  const titleSponsors = sponsors.filter((s) => s.tier === "Title");
+  const platinumSponsors = sponsors.filter((s) => s.tier === "Platinum");
+  const goldSponsors = sponsors.filter((s) => s.tier === "Gold");
+  const associateSponsors = sponsors.filter((s) => s.tier === "Partner");
 
   // Formatting helper for currency
   const formatCurrency = (val: number) => {
@@ -105,7 +115,7 @@ export default function SponsorsPage() {
   const handleSponsorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Call API client with pre-defined requirements
     await ApiClient.submitSponsorForm({
       companyName,
@@ -123,14 +133,14 @@ export default function SponsorsPage() {
     setEmail("");
   };
 
-  const currentTierInfo = TIERS[selectedTier];
+  const currentTierInfo = tiers[selectedTier] ?? FALLBACK_TIER;
   const calculatedImpressions = Math.round(currentTierInfo.baseImpressions * footfallMultiplier);
-  const calculatedCPM = (currentTierInfo.price / calculatedImpressions) * 1000;
+  const calculatedCPM = calculatedImpressions > 0 ? (currentTierInfo.price / calculatedImpressions) * 1000 : 0;
 
   return (
     <div className="w-full min-h-screen bg-[#F8FAFC] py-12">
       <div className="container max-w-7xl mx-auto px-4 flex flex-col gap-12">
-        
+
         {/* HERO SECTION */}
         <div className="relative w-full rounded-3xl bg-gradient-to-br from-[#070b19] via-[#0b1026] to-[#050711] border border-slate-800 p-8 md:p-12 text-white overflow-hidden shadow-2xl">
           {/* Subtle glow background */}
@@ -158,9 +168,9 @@ export default function SponsorsPage() {
 
             {/* Description */}
             <p className="text-slate-400 text-sm md:text-base leading-relaxed font-secondary max-w-3xl">
-              Recharge Nation is proud to collaborate with industry-leading corporate brands driving 
-              technological development, sustainability, and cultural preservation. Together, we power 
-              secure smart admissions, high-speed regional networking, and luxury handloom revival 
+              Recharge Nation is proud to collaborate with industry-leading corporate brands driving
+              technological development, sustainability, and cultural preservation. Together, we power
+              secure smart admissions, high-speed regional networking, and luxury handloom revival
               across South Asia.
             </p>
 
@@ -191,7 +201,7 @@ export default function SponsorsPage() {
 
         {/* ROI FORECASTER SECTION */}
         <div className="w-full bg-white border border-slate-200/80 rounded-3xl shadow-sm p-6 md:p-10 relative overflow-hidden bg-[radial-gradient(#e2e8f0_1.2px,transparent_1.2px)] [background-size:24px_24px]">
-          
+
           {/* Header Row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-100">
             <div className="flex flex-col gap-2">
@@ -231,7 +241,7 @@ export default function SponsorsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8">
             {/* Left Content (Slider + Metric Cards) */}
             <div className="lg:col-span-2 flex flex-col gap-6">
-              
+
               {/* Slider Container */}
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-5">
                 <div className="flex justify-between items-center mb-4">
@@ -242,7 +252,7 @@ export default function SponsorsPage() {
                     {Math.round(footfallMultiplier * 100)}% Capacity
                   </span>
                 </div>
-                
+
                 <input
                   type="range"
                   min="0.5"
@@ -252,7 +262,7 @@ export default function SponsorsPage() {
                   onChange={(e) => setFootfallMultiplier(parseFloat(e.target.value))}
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-pink-500 mb-2 focus:outline-none"
                 />
-                
+
                 <p className="text-[11px] text-slate-400">
                   Simulate maximum brand exposure based on surge capacities during grand finale weekends.
                 </p>
@@ -260,7 +270,7 @@ export default function SponsorsPage() {
 
               {/* Metrics Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
                 {/* Impressions */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition-shadow">
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 font-secondary">Estimated Brand Impressions</p>
@@ -373,7 +383,7 @@ export default function SponsorsPage() {
 
         {/* SHOWCASE SECTION */}
         <div className="flex flex-col gap-12 py-6 font-secondary">
-          
+
           {/* Section Title block */}
           <div className="text-left pb-4 border-b border-slate-200/60 w-full">
             <h2 className="text-xl md:text-2xl font-black text-slate-900 font-primary uppercase tracking-tight">
@@ -383,312 +393,325 @@ export default function SponsorsPage() {
               Connect with our title sponsors, strategic brand partners, and commercial alliances.
             </p>
           </div>
-               {/* Title Sponsor Showcase */}
-          <div className="flex flex-col items-start gap-4">
-            <div className="text-left w-full max-w-7xl">
-              <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
-                Grand Title Sponsor
-              </h3>
-            </div>
-                   {/* Tata Motors EV Card */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 max-w-7xl w-full">
-              <div className="relative w-full sm:w-48 h-40 sm:h-auto shrink-0 bg-slate-50">
-                <img 
-                  src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=600&q=80" 
-                  alt="Tata Motors EV"
-                  className="w-full h-full object-cover"
+
+          {isShowcaseLoading ? (
+            <>
+              {/* Title Sponsor Skeleton */}
+              <div className="flex flex-col items-start gap-4">
+                <div className="text-left w-full max-w-7xl">
+                  <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                    Grand Title Sponsor
+                  </h3>
+                </div>
+                <div
+                  className="h-40 rounded-3xl animate-pulse border border-slate-200 max-w-7xl w-full"
+                  style={{ background: "rgba(15,23,42,0.06)" }}
                 />
-                {/* Badge overlay inside image */}
-                <span className="bg-indigo-600 text-white px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                  TITLE SPONSOR
-                </span>
-                {/* Active Indicator dot */}
-                <div className="absolute top-3 right-3 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-md" />
-              </div>
-              
-              <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                <div className="flex flex-col gap-1">
-                  <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                    <span>⌖</span> Automotive
-                  </span>
-                  <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
-                    TATA MOTORS EV
-                  </h4>
-                  <p className="text-slate-555 text-xs leading-relaxed font-secondary">
-                    Driving India&apos;s green transit with cutting-edge clean electric mobility solutions.
-                  </p>
-                </div>
-                
-                <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100/60">
-                  <div className="flex flex-col text-left">
-                    <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
-                    <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Grand Title</span>
-                  </div>
-                  <a 
-                    href="https://tatamotors.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="bg-[#0c1222] hover:bg-slate-850 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
-                  >
-                    VISIT SITE
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Platinum Showcase */}
-          <div className="flex flex-col items-start gap-4 w-full">
-            <div className="text-left w-full max-w-7xl mx-auto">
-              <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
-                Platinum Alliance Patrons
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
-              {/* Airtel Card */}
-              <div className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
-                <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
-                  <img 
-                    src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" 
-                    alt="Airtel 5G Plus"
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="bg-indigo-600 text-white px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                    PLATINUM
-                  </span>
-                </div>
-                
-                <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                      <span>⌖</span> Telecom
-                    </span>
-                    <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
-                      AIRTEL 5G PLUS
-                    </h4>
-                    <p className="text-slate-550 text-xs leading-relaxed font-secondary line-clamp-2">
-                      Supercharging experiential connectivity, high-fidelity live streaming, & smart paddock telemetry.
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100/60">
-                    <div className="flex flex-col text-left">
-                      <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
-                      <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Platinum</span>
-                    </div>
-                    <a 
-                      href="https://airtel.in"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
-                    >
-                      VISIT SITE
-                    </a>
-                  </div>
-                </div>
               </div>
 
-              {/* Paytm Card */}
-              <div className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
-                <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4">
-                  <div className="font-black text-slate-450 font-primary tracking-tighter text-md flex flex-col">
-                    <span>Paytm</span>
-                    <span className="text-[10px] text-slate-350 tracking-wider font-secondary font-primary">Checkout</span>
-                  </div>
-                  <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                    PLATINUM
-                  </span>
+              {/* Platinum Skeleton */}
+              <div className="flex flex-col items-start gap-4 w-full">
+                <div className="text-left w-full max-w-7xl mx-auto">
+                  <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                    Platinum Alliance Patrons
+                  </h3>
                 </div>
-                
-                <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                      <span>⌖</span> FinTech
-                    </span>
-                    <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
-                      PAYTM CHECKOUT
-                    </h4>
-                    <p className="text-slate-555 text-xs leading-relaxed font-secondary line-clamp-2">
-                      Securing millions of instant ledger transfers for frictionless track and gate checkouts.
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100/60">
-                    <div className="flex flex-col text-left">
-                      <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
-                      <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Platinum</span>
-                    </div>
-                    <a 
-                      href="https://paytm.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
-                    >
-                      VISIT SITE
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Gold and Associate Side-by-Side Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
-            {/* Gold Sponsor Block */}
-            <div className="flex flex-col items-start gap-4 w-full">
-              <div className="text-left w-full">
-                <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
-                  Gold Event Sponsors
-                </h3>
-              </div>
-              
-              <div className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full h-fit">
-                <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
-                  <img 
-                    src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=300&q=80" 
-                    alt="Reliance Trends"
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                    GOLD
-                  </span>
-                </div>
-                
-                <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                      <span>⌖</span> Retail
-                    </span>
-                    <h4 className="text-base font-black text-slate-900 font-primary leading-tight">
-                      Reliance Trends
-                    </h4>
-                    <p className="text-slate-550 text-xs leading-relaxed font-secondary line-clamp-2">
-                      Connecting modern demographics with premium fashion collections across India&apos;s cities.
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-slate-100/60">
-                    <div className="flex flex-col text-left">
-                      <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
-                      <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Gold</span>
-                    </div>
-                    <a 
-                      href="https://trends.ajio.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
-                    >
-                      VISIT SITE
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Associate Sponsor Block */}
-            <div className="flex flex-col items-start gap-4 w-full">
-              <div className="text-left w-full">
-                <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
-                  Associate Event Patrons
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-4 w-full">
-                {/* Bisleri Card */}
-                <div className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
-                  <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
-                    <img 
-                      src="https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=600&q=80" 
-                      alt="Bisleri Vedica"
-                      className="w-full h-full object-cover"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
+                  {[...Array(2)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-40 rounded-3xl animate-pulse border border-slate-200"
+                      style={{ background: "rgba(15,23,42,0.06)" }}
                     />
-                    <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                      ASSOCIATE
-                    </span>
-                  </div>
-                  
-                  <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                        <span>⌖</span> F&B
-                      </span>
-                      <h4 className="text-base font-black text-slate-900 font-primary leading-tight">
-                        BISLERI VEDICA
-                      </h4>
-                      <p className="text-slate-555 text-xs leading-normal line-clamp-1">
-                        Premium natural mountain water.
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-slate-100/60">
-                      <div className="flex flex-col text-left">
-                        <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
-                        <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Associate</span>
-                      </div>
-                      <a 
-                        href="https://bisleri.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-lg transition-colors cursor-pointer"
-                      >
-                        VISIT SITE
-                      </a>
-                    </div>
-                  </div>
+                  ))}
                 </div>
+              </div>
 
-                {/* BookMyShow Card */}
-                <div className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
-                  <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
-                    <img 
-                      src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=300&q=80" 
-                      alt="BookMyShow"
-                      className="w-full h-full object-cover"
-                    />
-                    <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                      ASSOCIATE
-                    </span>
+              {/* Gold and Associate Skeleton */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
+                <div className="flex flex-col items-start gap-4 w-full">
+                  <div className="text-left w-full">
+                    <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                      Gold Event Sponsors
+                    </h3>
                   </div>
-                  
-                  <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                        <span>⌖</span> Entertainment
-                      </span>
-                      <h4 className="text-base font-black text-slate-900 font-primary leading-tight">
-                        BOOKMYSHOW
-                      </h4>
-                      <p className="text-slate-555 text-xs leading-normal line-clamp-1">
-                        Online movie and event tickets.
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-slate-100/60">
-                      <div className="flex flex-col text-left">
-                        <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
-                        <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Associate</span>
-                      </div>
-                      <a 
-                        href="https://bookmyshow.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-lg transition-colors cursor-pointer"
-                      >
-                        VISIT SITE
-                      </a>
-                    </div>
+                  <div
+                    className="h-40 rounded-3xl animate-pulse border border-slate-200 w-full"
+                    style={{ background: "rgba(15,23,42,0.06)" }}
+                  />
+                </div>
+                <div className="flex flex-col items-start gap-4 w-full">
+                  <div className="text-left w-full">
+                    <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                      Associate Event Patrons
+                    </h3>
+                  </div>
+                  <div className="flex flex-col gap-4 w-full">
+                    {[...Array(2)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-40 rounded-3xl animate-pulse border border-slate-200 w-full"
+                        style={{ background: "rgba(15,23,42,0.06)" }}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          ) : (
+            <>
+              {/* Title Sponsor Showcase */}
+              {titleSponsors.length > 0 && (
+                <div className="flex flex-col items-start gap-4">
+                  <div className="text-left w-full max-w-7xl">
+                    <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                      Grand Title Sponsor
+                    </h3>
+                  </div>
+                  {titleSponsors.map((sponsor) => (
+                    <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 max-w-7xl w-full">
+                      <div className={`relative w-full sm:w-48 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
+                        {sponsor.logoUrl ? (
+                          <img
+                            src={sponsor.logoUrl}
+                            alt={sponsor.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          renderLogoFallback(sponsor.name)
+                        )}
+                        {/* Badge overlay inside image */}
+                        <span className="bg-indigo-600 text-white px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
+                          TITLE SPONSOR
+                        </span>
+                        {/* Active Indicator dot */}
+                        <div className="absolute top-3 right-3 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-md" />
+                      </div>
+
+                      <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                            <span>⌖</span> {sponsor.industry}
+                          </span>
+                          <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
+                            {sponsor.name}
+                          </h4>
+                          <p className="text-slate-555 text-xs leading-relaxed font-secondary">
+                            {sponsor.description}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100/60">
+                          <div className="flex flex-col text-left">
+                            <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
+                            <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Grand Title</span>
+                          </div>
+                          <a
+                            href={sponsor.websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-[#0c1222] hover:bg-slate-850 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                          >
+                            VISIT SITE
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Platinum Showcase */}
+              {platinumSponsors.length > 0 && (
+                <div className="flex flex-col items-start gap-4 w-full">
+                  <div className="text-left w-full max-w-7xl mx-auto">
+                    <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                      Platinum Alliance Patrons
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
+                    {platinumSponsors.map((sponsor) => (
+                      <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
+                        <div className={`relative w-full sm:w-40 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
+                          {sponsor.logoUrl ? (
+                            <img
+                              src={sponsor.logoUrl}
+                              alt={sponsor.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            renderLogoFallback(sponsor.name)
+                          )}
+                          <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
+                            PLATINUM
+                          </span>
+                        </div>
+
+                        <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                              <span>⌖</span> {sponsor.industry}
+                            </span>
+                            <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
+                              {sponsor.name}
+                            </h4>
+                            <p className="text-slate-550 text-xs leading-relaxed font-secondary line-clamp-2">
+                              {sponsor.description}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100/60">
+                            <div className="flex flex-col text-left">
+                              <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
+                              <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Platinum</span>
+                            </div>
+                            <a
+                              href={sponsor.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                            >
+                              VISIT SITE
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Gold and Associate Side-by-Side Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
+                {/* Gold Sponsor Block */}
+                {goldSponsors.length > 0 && (
+                  <div className="flex flex-col items-start gap-4 w-full">
+                    <div className="text-left w-full">
+                      <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                        Gold Event Sponsors
+                      </h3>
+                    </div>
+
+                    {goldSponsors.map((sponsor) => (
+                      <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full h-fit">
+                        <div className={`relative w-full sm:w-40 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
+                          {sponsor.logoUrl ? (
+                            <img
+                              src={sponsor.logoUrl}
+                              alt={sponsor.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            renderLogoFallback(sponsor.name)
+                          )}
+                          <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
+                            GOLD
+                          </span>
+                        </div>
+
+                        <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                              <span>⌖</span> {sponsor.industry}
+                            </span>
+                            <h4 className="text-base font-black text-slate-900 font-primary leading-tight">
+                              {sponsor.name}
+                            </h4>
+                            <p className="text-slate-550 text-xs leading-relaxed font-secondary line-clamp-2">
+                              {sponsor.description}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-slate-100/60">
+                            <div className="flex flex-col text-left">
+                              <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
+                              <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Gold</span>
+                            </div>
+                            <a
+                              href={sponsor.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                            >
+                              VISIT SITE
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Associate Sponsor Block */}
+                {associateSponsors.length > 0 && (
+                  <div className="flex flex-col items-start gap-4 w-full">
+                    <div className="text-left w-full">
+                      <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-slate-400">
+                        Associate Event Patrons
+                      </h3>
+                    </div>
+
+                    <div className="flex flex-col gap-4 w-full">
+                      {associateSponsors.map((sponsor) => (
+                        <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
+                          <div className={`relative w-full sm:w-40 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
+                            {sponsor.logoUrl ? (
+                              <img
+                                src={sponsor.logoUrl}
+                                alt={sponsor.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              renderLogoFallback(sponsor.name)
+                            )}
+                            <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
+                              ASSOCIATE
+                            </span>
+                          </div>
+
+                          <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                                <span>⌖</span> {sponsor.industry}
+                              </span>
+                              <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-tight">
+                                {sponsor.name}
+                              </h4>
+                              <p className="text-slate-555 text-xs leading-normal line-clamp-1">
+                                {sponsor.description}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-slate-100/60">
+                              <div className="flex flex-col text-left">
+                                <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
+                                <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Associate</span>
+                              </div>
+                              <a
+                                href={sponsor.websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                              >
+                                VISIT SITE
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* ENLIST YOUR BRAND FORM SECTION */}
         <div id="enlist" className="w-full rounded-3xl bg-gradient-to-br from-[#0c1328] via-[#090d1f] to-[#04060d] border border-slate-800 p-8 md:p-12 text-white overflow-hidden shadow-2xl relative">
           <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/5 rounded-full blur-[100px]" />
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center relative z-10">
             {/* Left Side: Information */}
             <div className="flex flex-col gap-6 text-left font-secondary">
@@ -701,7 +724,7 @@ export default function SponsorsPage() {
               <p className="text-slate-400 text-xs md:text-sm leading-relaxed max-w-md">
                 Gain premier brand recall and highly localized exposure to massive energetic audiences. We offer physical experiential stalls, interactive app integrations, visual custom stage banners, and direct category sponsorships.
               </p>
-              
+
               <ul className="flex flex-col gap-4 mt-2 font-primary text-xs text-slate-350">
                 <li className="flex gap-2 items-center">
                   <span>✓</span>
@@ -720,7 +743,7 @@ export default function SponsorsPage() {
 
             {/* Right Side: Form */}
             <div className="bg-[#070b14] border border-slate-800/80 rounded-2xl p-6 md:p-8 shadow-inner relative overflow-hidden">
-              
+
               {isSubmitted ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center gap-4">
                   <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 border border-emerald-500/20">
@@ -730,7 +753,7 @@ export default function SponsorsPage() {
                   <p className="text-slate-400 text-xs max-w-sm font-secondary">
                     A simulated confirmation mail has been triggered. Our brand alliances team will contact you with a customized proposal deck.
                   </p>
-                  <button 
+                  <button
                     onClick={() => setIsSubmitted(false)}
                     className="text-xs text-pink-500 hover:text-pink-400 underline font-bold mt-2 cursor-pointer font-primary"
                   >
@@ -744,8 +767,8 @@ export default function SponsorsPage() {
                     <label className="text-[10px] font-primary tracking-widest text-slate-400 uppercase font-bold">
                       Company / Brand Entity
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="e.g. Jio Infocomm Ltd"
                       className="w-full bg-[#0d1324] border border-slate-800 rounded-lg py-3 px-4 text-slate-200 text-xs outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                       value={companyName}
@@ -756,14 +779,14 @@ export default function SponsorsPage() {
 
                   {/* Contact Person & Email Row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
+
                     {/* Name */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[10px] font-primary tracking-widest text-slate-400 uppercase font-bold">
                         Representative Name
                       </label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="Full Name"
                         className="w-full bg-[#0d1324] border border-slate-800 rounded-lg py-3 px-4 text-slate-200 text-xs outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                         value={contactPerson}
@@ -777,8 +800,8 @@ export default function SponsorsPage() {
                       <label className="text-[10px] font-primary tracking-widest text-slate-400 uppercase font-bold">
                         Official Corporate Email
                       </label>
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         placeholder="name@company.com"
                         className="w-full bg-[#0d1324] border border-slate-800 rounded-lg py-3 px-4 text-slate-200 text-xs outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all"
                         value={email}
@@ -795,7 +818,7 @@ export default function SponsorsPage() {
                       Tier Level of Interest
                     </label>
                     <div className="relative">
-                      <select 
+                      <select
                         className="w-full bg-[#0d1324] border border-slate-800 rounded-lg py-3 pl-4 pr-10 text-slate-300 text-xs outline-none focus:border-pink-500 transition-all appearance-none cursor-pointer"
                         value={tierInterest}
                         onChange={(e) => setTierInterest(e.target.value)}
@@ -812,7 +835,7 @@ export default function SponsorsPage() {
                   </div>
 
                   {/* Button */}
-                  <button 
+                  <button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-[#FF0055] hover:bg-[#E6004C] text-white font-primary font-bold text-xs tracking-wider uppercase py-3.5 rounded-lg shadow-lg hover:shadow-pink-500/20 active:scale-[0.98] transition-all text-center mt-2 cursor-pointer"

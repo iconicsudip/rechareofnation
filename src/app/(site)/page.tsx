@@ -8,270 +8,19 @@ import {
   HelpCircle, Eye, Mail, Award, CheckCircle, Ticket, Layers, 
   Laptop, Briefcase, GraduationCap, Globe, Shield, RefreshCw, ChevronLeft, BookOpen, Send
 } from "lucide-react";
-import { ApiClient, Sponsor, GalleryItem } from "@/lib/api-client";
+import { ApiClient, Sponsor, GalleryItem, Event, CompetitionRecord, Blog } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import CompetitionCard from "@/components/CompetitionCard";
 import BlogCard from "@/components/BlogCard";
 
-// Carousel slides seed with high-end digital styling specs
-const HERO_SLIDES = [
-  {
-    badge: "✦ ELITE AUTOMOTIVE CLASH",
-    titleLine1: "REV UP THE",
-    titleLine2: "CYBER ENGINE",
-    accent: "CYBERPUNK SPEED EXPO",
-    desc: "Witness India's most aggressive tuning clash, custom supercars, drift spec showcases, and hypercar networking setups.",
-    bgGradient: "from-slate-950 via-[#0a0e1e] to-cyan-950/20",
-    image: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80",
-    tier: "PADDOCK EXHIBITOR VIP",
-    multipass: "MULTIPASS 2.4GHZ",
-    eventDate: "OCT 12-14, 2026",
-    venue: "BIC Arena, Greater Noida",
-    gate: "GATE 03 / PITS",
-    price: "₹1,499",
-    code: "PASS-AUTO-992",
-    slug: "recharge-cultural-odyssey-2026"
-  },
-  {
-    badge: "✦ NATARAJA DANCE CLASH",
-    titleLine1: "FEEL THE VIBE",
-    titleLine2: "AND RHYTHM",
-    accent: "NATIONAL CHOREO BATTLE",
-    desc: "Compete or witness the ultimate choreography battle where elite street, classical, and contemporary crews clash for the national shield.",
-    bgGradient: "from-slate-950 via-[#0a0e1e] to-purple-950/20",
-    image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=1200&q=80",
-    tier: "STAGE SIDE CONTESTANT VIP",
-    multipass: "STAGEPASS 5.8GHZ",
-    eventDate: "NOV 08, 2026",
-    venue: "Ravindra Bharathi, Hyderabad",
-    gate: "STAGE DOOR BACKSTAGE",
-    price: "₹500",
-    code: "PASS-DNC-4214",
-    slug: "national-vibe-rhythm-dance-cup"
-  },
-  {
-    badge: "✦ ABHYUDAYA MEGA FEST",
-    titleLine1: "CELEBRATE THE",
-    titleLine2: "CULTURAL ODYSSEY",
-    accent: "INDIAN HERITAGE CARNIVAL",
-    desc: "A massive celebration of folk dances, local street foods, multi-state music ensembles, and handmade artisan craft markets.",
-    bgGradient: "from-slate-950 via-[#0a0e1e] to-pink-950/20",
-    image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
-    tier: "GENERAL ENTRY BADGE",
-    multipass: "ADMIT 4 FAMILY",
-    eventDate: "OCT 15, 2026",
-    venue: "Jawaharlal Nehru Stadium, Delhi",
-    gate: "GATE 06 / GROUND",
-    price: "₹299",
-    code: "PASS-ODY-5524",
-    slug: "recharge-cultural-odyssey-2026"
-  }
-];
+interface HeroSlide {
+  badge: string; titleLine1: string; titleLine2: string; accent: string; desc: string;
+  image: string; tier: string; multipass: string; eventDate: string; venue: string;
+  gate: string; price: string; code: string; slug: string;
+}
 
-const HOMEPAGE_EVENTS = [
-  {
-    id: "ev-1",
-    slug: "recharge-cultural-odyssey-2026",
-    name: "ABHYUDAYA - NATIONAL CULTURAL MEGA FESTIVAL",
-    category: "Festivals",
-    city: "New Delhi",
-    price: 499,
-    date: "2026-10-14",
-    rating: 4.9,
-    reviews: 1420,
-    bannerUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
-    desc: "A grand celebration of Indian heritage, featuring classical dances, folk music, and theatrical displays.",
-    tag: "SELLING FAST"
-  },
-  {
-    id: "ev-6",
-    slug: "india-smart-city-tech-trade-expo-2026",
-    name: "INDIA SMART-CITY & TECH TRADE EXPO 2026",
-    category: "Expos",
-    city: "Mumbai",
-    price: 199,
-    date: "2026-11-04",
-    rating: 4.7,
-    reviews: 840,
-    bannerUrl: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80",
-    desc: "Exhibiting smart infrastructure, next-generation IoT hardware, clean energy, and mobility techs.",
-    tag: "SELLING FAST"
-  },
-  {
-    id: "ev-4",
-    slug: "deccan-founders-vcs-summit",
-    name: "DECCAN FOUNDERS & VCS SUMMIT",
-    category: "Business Networking",
-    city: "Bengaluru",
-    price: 1299,
-    date: "2026-09-22",
-    rating: 4.8,
-    reviews: 310,
-    bannerUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80",
-    desc: "Connecting high-growth startups, venture capitalists, corporate sponsors, and tech leaders."
-  },
-  {
-    id: "ev-2",
-    slug: "advanced-aero-modeling-uav-workshop",
-    name: "ADVANCED AERO-MODELING & UAV WORKSHOP",
-    category: "Workshops",
-    city: "Chennai",
-    price: 2499,
-    date: "2026-12-05",
-    rating: 4.9,
-    reviews: 195,
-    bannerUrl: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=600&q=80",
-    desc: "Master the design, construction and flying of unmanned aerial vehicles and modern RC aero-models."
-  }
-];
-
-const ARENAS = [
-  {
-    id: "ar-1",
-    name: "MISS & MR. TRADITIONAL INDIA 2026",
-    city: "BENGALURU",
-    prizePool: "25,00,000",
-    registrationFee: 1500,
-    bannerUrl: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80",
-    desc: "National grand finale showcasing handloom couture, traditional attire audits, and multi-state cultural representation."
-  },
-  {
-    id: "ar-2",
-    name: "NATARAJA INDIAN CLASSICAL & CONTEMPORARY DANCE CLASH",
-    city: "NEW DELHI",
-    prizePool: "5,00,000",
-    registrationFee: 750,
-    bannerUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
-    desc: "High-octane classical and modern fusion solo/group battle with top-tier choreographer panels and media coverage."
-  },
-  {
-    id: "ar-3",
-    name: "SWARANJALI NATIONAL VOCAL TALENT HUNT",
-    city: "KOLKATA",
-    prizePool: "3,50,000",
-    registrationFee: 500,
-    bannerUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
-    desc: "A search for India's finest voices, featuring classical thumri, light music, and contemporary vocal face-offs."
-  }
-];
-
-const CARNIVALS = [
-  {
-    id: "fest-1",
-    slug: "recharge-cultural-odyssey-2026",
-    name: "ABHYUDAYA - NATIONAL CULTURAL MEGA FESTIVAL",
-    city: "New Delhi",
-    date: "2026-10-14",
-    bannerUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: "fest-2",
-    slug: "grand-dandiya-utsav-navratri-2026",
-    name: "GRAND DANDIYA UTSAV - NAVRATRI CELEBRATIONS 2026",
-    city: "Mumbai",
-    date: "2026-10-18",
-    bannerUrl: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: "fest-3",
-    slug: "recharge-cultural-odyssey-2026", // link to existing details or lists
-    name: "BENGALURU SUNBURN FUSION & FOOD CARNIVAL 2026",
-    city: "Bengaluru",
-    date: "2026-11-05",
-    bannerUrl: "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: "fest-4",
-    slug: "recharge-cultural-odyssey-2026", // link to existing details or lists
-    name: "SUNBURN GOA FESTIVAL & BEACH CARNIVAL 2026",
-    city: "Goa",
-    date: "2026-12-28",
-    bannerUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
-const EXPOS = [
-  {
-    id: "exp-1",
-    slug: "india-smart-city-tech-trade-expo-2026",
-    name: "INDIA SMART-CITY & TECH TRADE EXPO 2026",
-    city: "Mumbai",
-    bannerUrl: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: "exp-2",
-    slug: "ev-future-mobility-india-expo-2026",
-    name: "EV & FUTURE MOBILITY INDIA EXPO 2026",
-    city: "Chennai",
-    bannerUrl: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: "exp-3",
-    slug: "india-smart-city-tech-trade-expo-2026", // link to existing details or lists
-    name: "INDIA DEFENSE & AEROSPACE TECH EXPO 2026",
-    city: "New Delhi",
-    bannerUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: "exp-4",
-    slug: "india-smart-city-tech-trade-expo-2026", // link to existing details or lists
-    name: "SUSTAINABLE ENERGY & GREEN GRID EXPO 2026",
-    city: "Hyderabad",
-    bannerUrl: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
-const ESSAYS = [
-  {
-    title: "THE REVIVAL OF TRADITIONAL HANDLOOM IN MODERN INDIAN PAGEANTRY",
-    slug: "luxury-stays-mewar-lakefront-havelis",
-    author: "SUNITA MEHRA",
-    role: "FASHION LEAD",
-    date: "Jun 28, 2026",
-    excerpt: "How Miss & Mr. Traditional India 2026 is redirecting global runway attention to local weaving clusters in Benaras, Pochampally, and Kanjeevaram.",
-    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    title: "DESIGNING HIGHLY FRICTIONLESS EVENT TICKETING SYSTEMS FOR SCALE",
-    slug: "navigating-kumbalgarh-fort-mountain-passes",
-    author: "RAJIV MALHOTRA",
-    role: "LEAD ARCHITECT",
-    date: "May 14, 2026",
-    excerpt: "Inside the engineering patterns that handle high-concurrency ticket surges during multi-city festival announcements in India.",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    title: "TECHNICAL DRIVING: MASTER THE TIGHT HAIRPINS OF MOUNT ABU",
-    slug: "technical-driving-hairpins-mount-abu",
-    author: "AMIT SHARMA",
-    role: "DRIVING COORDINATOR",
-    date: "Apr 19, 2026",
-    excerpt: "Master the Mount Abu winding passes with expert engine braking techniques, lines of entry for blind curves, and traction protocols.",
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    title: "HERITAGE RETREATS OF JAIPUR: LIVING AMONG ROYAL CONSERVERS",
-    slug: "heritage-retreats-jaipur-royal-conservers",
-    author: "PRIYA CHOUDHARY",
-    role: "ARCHITECTURAL HISTORIAN",
-    date: "Mar 30, 2026",
-    excerpt: "Discover Jaipur's ancestral homes converted into luxury boutique hotels and meet royal descendants preserving these properties.",
-    image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
-const TESTIMONIALS = [
-  { quote: "Booking the VIP tickets for Abhyudaya was incredibly smooth on Recharge Nation. The Smart QR wristband scanned immediately at Gates 1 and 3 without any check-in friction. Best ticketing experience in India.", author: "Rajesh Malhotra", role: "Auto Expo Sponsor" },
-  { quote: "I registered as a participant for Mr. Traditional India. The Participant ID Badge looked beautiful with my headshot, and security scanned me straight backstage in seconds. Extremely organized platform.", author: "Divya Nair", role: "Contestant Dancer" },
-  { quote: "We booked visitor passes for our college coding club to visit the Mumbai Tech Trade Expo. Scanning was extremely rapid. The interactive floor plan links inside our dashboard saved us so much time.", author: "Karthik Subramaniam", role: "General Badge Holder" },
-  { quote: "The runway coordinators at Miss & Mr. Traditional India 2026 were top-tier. My designer dress was handled with premium care, and our profile was broadcasted to major fashion agency sponsors.", author: "Ananya Sharma", role: "Fashion Designer" },
-  { quote: "Managing a corporate panel at Pragati Maidan can be chaotic, but the real-time registration desk dashboard let us track attendee metrics and check-in speeds with absolute accuracy.", author: "Vikram Seth", role: "Summit Convener" },
-  { quote: "Sunburn Goa beach carnival was unmatched! Getting my pass verified digitally via the WhatsApp ticket bot took less than 15 seconds. No queues, no hassle, just pure music vibes.", author: "Priya Patel", role: "Festival Visitor" },
-  { quote: "I love the clean interface of the national events portal. Filtering events by category (Expos, Carnivals, Arenas) is fast, and the layout looks so beautiful in both light and dark backgrounds.", author: "Rohan Gupta", role: "Tech Enthusiast" },
-  { quote: "Our college cultural committee partnered with Recharge of Nation to host our regional zonal qualifiers. The platform helped us sell 3,000 passes in less than 48 hours without any downtime.", author: "Sneha Reddy", role: "College Ambassador" },
-  { quote: "Highly recommend getting the Premium VIP pass! The exclusive lounge access, early check-in at the stadium, and complimentary delegate kit made the entire event feel extremely high-end.", author: "Amit Verma", role: "VIP Pass Holder" }
-];
+interface Testimonial { quote: string; author: string; role: string }
 
 export default function HomePage() {
   const router = useRouter();
@@ -292,21 +41,48 @@ export default function HomePage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
+  // Dynamic content
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [partnerLogos, setPartnerLogos] = useState<string[]>([]);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [arenas, setArenas] = useState<CompetitionRecord[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+
   // Next slide automation
   useEffect(() => {
+    if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroSlides.length]);
 
   // Fetch list data
   useEffect(() => {
     const fetchData = async () => {
-      const allSponsors = await ApiClient.getSponsors();
-      const allGallery = await ApiClient.getGalleryItems();
+      const [allSponsors, allGallery, hero, testimonialContent, partnerContent, events, competitions, blogList, cityList] = await Promise.all([
+        ApiClient.getSponsors(),
+        ApiClient.getGalleryItems(),
+        ApiClient.getSiteContent<{ slides: HeroSlide[] }>('homepage_hero'),
+        ApiClient.getSiteContent<{ testimonials: Testimonial[] }>('homepage_testimonials'),
+        ApiClient.getSiteContent<{ logos: string[] }>('homepage_partner_logos'),
+        ApiClient.getEvents(),
+        ApiClient.getCompetitions(),
+        ApiClient.getBlogs(),
+        ApiClient.getTaxonomy('city'),
+      ]);
       setSponsors(allSponsors);
       setGallery(allGallery);
+      setHeroSlides(hero?.slides ?? []);
+      setTestimonials(testimonialContent?.testimonials ?? []);
+      setPartnerLogos(partnerContent?.logos ?? []);
+      setAllEvents(events);
+      setArenas(competitions);
+      setBlogs(blogList);
+      setCities(cityList);
+      if (cityList.length > 0) setTrendingCity(cityList[0]);
     };
     fetchData();
   }, []);
@@ -330,64 +106,55 @@ export default function HomePage() {
     }
   };
 
-  const activeHero = HERO_SLIDES[currentSlide];
+  const activeHero = heroSlides[currentSlide];
 
-  // Dynamic Trending Events List Based on City selection
-  const trendingEvents = {
-    "New Delhi": [
-      { id: "tr-1", title: "ABHYUDAYA - NATIONAL CULTURAL MEGA FESTIVAL", category: "FESTIVALS", rating: 4.9, reviews: 1420, venue: "Jawaharlal Nehru Stadium", price: 299, image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80", desc: "India's largest multi-state heritage festival celebrating folk, cuisine, and design." },
-      { id: "tr-2", title: "INDICORP LEADERSHIP & SPORTS SUMMIT 2026", category: "CORPORATE", rating: 4.6, reviews: 220, venue: "Pragati Maidan", price: 1500, image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80", desc: "Strategic corporate leadership forums, panel discussions, team building audits, and CEO mixers." },
-      { id: "tr-3", title: "INDO-SEC: NATIONAL CYBER DEFENCE CONFERENCE", category: "CONFERENCES", rating: 4.6, reviews: 450, venue: "JNS Auditorium", price: 799, image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80", desc: "National security panel debates, threat matrix modules, white-hat workshops, and digital assets audit." }
-    ],
-    "Mumbai": [
-      { id: "tr-4", title: "GRAND DANDIYA UTSAV - NAVRATRI CELEBRATIONS 2026", category: "FESTIVALS", rating: 4.9, reviews: 980, venue: "Jio Convention Centre", price: 350, image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&q=80", desc: "Dance to traditional beats with India's top Garba artists, premium catering, and grand awards." },
-      { id: "tr-5", title: "INDIA SMART-CITY & TECH TRADE EXPO 2026", category: "EXPOS", rating: 4.8, reviews: 840, venue: "Jio World Hall", price: 199, image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80", desc: "Exhibiting smart infrastructure, next-generation IoT hardware, clean energy, and mobility techs." }
-    ],
-    "Bengaluru": [
-      { id: "tr-6", title: "DECCAN FOUNDERS & VCS SUMMIT", category: "BUSINESS NETWORKING", rating: 4.8, reviews: 310, venue: "Palace Grounds", price: 1299, image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80", desc: "Connecting high-growth startups, venture capitalists, corporate sponsors, and tech leaders." }
-    ],
-    "Chennai": [
-      { id: "tr-7", title: "ADVANCED AERO-MODELING & UAV WORKSHOP", category: "WORKSHOPS", rating: 4.9, reviews: 195, venue: "IIT Madras Hall", price: 2499, image: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=600&q=80", desc: "Master the design, construction and flying of unmanned aerial vehicles and modern RC aero-models." }
-    ]
-  };
+  // Derived curated sections from real event data
+  const spotlightEvents = allEvents.filter(e => e.isFeatured).slice(0, 4);
+  const carnivals = allEvents.filter(e => e.category === "Cultural Programs").slice(0, 4);
+  const expos = allEvents.filter(e => e.category === "Trade Expos").slice(0, 4);
+  const trendingEventsForCity = allEvents.filter(e => e.city === trendingCity).slice(0, 3);
 
   return (
     <div className="flex flex-col text-left">
       
       {/* 1. HERO BANNER (CAROUSEL) */}
       <section className="relative min-h-[80vh] lg:min-h-[85vh] flex items-center justify-center pt-24 pb-20 overflow-hidden dark-bg">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform scale-102"
-          style={{ backgroundImage: `url('${activeHero.image}')` }}
-        ></div>
-        
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/50 backdrop-blur-xs"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(255,255,255,0.015)_1px,_transparent_1px)] bg-[size:30px_30px] opacity-35"></div>
+        {activeHero && (
+          <>
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform scale-102"
+              style={{ backgroundImage: `url('${activeHero.image}')` }}
+            ></div>
 
-        <div className="container relative z-10">
-          <div className="max-w-4xl text-left flex flex-col gap-6">
-            <span className="text-pink-500 font-primary text-xs font-black tracking-widest uppercase">
-              {activeHero.badge}
-            </span>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl tracking-tighter leading-none font-primary text-white shadow-text-glow uppercase">
-              {activeHero.titleLine1} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-indigo-400 to-cyan-400 font-primary">
-                {activeHero.titleLine2}
-              </span>
-            </h1>
-            <p className="text-gray-300 text-xs sm:text-sm md:text-base font-secondary leading-relaxed max-w-xl">
-              {activeHero.desc}
-            </p>
-            <div className="flex flex-wrap gap-4 mt-2">
-              <Link href={`/events/${activeHero.slug}`} className="btn btn-primary bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-xs tracking-wide rounded-xl px-8 py-3.5 shadow-neon-pink">
-                BOOK PASS
-              </Link>
-              <Link href="/events" className="btn btn-secondary bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs rounded-xl px-6 py-3.5">
-                EXPLORE ALL
-              </Link>
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/50 backdrop-blur-xs"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(255,255,255,0.015)_1px,_transparent_1px)] bg-[size:30px_30px] opacity-35"></div>
+
+            <div className="container relative z-10">
+              <div className="max-w-4xl text-left flex flex-col gap-6">
+                <span className="text-pink-500 font-primary text-xs font-black tracking-widest uppercase">
+                  {activeHero.badge}
+                </span>
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl tracking-tighter leading-none font-primary text-white shadow-text-glow uppercase">
+                  {activeHero.titleLine1} <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-indigo-400 to-cyan-400 font-primary">
+                    {activeHero.titleLine2}
+                  </span>
+                </h1>
+                <p className="text-gray-300 text-xs sm:text-sm md:text-base font-secondary leading-relaxed max-w-xl">
+                  {activeHero.desc}
+                </p>
+                <div className="flex flex-wrap gap-4 mt-2">
+                  <Link href={`/events/${activeHero.slug}`} className="btn btn-primary bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-xs tracking-wide rounded-xl px-8 py-3.5 shadow-neon-pink">
+                    BOOK PASS
+                  </Link>
+                  <Link href="/events" className="btn btn-secondary bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs rounded-xl px-6 py-3.5">
+                    EXPLORE ALL
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </section>
 
       {/* 2. FLOATING SEARCH PORTAL */}
@@ -545,8 +312,19 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {HOMEPAGE_EVENTS.map((evt) => (
-              <EventCard key={evt.id} {...evt} />
+            {spotlightEvents.map((evt) => (
+              <EventCard
+                key={evt.id}
+                id={evt.id}
+                name={evt.name}
+                category={evt.category}
+                city={evt.city}
+                rating={evt.rating}
+                reviews={evt.reviewCount}
+                price={evt.ticketPrices?.[0]?.price ?? 0}
+                bannerUrl={evt.bannerUrl}
+                desc={evt.summary || evt.description}
+              />
             ))}
           </div>
         </div>
@@ -567,8 +345,17 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {ARENAS.map((arena) => (
-              <CompetitionCard key={arena.id} {...arena} />
+            {arenas.map((arena) => (
+              <CompetitionCard
+                key={arena.id}
+                id={arena.id}
+                name={arena.name}
+                city={arena.city}
+                prizePool={arena.prizePool.replace(/^₹/, "")}
+                registrationFee={arena.registrationFee}
+                bannerUrl={arena.bannerUrl}
+                desc={arena.summary || arena.description}
+              />
             ))}
           </div>
         </div>
@@ -589,7 +376,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {CARNIVALS.map((fest) => (
+            {carnivals.map((fest) => (
               <div key={fest.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
                 <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
                   <img src={fest.bannerUrl} alt={fest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
@@ -606,13 +393,13 @@ export default function HomePage() {
                     <Link href={`/events/${fest.slug}`}>
                       <h3 className="font-extrabold text-slate-800 text-[13.5px] font-primary uppercase tracking-tight line-clamp-1 hover:text-pink-500 transition-colors mt-0.5">{fest.name}</h3>
                     </Link>
-                    <p className="text-slate-500 text-[10.5px] leading-relaxed line-clamp-2 font-secondary mt-1.5">Immerse yourself in India's most vibrant folk dance celebration. Experience three consecutive nights of live music, awards, and premium catering.</p>
+                    <p className="text-slate-500 text-[10.5px] leading-relaxed line-clamp-2 font-secondary mt-1.5">{fest.summary || fest.description}</p>
                   </div>
 
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
                     <div className="text-left">
                       <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">Starts</span>
-                      <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹350</span>
+                      <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹{fest.ticketPrices?.[0]?.price ?? 0}</span>
                     </div>
                     <Link href={`/events/${fest.slug}`} className="bg-slate-900 text-white font-primary text-[9.5px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
                       Get Badge
@@ -640,7 +427,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {EXPOS.map((expo) => (
+            {expos.map((expo) => (
               <div key={expo.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
                 <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
                   <img src={expo.bannerUrl} alt={expo.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
@@ -655,13 +442,13 @@ export default function HomePage() {
                     <Link href={`/events/${expo.slug}`}>
                       <h3 className="font-extrabold text-slate-800 text-[13.5px] font-primary uppercase tracking-tight line-clamp-1 hover:text-pink-500 transition-colors mt-0.5">{expo.name}</h3>
                     </Link>
-                    <p className="text-slate-500 text-[10.5px] leading-relaxed line-clamp-2 font-secondary mt-1.5">The definitive gathering of engineering marvels, IoT, AI integration hubs, sustainable infrastructure models, and next-gen clean mobility.</p>
+                    <p className="text-slate-500 text-[10.5px] leading-relaxed line-clamp-2 font-secondary mt-1.5">{expo.summary || expo.description}</p>
                   </div>
 
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 mt-4">
                     <div className="text-left">
                       <span className="text-[8px] text-slate-400 font-primary uppercase block tracking-wider">Admission</span>
-                      <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹199</span>
+                      <span className="text-slate-800 font-extrabold text-[12.5px] font-primary block mt-0.5">₹{expo.ticketPrices?.[0]?.price ?? 0}</span>
                     </div>
                     <Link href={`/events/${expo.slug}`} className="bg-slate-900 text-white font-primary text-[9.5px] font-bold px-4.5 py-2.5 rounded-lg tracking-widest uppercase hover:bg-pink-500 transition-colors duration-300">
                       Register
@@ -688,8 +475,8 @@ export default function HomePage() {
 
             {/* City Selector Tabs */}
             <div className="flex bg-[#0f172a] border border-gray-800 p-1 rounded-xl overflow-x-auto max-w-full shrink-0">
-              {["New Delhi", "Mumbai", "Bengaluru", "Chennai"].map((city) => (
-                <button 
+              {cities.map((city) => (
+                <button
                   key={city}
                   onClick={() => setTrendingCity(city)}
                   className={`px-4 py-2 text-xs font-bold rounded-lg transition-all shrink-0 cursor-pointer ${
@@ -704,14 +491,14 @@ export default function HomePage() {
 
           {/* City Specific Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {trendingEvents[trendingCity as keyof typeof trendingEvents].map((evt) => (
-              <div 
-                key={evt.id} 
+            {trendingEventsForCity.map((evt) => (
+              <div
+                key={evt.id}
                 className="bg-[#0f172a] dark-bg border border-gray-800 rounded-3xl overflow-hidden flex flex-col h-full hover:border-pink-500/40 transition-colors duration-300 group"
               >
                 <div className="h-44 relative overflow-hidden">
-                  <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-                  
+                  <img src={evt.bannerUrl} alt={evt.name} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+
                   {/* Rating Badge Overlay */}
                   <div className="absolute top-3.5 left-3.5 bg-gray-950/80 backdrop-blur-sm px-2.5 py-1 rounded flex items-center gap-1.5 text-[10px] text-amber-400 font-bold font-primary">
                     <Star size={11} fill="currentColor" />
@@ -722,19 +509,19 @@ export default function HomePage() {
                 <div className="p-6 flex flex-col justify-between flex-grow gap-4 text-left">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[8px] text-pink-500 font-primary font-bold uppercase tracking-wider">{evt.category}</span>
-                    <Link href="/events">
-                      <h3 className="font-extrabold text-white text-[13.5px] font-primary line-clamp-1 hover:text-pink-500 transition-colors cursor-pointer mt-0.5">{evt.title}</h3>
+                    <Link href={`/events/${evt.slug}`}>
+                      <h3 className="font-extrabold text-white text-[13.5px] font-primary line-clamp-1 hover:text-pink-500 transition-colors cursor-pointer mt-0.5">{evt.name}</h3>
                     </Link>
-                    <p className="text-gray-400 text-xs font-secondary line-clamp-2 leading-relaxed">{evt.desc}</p>
+                    <p className="text-gray-400 text-xs font-secondary line-clamp-2 leading-relaxed">{evt.summary || evt.description}</p>
                   </div>
 
                   <div className="pt-4 border-t border-gray-800/60 flex justify-between items-center mt-1">
                     <div>
                       <span className="text-[8px] text-gray-500 block uppercase leading-none font-primary">VENUE PRICE</span>
-                      <span className="font-bold text-white text-xs">₹{evt.price}</span>
+                      <span className="font-bold text-white text-xs">₹{evt.ticketPrices?.[0]?.price ?? 0}</span>
                     </div>
-                    <Link 
-                      href={`/events`}
+                    <Link
+                      href={`/events/${evt.slug}`}
                       className="bg-pink-500 hover:bg-pink-600 text-slate-950 text-[9.5px] font-primary font-black px-4.5 py-2.5 rounded-lg transition-colors duration-200"
                     >
                       Get Badge
@@ -762,23 +549,16 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            {[
-              { title: "ABHYUDAYA Arena", category: "CULTURAL", image: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=400&q=80" },
-              { title: "MISS TRADITIONAL Final", category: "MUSIC", image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=400&q=80" },
-              { title: "CONFERENCES Keynote", category: "DANCE CLASH", image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=400&q=80" },
-              { title: "EXPOS IoT Lab", category: "TRADE STALL", image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=400&q=80" },
-              { title: "COMPETITIONS Stage", category: "FASHION SHOW", image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=400&q=80" },
-              { title: "ABHYUDAYA Crowd", category: "FOOD FEST", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80" }
-            ].map((item, idx) => (
-              <div 
-                key={idx}
+            {gallery.slice(0, 6).map((item) => (
+              <div
+                key={item.id}
                 className="relative h-44 rounded-xl overflow-hidden group border border-slate-100 shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:-translate-y-0.5 transition-transform duration-350"
               >
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                <img src={item.thumbnailUrl || item.url} alt={item.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-transparent"></div>
-                
+
                 <div className="absolute bottom-3 left-3 flex flex-col gap-0.5 text-left z-10">
-                  <span className="text-[7px] text-pink-400 font-primary font-bold tracking-widest uppercase">{item.category}</span>
+                  <span className="text-[7px] text-pink-400 font-primary font-bold tracking-widest uppercase">{item.event}</span>
                   <span className="text-white font-bold text-[9px] line-clamp-1">{item.title}</span>
                 </div>
               </div>
@@ -798,12 +578,9 @@ export default function HomePage() {
           </p>
           <div className="overflow-hidden w-full flex">
             <div className="flex gap-16 items-center animate-marquee whitespace-nowrap">
-              {[
-                "TATA", "Airtel", "Paytm", "Reliance", "Bisleri", "BookMyShow",
-                "TATA", "Airtel", "Paytm", "Reliance", "Bisleri", "BookMyShow"
-              ].map((logo, idx) => (
-                <div 
-                  key={idx} 
+              {[...partnerLogos, ...partnerLogos].map((logo, idx) => (
+                <div
+                  key={idx}
                   className="font-black text-lg sm:text-2xl text-slate-400/60 font-primary tracking-tight hover:text-indigo-600 transition-colors duration-300 select-none shrink-0"
                 >
                   {logo.toUpperCase()}
@@ -828,7 +605,7 @@ export default function HomePage() {
 
             {/* Column 1 (Scroll Up) */}
             <div className="flex flex-col gap-6 animate-scroll-vertical">
-              {[...TESTIMONIALS.slice(0, 3), ...TESTIMONIALS.slice(0, 3)].map((t, idx) => (
+              {[...testimonials.slice(0, 3), ...testimonials.slice(0, 3)].map((t, idx) => (
                 <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col justify-between gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left shrink-0">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-0.5 text-amber-500">
@@ -846,7 +623,7 @@ export default function HomePage() {
 
             {/* Column 2 (Scroll Down) */}
             <div className="flex flex-col gap-6 animate-scroll-vertical-down">
-              {[...TESTIMONIALS.slice(3, 6), ...TESTIMONIALS.slice(3, 6)].map((t, idx) => (
+              {[...testimonials.slice(3, 6), ...testimonials.slice(3, 6)].map((t, idx) => (
                 <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col justify-between gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left shrink-0">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-0.5 text-amber-500">
@@ -864,7 +641,7 @@ export default function HomePage() {
 
             {/* Column 3 (Scroll Up) */}
             <div className="flex flex-col gap-6 animate-scroll-vertical">
-              {[...TESTIMONIALS.slice(6, 9), ...TESTIMONIALS.slice(6, 9)].map((t, idx) => (
+              {[...testimonials.slice(6, 9), ...testimonials.slice(6, 9)].map((t, idx) => (
                 <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col justify-between gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left shrink-0">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-0.5 text-amber-500">
@@ -898,15 +675,15 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {ESSAYS.map((essay, idx) => (
+            {blogs.slice(0, 4).map((blog) => (
               <BlogCard
-                key={idx}
-                title={essay.title}
-                slug={essay.slug}
-                summary={essay.excerpt}
-                imageUrl={essay.image}
-                category="Editorial"
-                publishedAt={essay.date}
+                key={blog.id}
+                title={blog.title}
+                slug={blog.slug}
+                summary={blog.summary}
+                imageUrl={blog.imageUrl}
+                category={blog.category}
+                publishedAt={blog.publishedAt}
                 aspectRatio="aspect-[16/9]"
               />
             ))}

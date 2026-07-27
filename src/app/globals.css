@@ -537,3 +537,40 @@ body .text-gray-500:not(:hover):not(.group:hover *):not(.peer:hover *):not(foote
 .animate-scroll-vertical-down:hover {
   animation-play-state: paused;
 }
+
+/* Tiptap rich text: shared minimal styles for editor + rendered public content */
+.rn-rich-text-editor,
+.rn-rich-text-content {
+  line-height: 1.7;
+}
+.rn-rich-text-editor p,
+.rn-rich-text-content p {
+  margin: 0 0 0.75em;
+}
+.rn-rich-text-editor h2,
+.rn-rich-text-content h2 {
+  font-size: 1.35em;
+  font-weight: 800;
+  margin: 0.9em 0 0.5em;
+}
+.rn-rich-text-editor ul,
+.rn-rich-text-content ul {
+  list-style: disc;
+  padding-left: 1.4em;
+  margin: 0 0 0.75em;
+}
+.rn-rich-text-editor ol,
+.rn-rich-text-content ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+  margin: 0 0 0.75em;
+}
+.rn-rich-text-editor a,
+.rn-rich-text-content a {
+  color: #818CF8;
+  text-decoration: underline;
+}
+.rn-rich-text-editor:focus,
+.rn-rich-text-editor *:focus {
+  outline: none;
+}

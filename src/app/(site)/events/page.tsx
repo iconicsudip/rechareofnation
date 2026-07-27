@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Search, Calendar, MapPin, Sliders, Star, X, Check } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { ApiClient } from "@/lib/api-client";
 
 interface UIEvent {
   id: string;
@@ -19,130 +20,6 @@ interface UIEvent {
   desc: string;
   tag?: string; // e.g. "SELLING FAST"
 }
-
-const MOCK_EVENTS_UI: UIEvent[] = [
-  {
-    id: "ev-1",
-    slug: "recharge-cultural-odyssey-2026",
-    name: "RECHARGE CULTURAL ODYSSEY 2026",
-    category: "Festivals",
-    city: "New Delhi",
-    price: 499,
-    date: "2026-10-14",
-    rating: 4.9,
-    reviews: 1420,
-    bannerUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
-    desc: "A grand celebration of Indian heritage, featuring classical dances, folk music, and theatrical displays.",
-    tag: "SELLING FAST"
-  },
-  {
-    id: "ev-2",
-    slug: "national-vibe-rhythm-dance-cup",
-    name: "NATIONAL VIBE & RHYTHM DANCE CUP 2026",
-    category: "Workshops",
-    city: "Chennai",
-    price: 2499,
-    date: "2026-12-05",
-    rating: 4.9,
-    reviews: 195,
-    bannerUrl: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=600&q=80",
-    desc: "Master the design, construction and flying of unmanned aerial vehicles and modern RC aero-models."
-  },
-  {
-    id: "ev-3",
-    slug: "india-tech-startup-trade-expo-2026",
-    name: "INDIA TECH & STARTUP TRADE EXPO 2026",
-    category: "Festivals",
-    city: "Mumbai",
-    price: 350,
-    date: "2026-10-18",
-    rating: 4.9,
-    reviews: 980,
-    bannerUrl: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=600&q=80",
-    desc: "Dance to traditional beats with India's top Garba artists, premium catering, and grand awards.",
-    tag: "SELLING FAST"
-  },
-  {
-    id: "ev-4",
-    slug: "india-culinary-food-festival-2026",
-    name: "INDIA CULINARY & FOOD FESTIVAL 2026",
-    category: "Business Networking",
-    city: "Bengaluru",
-    price: 1299,
-    date: "2026-09-22",
-    rating: 4.8,
-    reviews: 310,
-    bannerUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80",
-    desc: "Connecting high-growth startups, venture capitalists, corporate sponsors, and tech leaders."
-  },
-  {
-    id: "ev-5",
-    slug: "glow-music-fusion-carnival-2025",
-    name: "GLOW MUSIC & FUSION CARNIVAL 2025",
-    category: "School & College",
-    city: "Bengaluru",
-    price: 250,
-    date: "2026-11-12",
-    rating: 4.8,
-    reviews: 740,
-    bannerUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
-    desc: "The mega collegiate showcase featuring rock battles, quizzes, couture shows, and classical arts.",
-    tag: "SELLING FAST"
-  },
-  {
-    id: "ev-6",
-    slug: "national-quiz-talent-hunt-2025",
-    name: "NATIONAL QUIZ & TALENT HUNT 2025",
-    category: "Expos",
-    city: "Mumbai",
-    price: 199,
-    date: "2026-11-04",
-    rating: 4.7,
-    reviews: 840,
-    bannerUrl: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80",
-    desc: "Exhibiting smart infrastructure, next-generation IoT hardware, clean energy, and mobility techs.",
-    tag: "SELLING FAST"
-  },
-  {
-    id: "ev-7",
-    slug: "recharge-voice-of-india-2026",
-    name: "RECHARGE VOICE OF INDIA 2026",
-    category: "Corporate",
-    city: "New Delhi",
-    price: 1500,
-    date: "2026-09-18",
-    rating: 4.6,
-    reviews: 220,
-    bannerUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80",
-    desc: "Strategic corporate leadership forums, panel discussions, team building audits, and CEO mixers."
-  },
-  {
-    id: "ev-8",
-    slug: "india-youth-haute-couture-fashion-week-2026",
-    name: "INDIA YOUTH HAUTE COUTURE FASHION WEEK 2026",
-    category: "Conferences",
-    city: "New Delhi",
-    price: 799,
-    date: "2026-10-02",
-    rating: 4.6,
-    reviews: 450,
-    bannerUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80",
-    desc: "National security panel debates, threat matrix modules, white-hat workshops, and digital assets audit."
-  },
-  {
-    id: "ev-9",
-    slug: "artisanal-craft-art-expressions-exhibition-2026",
-    name: "ARTISANAL CRAFT & ART EXPRESSIONS EXHIBITION 2026",
-    category: "Expos",
-    city: "Chennai",
-    price: 150,
-    date: "2026-12-15",
-    rating: 4.5,
-    reviews: 280,
-    bannerUrl: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80",
-    desc: "Showcasing next-generation electric scooters, autonomous battery pods, solar grids, and smart charging hubs."
-  }
-];
 
 function EventsContent() {
   const [events, setEvents] = useState<UIEvent[]>([]);
@@ -199,40 +76,44 @@ function EventsContent() {
     else setSortBy("rating-desc");
   }, [searchParams]);
 
-  // Load events & calculate dynamic filter dates so mock data remains relevant in real-time
+  // Load real events + dynamic category/city taxonomies
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(["All"]);
+  const [cityOptions, setCityOptions] = useState<string[]>(["All"]);
+
   useEffect(() => {
-    const today = new Date();
-    const todayStr = today.toISOString().split("T")[0];
+    const fetchEvents = async () => {
+      const [allEvents, categories, cities] = await Promise.all([
+        ApiClient.getEvents(),
+        ApiClient.getTaxonomy('event_category'),
+        ApiClient.getTaxonomy('city'),
+      ]);
 
-    const formatDate = (d: Date) => d.toISOString().split("T")[0];
+      const mapped = allEvents.map((e) => {
+        const minPrice = e.ticketPrices && e.ticketPrices.length > 0
+          ? Math.min(...e.ticketPrices.map(tp => tp.price))
+          : (e.registrationFee || 0);
 
-    const getNextSaturday = () => {
-      const d = new Date();
-      const day = d.getDay();
-      const diff = day <= 6 ? 6 - day : 6;
-      d.setDate(d.getDate() + diff);
-      return formatDate(d);
+        return {
+          id: e.id,
+          slug: e.slug,
+          name: e.name.toUpperCase(),
+          category: e.category,
+          city: e.city,
+          price: minPrice,
+          date: e.date,
+          rating: e.rating,
+          reviews: e.reviewCount,
+          bannerUrl: e.bannerUrl,
+          desc: e.summary || e.description || '',
+          tag: e.isFeatured ? "MEGA FEST" : undefined
+        };
+      });
+
+      setEvents(mapped);
+      setCategoryOptions(["All", ...categories]);
+      setCityOptions(["All", ...cities]);
     };
-
-    const eventsWithDynamicDates = MOCK_EVENTS_UI.map((e) => {
-      if (e.id === "ev-4") {
-        // Today
-        return { ...e, date: todayStr };
-      }
-      if (e.id === "ev-5") {
-        // Weekend (next Saturday)
-        return { ...e, date: getNextSaturday() };
-      }
-      if (e.id === "ev-6") {
-        // Next 30 Days (today + 10 days)
-        const d = new Date();
-        d.setDate(d.getDate() + 10);
-        return { ...e, date: formatDate(d) };
-      }
-      return e;
-    });
-
-    setEvents(eventsWithDynamicDates);
+    fetchEvents();
   }, []);
 
   // Filter Logic
@@ -274,7 +155,6 @@ function EventsContent() {
         result = result.filter((e) => e.date === todayStr);
       } else if (dateTimeline === "weekend") {
         result = result.filter((e) => {
-          if (e.id === "ev-5") return true;
           const d = new Date(e.date);
           const day = d.getDay();
           return day === 0 || day === 6; // Sunday or Saturday
@@ -402,17 +282,7 @@ function EventsContent() {
             <div className="flex flex-col gap-1.5">
               <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Select Segment</span>
               <div className="flex flex-col gap-0.5">
-                {[
-                  "All",
-                  "Festivals",
-                  "Competitions",
-                  "Expos",
-                  "Workshops",
-                  "Corporate",
-                  "School & College",
-                  "Business Networking",
-                  "Conferences"
-                ].map((cat) => {
+                {categoryOptions.map((cat) => {
                   const isActive = category === cat;
                   return (
                     <button
@@ -435,7 +305,7 @@ function EventsContent() {
             <div className="flex flex-col gap-1.5">
               <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">City Location</span>
               <div className="flex flex-wrap gap-1.5">
-                {["All", "New Delhi", "Mumbai", "Bengaluru", "Chennai", "Kolkata"].map((cityOpt) => {
+                {cityOptions.map((cityOpt) => {
                   const isActive = location === cityOpt;
                   return (
                     <button
