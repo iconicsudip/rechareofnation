@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { FileText, Check, RefreshCw, AlertCircle } from "lucide-react";
+import { FileText, Check, RefreshCw, Plus, Trash2 } from "lucide-react";
+import RepeaterField from "@/components/admin/RepeaterField";
+import SimpleListEditor from "@/components/admin/SimpleListEditor";
 
 interface SiteContentRow {
   key: string;
@@ -28,19 +30,104 @@ const S = {
   card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
   input: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "9px 12px", fontSize: "13px", width: "100%" },
   btn: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "9px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer", border: "none" },
-  mono: { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "12px" },
 };
 
-// Fields long enough to need a textarea rather than a single-line input
 const isLongText = (v: string) => v.length > 90 || v.includes("\n");
+
+// ─── Empty row shapes for each structured field ─────────────────────────────
+const EMPTY_SLIDE = { badge: "", titleLine1: "", titleLine2: "", accent: "", desc: "", image: "", tier: "", multipass: "", eventDate: "", venue: "", gate: "", price: "", code: "", slug: "" };
+const EMPTY_TESTIMONIAL = { quote: "", author: "", role: "" };
+const EMPTY_MILESTONE = { title: "", desc: "" };
+const EMPTY_NAV_ITEM = { name: "", href: "" };
+const EMPTY_SECTION = { title: "", body: "" };
+const EMPTY_FOOTER_LINK = { label: "", href: "" };
+const EMPTY_TIER_KEYS = ["TITLE", "PLATINUM", "GOLD", "ASSOCIATE"];
+const EMPTY_TIER = { name: "", price: 0, baseImpressions: 0, space: "", allotments: "", entitlements: [] as string[], placements: "" };
+
+interface FooterColumn { title: string; links: { label: string; href: string }[] }
+
+function FooterColumnsEditor({ value, onChange }: { value: FooterColumn[]; onChange: (cols: FooterColumn[]) => void }) {
+  const columns = value ?? [];
+  const updateColumn = (i: number, patch: Partial<FooterColumn>) =>
+    onChange(columns.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
+  const removeColumn = (i: number) => onChange(columns.filter((_, idx) => idx !== i));
+  const addColumn = () => onChange([...columns, { title: "", links: [] }]);
+
+  return (
+    <div>
+      <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>
+        Footer Columns
+      </label>
+      <div className="flex flex-col gap-4">
+        {columns.map((col, i) => (
+          <div key={i} className="p-4 rounded-xl relative" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <button type="button" onClick={() => removeColumn(i)}
+              className="absolute top-3 right-3 w-6 h-6 rounded-lg flex items-center justify-center"
+              style={{ background: "rgba(239,68,68,0.1)", color: "#F87171", border: "none", cursor: "pointer" }}>
+              <Trash2 size={11} />
+            </button>
+            <input style={{ ...S.input, marginBottom: "10px", maxWidth: "70%" }} placeholder="Column title (e.g. For Audiences)"
+              value={col.title} onChange={(e) => updateColumn(i, { title: e.target.value })} />
+            <RepeaterField
+              columns={[{ key: "label", label: "Link label" }, { key: "href", label: "Link href (e.g. /events)" }]}
+              value={col.links as unknown as Record<string, unknown>[]}
+              onChange={(links) => updateColumn(i, { links: links as unknown as { label: string; href: string }[] })}
+              emptyRow={EMPTY_FOOTER_LINK}
+              addLabel="Add link"
+            />
+          </div>
+        ))}
+      </div>
+      <button type="button" onClick={addColumn} className="flex items-center gap-1.5 mt-2.5"
+        style={{ ...S.btn, background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
+        <Plus size={12} /> Add column
+      </button>
+    </div>
+  );
+}
+
+function SponsorshipTiersEditor({ value, onChange }: { value: Record<string, typeof EMPTY_TIER>; onChange: (v: Record<string, typeof EMPTY_TIER>) => void }) {
+  const tiers = value ?? {};
+  const updateTier = (key: string, patch: Partial<typeof EMPTY_TIER>) =>
+    onChange({ ...tiers, [key]: { ...(tiers[key] ?? EMPTY_TIER), ...patch } });
+
+  return (
+    <div className="flex flex-col gap-4">
+      {EMPTY_TIER_KEYS.map((tierKey) => {
+        const tier = tiers[tierKey] ?? EMPTY_TIER;
+        return (
+          <div key={tierKey} className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "#818CF8" }}>{tierKey}</label>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <input style={S.input} placeholder="Tier display name" value={tier.name}
+                onChange={(e) => updateTier(tierKey, { name: e.target.value })} />
+              <input type="number" style={S.input} placeholder="Price (₹)" value={tier.price}
+                onChange={(e) => updateTier(tierKey, { price: Number(e.target.value) })} />
+              <input type="number" style={S.input} placeholder="Base impressions" value={tier.baseImpressions}
+                onChange={(e) => updateTier(tierKey, { baseImpressions: Number(e.target.value) })} />
+              <input style={S.input} placeholder="Space (e.g. 300 sq.ft Pavilion)" value={tier.space}
+                onChange={(e) => updateTier(tierKey, { space: e.target.value })} />
+              <input style={S.input} placeholder="Allotments (e.g. 40 Full Pass Badges)" value={tier.allotments}
+                onChange={(e) => updateTier(tierKey, { allotments: e.target.value })} />
+              <input style={S.input} placeholder="Placements" value={tier.placements}
+                onChange={(e) => updateTier(tierKey, { placements: e.target.value })} />
+            </div>
+            <SimpleListEditor label="Entitlements" value={tier.entitlements}
+              onChange={(entitlements) => updateTier(tierKey, { entitlements })}
+              placeholder="Add an entitlement..." />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function AdminContentPage() {
   const [rows, setRows] = useState<Record<string, SiteContentRow>>({});
   const [loading, setLoading] = useState(true);
   const [activeKey, setActiveKey] = useState(KEY_ORDER[0]);
   const [scalarFields, setScalarFields] = useState<Record<string, string>>({});
-  const [jsonFields, setJsonFields] = useState<Record<string, string>>({});
-  const [jsonErrors, setJsonErrors] = useState<Record<string, string>>({});
+  const [structured, setStructured] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -59,35 +146,22 @@ export default function AdminContentPage() {
   useEffect(() => {
     const value = rows[activeKey]?.value ?? {};
     const scalars: Record<string, string> = {};
-    const jsons: Record<string, string> = {};
+    const struct: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value)) {
       if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
         scalars[k] = String(v);
       } else {
-        jsons[k] = JSON.stringify(v, null, 2);
+        struct[k] = v;
       }
     }
     setScalarFields(scalars);
-    setJsonFields(jsons);
-    setJsonErrors({});
+    setStructured(struct);
     setSaved(false);
   }, [activeKey, rows]);
 
   const handleSave = async () => {
-    const merged: Record<string, unknown> = { ...scalarFields };
-    const errors: Record<string, string> = {};
-    for (const [k, raw] of Object.entries(jsonFields)) {
-      try {
-        merged[k] = JSON.parse(raw);
-      } catch {
-        errors[k] = "Invalid JSON — fix before saving.";
-      }
-    }
-    if (Object.keys(errors).length > 0) {
-      setJsonErrors(errors);
-      return;
-    }
     setSaving(true);
+    const merged: Record<string, unknown> = { ...scalarFields, ...structured };
     await fetch("/api/admin/site-content", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -98,6 +172,7 @@ export default function AdminContentPage() {
     load();
   };
 
+  const setStruct = (patch: Record<string, unknown>) => setStructured((s) => ({ ...s, ...patch }));
   const meta = KEY_META[activeKey];
 
   return (
@@ -144,12 +219,13 @@ export default function AdminContentPage() {
               </div>
             </div>
 
-            {Object.keys(scalarFields).length === 0 && Object.keys(jsonFields).length === 0 && (
+            {Object.keys(scalarFields).length === 0 && Object.keys(structured).length === 0 && (
               <div className="flex items-center gap-2 text-sm py-8 justify-center" style={{ color: "rgba(148,163,184,0.5)" }}>
                 <FileText size={16} /> No content seeded for this key yet.
               </div>
             )}
 
+            {/* Flat scalar fields (headings, subheadings, single strings) */}
             {Object.entries(scalarFields).map(([field, val]) => (
               <div key={field}>
                 <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>
@@ -165,24 +241,123 @@ export default function AdminContentPage() {
               </div>
             ))}
 
-            {Object.entries(jsonFields).map(([field, val]) => (
-              <div key={field}>
-                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-2" style={{ color: "rgba(148,163,184,0.5)" }}>
-                  {field} <span className="normal-case font-normal" style={{ color: "rgba(148,163,184,0.35)" }}>(structured data — edit as JSON)</span>
-                </label>
-                <textarea
-                  rows={14}
-                  style={{ ...S.input, ...S.mono, resize: "vertical", borderColor: jsonErrors[field] ? "#F87171" : S.input.border }}
-                  value={val}
-                  onChange={(e) => setJsonFields((p) => ({ ...p, [field]: e.target.value }))}
+            {/* Structured, type-specific editors — no raw JSON anywhere */}
+            {activeKey === "homepage_hero" && (
+              <RepeaterField
+                label="Hero Slides"
+                columns={[
+                  { key: "badge", label: "Badge text", span: 2 },
+                  { key: "titleLine1", label: "Title line 1" },
+                  { key: "titleLine2", label: "Title line 2" },
+                  { key: "accent", label: "Accent label", span: 2 },
+                  { key: "desc", label: "Description", type: "textarea", span: 2 },
+                  { key: "image", label: "Image URL", span: 2 },
+                  { key: "tier", label: "Tier label" },
+                  { key: "multipass", label: "Multipass label" },
+                  { key: "eventDate", label: "Event date text" },
+                  { key: "venue", label: "Venue" },
+                  { key: "gate", label: "Gate label" },
+                  { key: "price", label: "Price text" },
+                  { key: "code", label: "Pass code" },
+                  { key: "slug", label: "Linked event slug" },
+                ]}
+                value={(structured.slides as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ slides: v })}
+                emptyRow={EMPTY_SLIDE}
+                addLabel="Add slide"
+              />
+            )}
+
+            {activeKey === "homepage_testimonials" && (
+              <RepeaterField
+                label="Testimonials"
+                columns={[
+                  { key: "quote", label: "Quote", type: "textarea", span: 2 },
+                  { key: "author", label: "Author name" },
+                  { key: "role", label: "Author role" },
+                ]}
+                value={(structured.testimonials as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ testimonials: v })}
+                emptyRow={EMPTY_TESTIMONIAL}
+                addLabel="Add testimonial"
+              />
+            )}
+
+            {activeKey === "homepage_partner_logos" && (
+              <SimpleListEditor
+                label="Partner Logo Names"
+                value={(structured.logos as string[]) ?? []}
+                onChange={(v) => setStruct({ logos: v })}
+                placeholder="Add a brand name..."
+              />
+            )}
+
+            {activeKey === "about_page" && (
+              <>
+                <SimpleListEditor
+                  label="Intro Paragraphs"
+                  value={(structured.introParagraphs as string[]) ?? []}
+                  onChange={(v) => setStruct({ introParagraphs: v })}
+                  placeholder="Add a paragraph..."
                 />
-                {jsonErrors[field] && (
-                  <p className="flex items-center gap-1.5 text-xs mt-1.5" style={{ color: "#F87171" }}>
-                    <AlertCircle size={12} /> {jsonErrors[field]}
-                  </p>
-                )}
-              </div>
-            ))}
+                <RepeaterField
+                  label="Milestones / Stats"
+                  columns={[{ key: "title", label: "Stat (e.g. 50+)" }, { key: "desc", label: "Label" }]}
+                  value={(structured.milestones as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ milestones: v })}
+                  emptyRow={EMPTY_MILESTONE}
+                  addLabel="Add milestone"
+                />
+                <RepeaterField
+                  label="Core Values"
+                  columns={[{ key: "title", label: "Title" }, { key: "desc", label: "Description", type: "textarea" }]}
+                  value={(structured.coreValues as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ coreValues: v })}
+                  emptyRow={EMPTY_MILESTONE}
+                  addLabel="Add core value"
+                />
+              </>
+            )}
+
+            {activeKey === "footer" && (
+              <FooterColumnsEditor
+                value={(structured.columns as FooterColumn[]) ?? []}
+                onChange={(v) => setStruct({ columns: v })}
+              />
+            )}
+
+            {activeKey === "nav_links" && (
+              <RepeaterField
+                label="Navigation Items"
+                columns={[{ key: "name", label: "Label" }, { key: "href", label: "Link (e.g. /events)" }]}
+                value={(structured.items as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ items: v })}
+                emptyRow={EMPTY_NAV_ITEM}
+                addLabel="Add nav item"
+              />
+            )}
+
+            {(activeKey === "legal_terms" || activeKey === "legal_privacy") && (
+              <RepeaterField
+                label="Sections"
+                hint="Body supports basic HTML (e.g. <ul><li>...</li></ul>, <strong>...</strong>)"
+                columns={[
+                  { key: "title", label: "Section title", span: 2 },
+                  { key: "body", label: "Body", type: "textarea", span: 2 },
+                ]}
+                value={(structured.sections as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ sections: v })}
+                emptyRow={EMPTY_SECTION}
+                addLabel="Add section"
+              />
+            )}
+
+            {activeKey === "sponsorship_tiers" && (
+              <SponsorshipTiersEditor
+                value={structured as Record<string, typeof EMPTY_TIER>}
+                onChange={(v) => setStructured(v)}
+              />
+            )}
           </div>
         )}
       </div>

@@ -2,11 +2,19 @@
 // SERVER-SIDE ONLY — Never import this in "use client" files
 // Neon serverless connection pool
 
-import { neon } from '@neondatabase/serverless';
+import { neon, types } from '@neondatabase/serverless';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
+
+// Postgres DATE columns have no time-of-day/timezone component, but the default
+// driver type parser builds a JS Date object from them — which then gets
+// interpreted in the server process's local timezone and shifts by that offset
+// when serialized to JSON (e.g. "2025-12-17" becoming "2025-12-16T18:30:00.000Z"
+// under IST). Keeping DATE columns as plain "YYYY-MM-DD" strings sidesteps any
+// timezone ambiguity entirely.
+types.setTypeParser(types.builtins.DATE, (value: string) => value);
 
 export const sql = neon(process.env.DATABASE_URL);
 
@@ -899,6 +907,13 @@ export async function ensureSchema() {
   // Schema migrations for existing tables
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) DEFAULT 4.6`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 25`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsorship_tiers JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS stall_options JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS ad_rates JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS date_is_tentative BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS headliners JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS faqs JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS schedule_days JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS description TEXT`;
   await sql`ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS industry TEXT`;
 

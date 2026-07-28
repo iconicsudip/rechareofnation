@@ -38,12 +38,14 @@ export async function POST(request: NextRequest) {
     const {
       name, slug, category, description, summary, bannerUrl,
       eventDate, eventTime, venue, city, googleMapUrl,
-      isFeatured, isUpcoming, ticketPrices, organizer, rating, reviewCount
+      isFeatured, isUpcoming, ticketPrices, organizer, rating, reviewCount,
+      sponsorshipTiers, stallOptions, adRates, dateIsTentative,
+      headliners, faqs, scheduleDays
     } = body;
 
     const events = await sql`
-      INSERT INTO events (name, slug, category, description, summary, banner_url, event_date, event_time, venue, city, google_map_url, is_featured, is_upcoming, ticket_prices, organizer, rating, review_count)
-      VALUES (${name}, ${slug}, ${category}, ${description}, ${summary}, ${bannerUrl}, ${eventDate}, ${eventTime}, ${venue}, ${city}, ${googleMapUrl}, ${isFeatured ?? false}, ${isUpcoming ?? true}, ${JSON.stringify(ticketPrices ?? [])}, ${JSON.stringify(organizer ?? {})}, ${rating ?? 4.6}, ${reviewCount ?? 25})
+      INSERT INTO events (name, slug, category, description, summary, banner_url, event_date, event_time, venue, city, google_map_url, is_featured, is_upcoming, ticket_prices, organizer, rating, review_count, sponsorship_tiers, stall_options, ad_rates, date_is_tentative, headliners, faqs, schedule_days)
+      VALUES (${name}, ${slug}, ${category}, ${description}, ${summary}, ${bannerUrl}, ${eventDate}, ${eventTime}, ${venue}, ${city}, ${googleMapUrl}, ${isFeatured ?? false}, ${isUpcoming ?? true}, ${JSON.stringify(ticketPrices ?? [])}, ${JSON.stringify(organizer ?? {})}, ${rating ?? 4.6}, ${reviewCount ?? 25}, ${JSON.stringify(sponsorshipTiers ?? [])}, ${JSON.stringify(stallOptions ?? [])}, ${JSON.stringify(adRates ?? [])}, ${dateIsTentative ?? false}, ${JSON.stringify(headliners ?? [])}, ${JSON.stringify(faqs ?? [])}, ${JSON.stringify(scheduleDays ?? [])})
       RETURNING *
     `;
     return NextResponse.json({ event: events[0] }, { status: 201 });
@@ -59,7 +61,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const {
       id, name, category, description, summary, bannerUrl, eventDate, eventTime, venue, city,
-      googleMapUrl, isFeatured, isUpcoming, ticketPrices, organizer, rating, reviewCount
+      googleMapUrl, isFeatured, isUpcoming, ticketPrices, organizer, rating, reviewCount,
+      sponsorshipTiers, stallOptions, adRates, dateIsTentative,
+      headliners, faqs, scheduleDays
     } = body;
 
     const events = await sql`
@@ -72,6 +76,13 @@ export async function PUT(request: NextRequest) {
         ticket_prices = ${JSON.stringify(ticketPrices ?? [])},
         organizer = ${JSON.stringify(organizer ?? {})},
         rating = ${rating ?? 4.6}, review_count = ${reviewCount ?? 25},
+        sponsorship_tiers = ${JSON.stringify(sponsorshipTiers ?? [])},
+        stall_options = ${JSON.stringify(stallOptions ?? [])},
+        ad_rates = ${JSON.stringify(adRates ?? [])},
+        date_is_tentative = ${dateIsTentative ?? false},
+        headliners = ${JSON.stringify(headliners ?? [])},
+        faqs = ${JSON.stringify(faqs ?? [])},
+        schedule_days = ${JSON.stringify(scheduleDays ?? [])},
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *

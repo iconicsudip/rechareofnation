@@ -121,7 +121,7 @@ export default function AdminUsersPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: "rgba(99,102,241,0.06)" }}>
+            <tbody className="divide-y divide-[rgba(99,102,241,0.06)]">
               {loading ? (
                 [...Array(7)].map((_, i) => (
                   <tr key={i}><td colSpan={7} className="px-5 py-4">

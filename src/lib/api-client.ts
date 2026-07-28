@@ -57,6 +57,13 @@ export interface Event {
     email: string;
     phone: string;
   };
+  sponsorshipTiers: { tier: string; amount: string; benefits: string }[];
+  stallOptions: { type: string; size: string; rate: string; includes: string }[];
+  adRates: { category: string; amount: string }[];
+  dateIsTentative: boolean;
+  headliners: { name: string; role: string; img: string }[];
+  faqs: { q: string; a: string }[];
+  scheduleDays: { dayLabel: string; items: { time: string; title: string; desc: string }[] }[];
   sponsors: { name: string; logoUrl: string }[];
   galleryUrls: string[];
 }
@@ -265,6 +272,25 @@ const mapDbEvent = (e: any): Event => ({
     : (() => { try { return JSON.parse(e.rules || '[]'); } catch { return []; } })(),
   rating: e.rating != null ? Number(e.rating) : 4.6,
   reviewCount: e.review_count != null ? Number(e.review_count) : 25,
+  sponsorshipTiers: Array.isArray(e.sponsorship_tiers)
+    ? e.sponsorship_tiers
+    : (() => { try { return JSON.parse(e.sponsorship_tiers || '[]'); } catch { return []; } })(),
+  stallOptions: Array.isArray(e.stall_options)
+    ? e.stall_options
+    : (() => { try { return JSON.parse(e.stall_options || '[]'); } catch { return []; } })(),
+  adRates: Array.isArray(e.ad_rates)
+    ? e.ad_rates
+    : (() => { try { return JSON.parse(e.ad_rates || '[]'); } catch { return []; } })(),
+  dateIsTentative: e.date_is_tentative ?? false,
+  headliners: Array.isArray(e.headliners)
+    ? e.headliners
+    : (() => { try { return JSON.parse(e.headliners || '[]'); } catch { return []; } })(),
+  faqs: Array.isArray(e.faqs)
+    ? e.faqs
+    : (() => { try { return JSON.parse(e.faqs || '[]'); } catch { return []; } })(),
+  scheduleDays: Array.isArray(e.schedule_days)
+    ? e.schedule_days
+    : (() => { try { return JSON.parse(e.schedule_days || '[]'); } catch { return []; } })(),
   sponsors: [],
   galleryUrls: [],
 });

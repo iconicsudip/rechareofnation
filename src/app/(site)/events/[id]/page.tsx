@@ -10,6 +10,7 @@ import {
   Info, Volume2, VolumeX, Clock, ArrowRight, ChevronDown, ChevronUp, Music, Sliders, Star, HelpCircle
 } from "lucide-react";
 import { ApiClient, Event, TicketType, TicketPriceInfo, TicketBooking, CompetitionRegistration } from "@/lib/api-client";
+import RichTextContent from "@/components/RichTextContent";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,16 +29,16 @@ export default function EventDetailPage({ params }: PageProps) {
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Interactive page states
-  const [selectedZone, setSelectedZone] = useState<"vvip" | "vip" | "general" | "student">("vvip");
-  const [passholderName, setPassholderName] = useState("AMIT RAJ");
+  const [selectedZone, setSelectedZone] = useState<number>(0);
+  const [passholderName, setPassholderName] = useState("");
   const [badgeGlow, setBadgeGlow] = useState<"purple" | "pink" | "orange" | "green">("purple");
-  const [scheduleTab, setScheduleTab] = useState<"day1" | "day2">("day1");
+  const [scheduleTab, setScheduleTab] = useState<number>(0);
   const [playingTrack, setPlayingTrack] = useState<string | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
-  
+
   // Curator bot states
   const [chatHistory, setChatHistory] = useState<Array<{ sender: "user" | "curator"; text: string }>>([
-    { sender: "curator", text: "Hello! Ask me anything about Abhyudaya festival entry rules, F&B passes, or transport arrangements." }
+    { sender: "curator", text: "Hello! Ask me anything about this event's entry rules, F&B passes, transport arrangements, or check the FAQs below." }
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -121,19 +122,22 @@ export default function EventDetailPage({ params }: PageProps) {
     setIsTyping(true);
 
     setTimeout(() => {
-      let reply = "Our team of curators is reviewing your query. We will send an SMS alert once confirmed!";
-      const q = userMsg.toLowerCase();
-      
-      if (q.includes("transport") || q.includes("metro") || q.includes("shuttle") || q.includes("bus") || q.includes("reach")) {
-        reply = "Yes! High-frequency air-conditioned shuttle coaches depart every 15 minutes from Botanical Garden Metro Station (Noida) directly to Buddh Circuit Gate 3 from 8:00 AM onwards.";
-      } else if (q.includes("camera") || q.includes("recording") || q.includes("video") || q.includes("photo")) {
-        reply = "Only non-professional smartphones and compact action cameras are allowed. Professional SLRs and recording gimbals require prior press accreditation.";
-      } else if (q.includes("food") || q.includes("drink") || q.includes("beverage") || q.includes("coupon")) {
-        reply = "F&B credentials can be scanned at the main registration kiosk to claim physical coupon books before entering the food bazaar.";
-      } else if (q.includes("re-entry") || q.includes("exit") || q.includes("leave")) {
-        reply = "Yes, re-entry is permitted as long as your smart QR wristband remains active and untampered.";
-      } else if (q.includes("parking") || q.includes("car") || q.includes("vehicle")) {
-        reply = "Free vehicle parking is available at Zone C. Ground curators will guide you from the main boulevard.";
+      const fallback = "I don't have an answer for that — please check the FAQs below or contact the organizer.";
+      let reply = fallback;
+
+      if (event && event.faqs.length > 0) {
+        const q = userMsg.toLowerCase();
+        const queryWords = q.split(/\s+/).map(w => w.trim()).filter(w => w.length > 2);
+
+        const matched = event.faqs.find(faq => {
+          const faqText = `${faq.q} ${faq.a}`.toLowerCase();
+          if (faqText.includes(q)) return true;
+          return queryWords.some(word => faqText.includes(word));
+        });
+
+        if (matched) {
+          reply = matched.a;
+        }
       }
 
       setChatHistory(prev => [...prev, { sender: "curator", text: reply }]);
@@ -162,41 +166,19 @@ export default function EventDetailPage({ params }: PageProps) {
     );
   }
 
-  // Seating Zones Configuration
-  const basePrice = event.ticketPrices.length > 0 ? event.ticketPrices[0].price : 499;
   const eventTag = event.isFeatured ? "SELLING OUT FAST" : undefined;
   const eventRating = event.rating;
   const eventReviews = event.reviewCount;
 
-  const zones = {
-    vvip: {
-      name: "VVIP Paddock Box",
-      price: Math.round(basePrice * 6),
-      perks: ["Ultra luxury lounge", "Meet and Greet with Amit Trivedi", "Front row viewing bay", "Free-flow gourmet dining"],
-      ref: "RN-AB-101",
-      capacity: "96% BOOKED"
-    },
-    vip: {
-      name: "VIP Front Stage",
-      price: Math.round(basePrice * 3),
-      perks: ["Priority front stage access", "Complementary beverage pass", "Exclusive artist merchandise kit", "Fast-track security entry"],
-      ref: "RN-AB-102",
-      capacity: "88% BOOKED"
-    },
-    general: {
-      name: "General Arena Main",
-      price: Math.round(basePrice),
-      perks: ["Stadium entry access", "Curated food court access", "Standing area entry", "General security gate scanning"],
-      ref: "RN-AB-103",
-      capacity: "62% BOOKED"
-    },
-    student: {
-      name: "Student Grass Zone",
-      price: Math.round(basePrice * 0.7),
-      perks: ["Discounted student access", "Free lawn seating area", "Bring your own blanket access", "Standard check-in credentials"],
-      ref: "RN-AB-104",
-      capacity: "ALMOST GONE!"
-    }
+  // Real ticket tier currently highlighted in the seating zone selector / badge preview.
+  // Falls back gracefully when ticketPrices is empty.
+  const selectedTicketInfo = event.ticketPrices[selectedZone] || event.ticketPrices[0] || null;
+
+  // Deterministic, non-fabricated pass reference derived from the real event id + ticket type
+  const getPassRef = (id: string, ticketType: string) => {
+    const idPart = (id.replace(/[^A-Za-z0-9]/g, "").slice(-4) || "GEN").toUpperCase();
+    const typePart = (ticketType.replace(/[^A-Za-z]/g, "").slice(0, 3) || "TIX").toUpperCase();
+    return `RN-${typePart}-${idPart}`;
   };
 
   // Holographic Glow themes helper
@@ -252,7 +234,7 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* Tag Badges */}
             <div className="flex flex-wrap gap-2">
               <span className="bg-indigo-600/90 text-white text-[8px] font-bold tracking-widest uppercase rounded px-2.5 py-1 inline-block border border-indigo-400/20 font-primary">
-                ★ FLAGSHIP CULTURAL FESTIVAL ★
+                ★ {event.category ? event.category.toUpperCase() : "FEATURED EVENT"} ★
               </span>
               {eventTag && (
                 <span className="bg-rose-500/90 text-white text-[8px] font-bold tracking-widest uppercase rounded px-2.5 py-1 inline-block border border-rose-400/20 font-primary">
@@ -268,7 +250,7 @@ export default function EventDetailPage({ params }: PageProps) {
 
             {/* Description */}
             <p className="text-slate-300 text-xs sm:text-sm font-secondary leading-relaxed max-w-2xl mt-1">
-              {event.description}
+              {event.summary || event.description.replace(/<[^>]+>/g, ' ').trim()}
             </p>
 
             {/* Info Badges Row */}
@@ -303,9 +285,10 @@ export default function EventDetailPage({ params }: PageProps) {
                   The {event.name.replace("RECHARGE ", "").replace(" 2026", "")} Experience
                 </h3>
               </div>
-              <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-secondary">
-                Abhyudaya represents India's largest youth-driven synchronization of acoustic heritage and state-of-the-art concert production. Hosted at the monumental Buddh International Circuit, our festival integrates high-speed laser mapping projections with a massive traditional food bazaar, featuring over 80 organic rural culinary artisans. Expect two days of uncompromised sensory excellence.
-              </p>
+              <RichTextContent
+                html={event.description}
+                className="text-slate-500 text-xs sm:text-sm leading-relaxed font-secondary"
+              />
             </div>
 
             {/* Card 2: ACOUSTICS PREVIEW */}
@@ -327,11 +310,18 @@ export default function EventDetailPage({ params }: PageProps) {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                {[
-                  { title: "Amit Folk Jugalbandi", desc: "Acoustic Folk / Sitar", duration: "2:15m Preview" },
-                  { title: "Nucleya Bass Drop", desc: "Electronic / Bass", duration: "1:50m Preview" },
-                  { title: "Sartorial Runway Theme", desc: "Classical Instrumental", duration: "3:05m Preview" }
-                ].map((track) => {
+                {(event.headliners.length > 0
+                  ? event.headliners.slice(0, 3).map((h, i) => ({
+                      title: `${h.name} — Live Preview`,
+                      desc: h.role || "Live Performance",
+                      duration: ["2:15m Preview", "1:50m Preview", "3:05m Preview"][i] || "Preview"
+                    }))
+                  : [
+                      { title: "Live Performance Preview", desc: "Main Stage", duration: "2:15m Preview" },
+                      { title: "Featured Set", desc: "Live Mix", duration: "1:50m Preview" },
+                      { title: "Opening Act Preview", desc: "Live Performance", duration: "3:05m Preview" }
+                    ]
+                ).map((track) => {
                   const isCurrent = playingTrack === track.title;
                   return (
                     <button
@@ -373,257 +363,232 @@ export default function EventDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Card 3: PROGRAM SCHEDULE */}
-            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-5 text-left">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-3">
-                <div className="flex flex-col gap-1">
+            {/* Card 3: PROGRAM SCHEDULE (only if the event has schedule days configured) */}
+            {event.scheduleDays.length > 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-5 text-left">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
+                      Festival Timetable
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <Clock size={16} className="text-indigo-600" />
+                      <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                        Festival Program Schedule
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Day Tab Pills */}
+                  <div className="flex bg-slate-100 p-1 rounded-xl w-fit flex-wrap">
+                    {event.scheduleDays.map((day, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setScheduleTab(idx)}
+                        className={`px-4 py-1.5 rounded-lg text-[9px] font-primary font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                          scheduleTab === idx
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "text-slate-500 hover:text-slate-800"
+                        }`}
+                      >
+                        {day.dayLabel}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Active Day Schedule Timeline */}
+                {event.scheduleDays[scheduleTab] && (
+                  <div className="flex flex-col gap-6 pl-1 mt-2">
+                    {event.scheduleDays[scheduleTab].items.map((item, idx) => (
+                      <div key={idx} className="flex gap-4 sm:gap-6 items-start relative group">
+                        <span className="w-16 sm:w-20 shrink-0 text-[10px] font-primary font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-center border border-indigo-100">
+                          {item.time}
+                        </span>
+                        <div className="flex flex-col text-left">
+                          <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase font-primary">
+                            {item.title}
+                          </h4>
+                          <p className="text-slate-400 text-[10.5px] sm:text-xs leading-relaxed font-secondary mt-1">
+                            {item.desc}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Card 4: SEATING ZONES SELECTOR (only if the event has ticket tiers configured) */}
+            {event.ticketPrices.length > 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-5 text-left">
+                <div className="flex flex-col gap-1 border-b border-slate-100 pb-3">
                   <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
-                    Festival Timetable
+                    Interactive Stadium Arena Map
                   </span>
                   <div className="flex items-center gap-2.5">
-                    <Clock size={16} className="text-indigo-600" />
+                    <Sliders size={16} className="text-indigo-600" />
                     <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
-                      Festival Program Schedule
+                      Select Seating Zone & Perks
                     </h3>
                   </div>
                 </div>
 
-                {/* Day Tab Pills */}
-                <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
-                  <button
-                    onClick={() => setScheduleTab("day1")}
-                    className={`px-4 py-1.5 rounded-lg text-[9px] font-primary font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                      scheduleTab === "day1" 
-                        ? "bg-white text-slate-900 shadow-sm" 
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Day 1: Oct 24
-                  </button>
-                  <button
-                    onClick={() => setScheduleTab("day2")}
-                    className={`px-4 py-1.5 rounded-lg text-[9px] font-primary font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                      scheduleTab === "day2" 
-                        ? "bg-white text-slate-900 shadow-sm" 
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Day 2: Oct 25
-                  </button>
+                <p className="text-slate-500 text-xs leading-relaxed font-secondary">
+                  Click any stadium zone card below to preview pricing, availability, and what&apos;s included.
+                </p>
+
+                {/* Seating zones grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  {event.ticketPrices.map((ticket, idx) => {
+                    const isSelected = selectedZone === idx;
+                    const isSoldOut = ticket.available <= 0;
+                    return (
+                      <button
+                        key={`${ticket.type}-${idx}`}
+                        onClick={() => setSelectedZone(idx)}
+                        className={`p-5 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 relative group cursor-pointer ${
+                          isSelected
+                            ? "border-indigo-600 bg-slate-950 text-white shadow-md scale-[1.01]"
+                            : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100/60 text-slate-800"
+                        }`}
+                      >
+                        {/* Checkmark indicator */}
+                        {isSelected && (
+                          <span className="absolute top-4 right-4 bg-indigo-600 text-white w-4 h-4 rounded-full flex items-center justify-center">
+                            <Check size={9} strokeWidth={3} />
+                          </span>
+                        )}
+
+                        <div className="flex flex-col text-left gap-1">
+                          <span className={`text-[8.5px] font-primary tracking-wider uppercase font-bold ${isSelected ? "text-indigo-400" : "text-slate-400"}`}>
+                            Stadium Tier
+                          </span>
+                          <h4 className="text-xs sm:text-sm font-black uppercase font-primary mt-1">
+                            {ticket.type}
+                          </h4>
+                        </div>
+
+                        <div className="flex items-end justify-between mt-6 pt-3 border-t border-slate-200/50 w-full">
+                          <span className={`text-base font-black font-primary ${isSelected ? "text-white" : "text-slate-900"}`}>
+                            ₹{ticket.price.toLocaleString()}
+                          </span>
+                          <span className={`text-[8px] font-primary tracking-wider font-bold ${
+                            isSoldOut
+                              ? "text-rose-500"
+                              : isSelected ? "text-indigo-400" : "text-emerald-600"
+                          }`}>
+                            ● {isSoldOut ? "SOLD OUT" : `${ticket.available.toLocaleString()} PASSES AVAILABLE`}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
+
+                {/* Dynamic description for the selected tier */}
+                {selectedTicketInfo && (() => {
+                  const perkItems = selectedTicketInfo.description
+                    ? selectedTicketInfo.description.split(/[,;]/).map(s => s.trim()).filter(Boolean)
+                    : [];
+                  return (
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mt-2 text-left">
+                      <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase block mb-3">
+                        Included with {selectedTicketInfo.type}:
+                      </span>
+                      {perkItems.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                          {perkItems.map((perk, i) => (
+                            <div key={i} className="flex items-center gap-2 text-[10.5px] sm:text-xs text-slate-600">
+                              <span className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-150 flex items-center justify-center shrink-0">
+                                <Check size={9} strokeWidth={3.5} />
+                              </span>
+                              <span className="font-secondary font-bold text-slate-700">{perk}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[10.5px] sm:text-xs text-slate-500 font-secondary">
+                          No additional details provided for this tier.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
+            )}
 
-              {/* Day 1 Schedule Timeline */}
-              {scheduleTab === "day1" && (
-                <div className="flex flex-col gap-6 pl-1 mt-2">
-                  {[
-                    { time: "10:00 AM", title: "Gates Opening & Welcome Dhol", desc: "Opening of the curated traditional food bazaars and craft exhibitions." },
-                    { time: "12:30 PM", title: "Fusion Jugalbandi Ensemble", desc: "North-South instrumental dialogue featuring classical sitar and electric violin." },
-                    { time: "04:00 PM", title: "Handloom Runway Showcases", desc: "Regional weaver weavers presentation with live performance by classical folk singers." },
-                    { time: "07:30 PM", title: "Amit Trivedi & Folk Crew Concert", desc: "The blockbuster 2.5-hour live musical set. Expect majestic visual mapping projection." }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex gap-4 sm:gap-6 items-start relative group">
-                      <span className="w-16 sm:w-20 shrink-0 text-[10px] font-primary font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-center border border-indigo-100">
-                        {item.time}
-                      </span>
-                      <div className="flex flex-col text-left">
-                        <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase font-primary">
-                          {item.title}
-                        </h4>
-                        <p className="text-slate-400 text-[10.5px] sm:text-xs leading-relaxed font-secondary mt-1">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Day 2 Schedule Timeline */}
-              {scheduleTab === "day2" && (
-                <div className="flex flex-col gap-6 pl-1 mt-2">
-                  {[
-                    { time: "11:00 AM", title: "Craft Innovation Workshops", desc: "Interactive sessions with artisanal weavers and designers exploring eco-dyeing." },
-                    { time: "02:00 PM", title: "Theatre Audits & Street Dance", desc: "Live street plays, flash mobs, and cultural expressions across the boulevard." },
-                    { time: "05:00 PM", title: "EDM Fusion Beats Showcase", desc: "Electronic DJs mixing classical tracks with heavy synth loops." },
-                    { time: "08:00 PM", title: "Nucleya Bass Drop Finale", desc: "High-energy concluding performance with projection mapping and laser display." }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex gap-4 sm:gap-6 items-start relative group">
-                      <span className="w-16 sm:w-20 shrink-0 text-[10px] font-primary font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-center border border-indigo-100">
-                        {item.time}
-                      </span>
-                      <div className="flex flex-col text-left">
-                        <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase font-primary">
-                          {item.title}
-                        </h4>
-                        <p className="text-slate-400 text-[10.5px] sm:text-xs leading-relaxed font-secondary mt-1">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Card 4: SEATING ZONES SELECTOR */}
-            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-5 text-left">
-              <div className="flex flex-col gap-1 border-b border-slate-100 pb-3">
-                <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
-                  Interactive Stadium Arena Map
-                </span>
-                <div className="flex items-center gap-2.5">
-                  <Sliders size={16} className="text-indigo-600" />
+            {/* Card 5: HEADLINERS CIRCLES (only if the event has any configured) */}
+            {event.headliners.length > 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-6 text-left">
+                <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                  <User size={16} className="text-indigo-600" />
                   <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
-                    Select Seating Zone & Perks
+                    National & Global Headliners
                   </h3>
                 </div>
-              </div>
 
-              <p className="text-slate-500 text-xs leading-relaxed font-secondary">
-                Click any stadium zone card below to preview pricing, capacity, and premium catering perks.
-              </p>
-
-              {/* Seating zones grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                {(Object.keys(zones) as Array<keyof typeof zones>).map((key) => {
-                  const zone = zones[key];
-                  const isSelected = selectedZone === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedZone(key)}
-                      className={`p-5 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 relative group cursor-pointer ${
-                        isSelected 
-                          ? "border-indigo-600 bg-slate-950 text-white shadow-md scale-[1.01]" 
-                          : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100/60 text-slate-800"
-                      }`}
-                    >
-                      {/* Checkmark indicator */}
-                      {isSelected && (
-                        <span className="absolute top-4 right-4 bg-indigo-600 text-white w-4 h-4 rounded-full flex items-center justify-center">
-                          <Check size={9} strokeWidth={3} />
-                        </span>
-                      )}
-                      
-                      <div className="flex flex-col text-left gap-1">
-                        <span className={`text-[8.5px] font-primary tracking-wider uppercase font-bold ${isSelected ? "text-indigo-400" : "text-slate-400"}`}>
-                          Stadium Tier
-                        </span>
-                        <h4 className="text-xs sm:text-sm font-black uppercase font-primary mt-1">
-                          {zone.name}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-1">
+                  {event.headliners.map((artist, idx) => (
+                    <div key={idx} className="flex flex-col items-center text-center gap-2 group">
+                      <div className="w-20 h-20 rounded-full overflow-hidden shadow border border-slate-200 relative">
+                        <img
+                          src={artist.img}
+                          alt={artist.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5 mt-1">
+                        <h4 className="text-[11px] font-black text-slate-900 uppercase font-primary tracking-tight">
+                          {artist.name}
                         </h4>
-                      </div>
-
-                      <div className="flex items-end justify-between mt-6 pt-3 border-t border-slate-200/50 w-full">
-                        <span className={`text-base font-black font-primary ${isSelected ? "text-white" : "text-slate-900"}`}>
-                          ₹{zone.price.toLocaleString()}
-                        </span>
-                        <span className={`text-[8px] font-primary tracking-wider font-bold ${
-                          zone.capacity.includes("ALMOST") 
-                            ? "text-rose-500" 
-                            : isSelected ? "text-indigo-400" : "text-emerald-600"
-                        }`}>
-                          ● {zone.capacity}
+                        <span className="text-[8px] font-primary tracking-wider font-bold text-indigo-600 uppercase">
+                          {artist.role}
                         </span>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Dynamic perks list */}
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mt-2 text-left">
-                <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase block mb-3">
-                  Included Credentials for {zones[selectedZone].name}:
-                </span>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-                  {zones[selectedZone].perks.map((perk, i) => (
-                    <div key={i} className="flex items-center gap-2 text-[10.5px] sm:text-xs text-slate-600">
-                      <span className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-150 flex items-center justify-center shrink-0">
-                        <Check size={9} strokeWidth={3.5} />
-                      </span>
-                      <span className="font-secondary font-bold text-slate-700">{perk}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* Card 5: HEADLINERS CIRCLES */}
-            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-6 text-left">
-              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-                <User size={16} className="text-indigo-600" />
-                <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
-                  National & Global Headliners
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-1">
-                {[
-                  { name: "Amit Trivedi", role: "Folk Headliner", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" },
-                  { name: "Nucleya Live", role: "EDM Sensation", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" },
-                  { name: "Meenakshi Iyer", role: "Classical Violinist", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" },
-                  { name: "Shiva & Drums", role: "Fusion Percussionist", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" }
-                ].map((artist, idx) => (
-                  <div key={idx} className="flex flex-col items-center text-center gap-2 group">
-                    <div className="w-20 h-20 rounded-full overflow-hidden shadow border border-slate-200 relative">
-                      <img 
-                        src={artist.img} 
-                        alt={artist.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-0.5 mt-1">
-                      <h4 className="text-[11px] font-black text-slate-900 uppercase font-primary tracking-tight">
-                        {artist.name}
-                      </h4>
-                      <span className="text-[8px] font-primary tracking-wider font-bold text-indigo-600 uppercase">
-                        {artist.role}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
 
             {/* Card 6: FREQUENTLY ASKED QUESTIONS & CURATOR CHAT */}
             <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-6 text-left">
-              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-                <HelpCircle size={16} className="text-indigo-600" />
-                <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
-                  Frequently Asked Questions
-                </h3>
-              </div>
+              {event.faqs.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                    <HelpCircle size={16} className="text-indigo-600" />
+                    <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
+                      Frequently Asked Questions
+                    </h3>
+                  </div>
 
-              {/* Accordion FAQ items */}
-              <div className="flex flex-col gap-3 mt-1">
-                {[
-                  { q: "Is transport or shuttle buses arranged for Buddh Circuit?", a: "Yes! High-frequency air-conditioned shuttle coaches depart every 15 minutes from Botanical Garden Metro Station (Noida) directly to Buddh Circuit Gate 3 from 8:00 AM onwards." },
-                  { q: "Are professional cameras or recording rigs allowed?", a: "Only non-professional smartphones and compact action cameras are allowed. Professional SLRs and recording gimbals require prior press accreditation." },
-                  { q: "How do I redeem food and beverage coupon passes?", a: "F&B credentials can be scanned at the main registration kiosk to claim physical coupon books before entering the food bazaar." },
-                  { q: "Is re-entry permitted during the two-day festival?", a: "Yes, re-entry is permitted as long as your smart QR wristband remains active and untampered." }
-                ].map((faq, i) => {
-                  const isOpen = faqOpen === i;
-                  return (
-                    <div key={i} className="border border-slate-200/80 rounded-xl overflow-hidden bg-slate-50 transition-colors">
-                      <button
-                        onClick={() => setFaqOpen(isOpen ? null : i)}
-                        className="w-full px-4 py-3.5 flex items-center justify-between text-left text-xs font-bold font-primary uppercase text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
-                      >
-                        <span>{faq.q}</span>
-                        {isOpen ? <ChevronUp size={14} className="text-indigo-600" /> : <ChevronDown size={14} className="text-slate-400" />}
-                      </button>
-                      
-                      {isOpen && (
-                        <div className="px-4 pb-4 pt-1 text-[11px] sm:text-xs leading-relaxed text-slate-500 font-secondary border-t border-slate-200/50 mt-1">
-                          {faq.a}
+                  {/* Accordion FAQ items */}
+                  <div className="flex flex-col gap-3 mt-1">
+                    {event.faqs.map((faq, i) => {
+                      const isOpen = faqOpen === i;
+                      return (
+                        <div key={i} className="border border-slate-200/80 rounded-xl overflow-hidden bg-slate-50 transition-colors">
+                          <button
+                            onClick={() => setFaqOpen(isOpen ? null : i)}
+                            className="w-full px-4 py-3.5 flex items-center justify-between text-left text-xs font-bold font-primary uppercase text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                          >
+                            <span>{faq.q}</span>
+                            {isOpen ? <ChevronUp size={14} className="text-indigo-600" /> : <ChevronDown size={14} className="text-slate-400" />}
+                          </button>
+
+                          {isOpen && (
+                            <div className="px-4 pb-4 pt-1 text-[11px] sm:text-xs leading-relaxed text-slate-500 font-secondary border-t border-slate-200/50 mt-1">
+                              {faq.a}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
 
               {/* Interactive Curator Chatbot box */}
               <div className="border border-slate-200 rounded-2xl p-4 md:p-5 mt-3 bg-slate-50/50 flex flex-col gap-4 text-left">
@@ -770,7 +735,7 @@ export default function EventDetailPage({ params }: PageProps) {
                     Stadium Tier
                   </span>
                   <h3 className="text-sm font-black font-primary uppercase tracking-wide mt-0.5 line-clamp-1">
-                    {zones[selectedZone].name}
+                    {selectedTicketInfo ? selectedTicketInfo.type : "General Entry"}
                   </h3>
                 </div>
 
@@ -792,7 +757,9 @@ export default function EventDetailPage({ params }: PageProps) {
                   </div>
                   <div className="flex flex-col text-right">
                     <span className="text-white/50 text-[6.5px] uppercase">Pass Ref No</span>
-                    <span className="uppercase">{zones[selectedZone].ref}</span>
+                    <span className="uppercase">
+                      {selectedTicketInfo ? getPassRef(event.id, selectedTicketInfo.type) : "—"}
+                    </span>
                   </div>
                 </div>
 
@@ -836,25 +803,25 @@ export default function EventDetailPage({ params }: PageProps) {
               <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-200/60 p-4 rounded-xl text-left">
                 <div className="flex flex-col gap-0.5 border-r border-slate-200/60 pr-2">
                   <span className="text-[7px] font-primary font-bold tracking-wider text-slate-400 uppercase">
-                    Current Weather
+                    Weather
                   </span>
-                  <span className="text-base font-black text-slate-900 uppercase font-primary mt-1">
-                    25°C
+                  <span className="text-[11px] font-black text-slate-900 uppercase font-primary mt-1 leading-snug">
+                    Check Forecast
                   </span>
-                  <span className="text-[9px] text-slate-500 font-secondary mt-0.5 line-clamp-1">
-                    Clear Cool Evening
+                  <span className="text-[9px] text-slate-500 font-secondary mt-0.5 line-clamp-2">
+                    Check the local weather closer to the event date.
                   </span>
                 </div>
-                
+
                 <div className="flex flex-col gap-0.5 pl-1">
                   <span className="text-[7px] font-primary font-bold tracking-wider text-slate-400 uppercase">
-                    Atmosphere AQI
+                    Air Quality
                   </span>
-                  <span className="text-base font-black text-rose-600 uppercase font-primary mt-1">
-                    AQI 110
+                  <span className="text-[11px] font-black text-slate-900 uppercase font-primary mt-1 leading-snug">
+                    Check AQI
                   </span>
-                  <span className="text-[9px] text-rose-500 font-secondary mt-0.5 font-bold line-clamp-1">
-                    Moderate Haze
+                  <span className="text-[9px] text-slate-500 font-secondary mt-0.5 font-bold line-clamp-2">
+                    Check the local air quality index before you travel.
                   </span>
                 </div>
               </div>
@@ -863,11 +830,11 @@ export default function EventDetailPage({ params }: PageProps) {
               <div className="flex flex-col gap-2.5 text-[10.5px] leading-relaxed text-slate-500 font-secondary mt-1">
                 <div className="flex items-start gap-1.5">
                   <span className="font-bold text-slate-700">1.</span>
-                  <span>Security checkpoints open exactly at <strong className="text-slate-800">9:00 AM</strong> both days. Please carry a valid digital student ID card if booking the student stand ticket.</span>
+                  <span>Security checkpoints typically open well ahead of the event start time. Please carry a valid photo ID, especially if you booked a discounted or student ticket.</span>
                 </div>
                 <div className="flex items-start gap-1.5">
                   <span className="font-bold text-slate-700">2.</span>
-                  <span>Safe luggage cloakroom lockers are fully operational inside the Gate 3 stadium premises for a nominal maintenance fee of ₹50.</span>
+                  <span>Cloakroom / luggage storage may be available at the venue for a nominal fee — please check with venue staff on arrival.</span>
                 </div>
               </div>
             </div>
@@ -887,9 +854,11 @@ export default function EventDetailPage({ params }: PageProps) {
                   <span className="text-[11.5px] font-black text-slate-800 uppercase font-primary leading-tight mt-0.5">
                     {event.organizer.name}
                   </span>
-                  <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-1">
-                    Dedicated to showcasing the sublime synthesis of traditional Indian heritage and contemporary expressions.
-                  </p>
+                  {event.organizer.contact && (
+                    <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-1">
+                      {event.organizer.contact}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-100 text-[10px] font-primary font-bold tracking-wider text-slate-500">
@@ -904,6 +873,76 @@ export default function EventDetailPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
+
+            {/* Card 4: SPONSORSHIP TIERS (only if the event has any) */}
+            {event.sponsorshipTiers.length > 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 shadow-sm flex flex-col gap-4 text-left">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                  <Trophy size={15} className="text-indigo-600" />
+                  <h4 className="text-xs font-bold font-primary text-slate-900 uppercase tracking-wider">
+                    Sponsorship Opportunities
+                  </h4>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {event.sponsorshipTiers.map((tier, i) => (
+                    <div key={i} className="pb-3 border-b border-slate-100 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-black text-slate-800 uppercase font-primary">{tier.tier}</span>
+                        <span className="text-[11px] font-bold text-indigo-600">{tier.amount}</span>
+                      </div>
+                      {tier.benefits && (
+                        <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-1">{tier.benefits}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Card 5: STALL / BOOTH BOOKING OPTIONS (only if the event has any) */}
+            {event.stallOptions.length > 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 shadow-sm flex flex-col gap-4 text-left">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                  <DollarSign size={15} className="text-indigo-600" />
+                  <h4 className="text-xs font-bold font-primary text-slate-900 uppercase tracking-wider">
+                    Stall &amp; Booth Booking
+                  </h4>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {event.stallOptions.map((stall, i) => (
+                    <div key={i} className="pb-3 border-b border-slate-100 last:border-0 last:pb-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-black text-slate-800 uppercase font-primary">{stall.type}</span>
+                        <span className="text-[11px] font-bold text-indigo-600">{stall.rate}</span>
+                      </div>
+                      <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-1">
+                        {stall.size}{stall.includes ? ` — ${stall.includes}` : ""}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Card 6: DIRECTORY / AD RATES (only if the event has any) */}
+            {event.adRates.length > 0 && (
+              <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 shadow-sm flex flex-col gap-4 text-left">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                  <Info size={15} className="text-indigo-600" />
+                  <h4 className="text-xs font-bold font-primary text-slate-900 uppercase tracking-wider">
+                    Directory Ad Rates
+                  </h4>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {event.adRates.map((rate, i) => (
+                    <div key={i} className="flex items-center justify-between gap-2 text-[10.5px]">
+                      <span className="text-slate-600 font-secondary">{rate.category}</span>
+                      <span className="font-bold text-slate-800 font-primary">{rate.amount}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
 

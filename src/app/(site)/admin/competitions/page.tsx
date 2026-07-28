@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Pencil, Trash2, X, Check, CalendarDays, MapPin, RefreshCw, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, CalendarDays, MapPin, RefreshCw } from "lucide-react";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import RepeaterField from "@/components/admin/RepeaterField";
+import SimpleListEditor from "@/components/admin/SimpleListEditor";
+
+interface CompetitionCategory { [key: string]: unknown; name: string; ageGroup: string; fee: number }
+interface CompetitionJudge { [key: string]: unknown; name: string; role: string; desc: string }
+interface CompetitionFaq { [key: string]: unknown; q: string; a: string }
+interface RegionalHub { [key: string]: unknown; city: string; venue: string; date: string }
+interface CompetitionOrganizer { name: string; contact: string; email: string; phone: string }
 
 interface Competition {
   id: string;
@@ -18,12 +26,12 @@ interface Competition {
   city: string;
   prize_pool: string;
   registration_fee: number;
-  categories: unknown[];
-  rules: unknown[];
-  judges: unknown[];
-  faqs: unknown[];
-  regional_hubs: unknown[];
-  organizer: Record<string, unknown>;
+  categories: CompetitionCategory[];
+  rules: string[];
+  judges: CompetitionJudge[];
+  faqs: CompetitionFaq[];
+  regional_hubs: RegionalHub[];
+  organizer: CompetitionOrganizer;
   is_active: boolean;
 }
 
@@ -32,15 +40,16 @@ const EMPTY_FORM = {
   bannerUrl: "", prizePool: "", registrationFee: "0", summary: "", description: "",
 };
 
-const EMPTY_JSON_FIELDS = {
-  categories: "[]", rules: "[]", judges: "[]", faqs: "[]", regionalHubs: "[]", organizer: "{}",
-};
+const EMPTY_CATEGORY: CompetitionCategory = { name: "", ageGroup: "", fee: 0 };
+const EMPTY_JUDGE: CompetitionJudge = { name: "", role: "", desc: "" };
+const EMPTY_FAQ: CompetitionFaq = { q: "", a: "" };
+const EMPTY_HUB: RegionalHub = { city: "", venue: "", date: "" };
+const EMPTY_ORGANIZER: CompetitionOrganizer = { name: "", contact: "", email: "", phone: "" };
 
 const S = {
   card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
   input: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "10px 12px", fontSize: "13px", width: "100%" },
   btn: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "9px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer", border: "none" },
-  mono: { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "12px" },
 };
 
 export default function AdminCompetitionsPage() {
@@ -49,8 +58,12 @@ export default function AdminCompetitionsPage() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Competition | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [jsonFields, setJsonFields] = useState(EMPTY_JSON_FIELDS);
-  const [jsonErrors, setJsonErrors] = useState<Record<string, string>>({});
+  const [categories, setCategories] = useState<CompetitionCategory[]>([]);
+  const [rules, setRules] = useState<string[]>([]);
+  const [judges, setJudges] = useState<CompetitionJudge[]>([]);
+  const [faqs, setFaqs] = useState<CompetitionFaq[]>([]);
+  const [regionalHubs, setRegionalHubs] = useState<RegionalHub[]>([]);
+  const [organizer, setOrganizer] = useState<CompetitionOrganizer>(EMPTY_ORGANIZER);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
@@ -67,8 +80,12 @@ export default function AdminCompetitionsPage() {
   const openCreate = () => {
     setEditTarget(null);
     setForm(EMPTY_FORM);
-    setJsonFields(EMPTY_JSON_FIELDS);
-    setJsonErrors({});
+    setCategories([]);
+    setRules([]);
+    setJudges([]);
+    setFaqs([]);
+    setRegionalHubs([]);
+    setOrganizer({ ...EMPTY_ORGANIZER });
     setPanelOpen(true);
   };
 
@@ -80,32 +97,27 @@ export default function AdminCompetitionsPage() {
       bannerUrl: c.banner_url || "", prizePool: c.prize_pool || "",
       registrationFee: String(c.registration_fee ?? 0), summary: c.summary || "", description: c.description || "",
     });
-    setJsonFields({
-      categories: JSON.stringify(c.categories ?? [], null, 2),
-      rules: JSON.stringify(c.rules ?? [], null, 2),
-      judges: JSON.stringify(c.judges ?? [], null, 2),
-      faqs: JSON.stringify(c.faqs ?? [], null, 2),
-      regionalHubs: JSON.stringify(c.regional_hubs ?? [], null, 2),
-      organizer: JSON.stringify(c.organizer ?? {}, null, 2),
-    });
-    setJsonErrors({});
+    setCategories(Array.isArray(c.categories) ? c.categories : []);
+    setRules(Array.isArray(c.rules) ? c.rules : []);
+    setJudges(Array.isArray(c.judges) ? c.judges : []);
+    setFaqs(Array.isArray(c.faqs) ? c.faqs : []);
+    setRegionalHubs(Array.isArray(c.regional_hubs) ? c.regional_hubs : []);
+    setOrganizer(c.organizer && c.organizer.name !== undefined ? c.organizer : { ...EMPTY_ORGANIZER });
     setPanelOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed: Record<string, unknown> = {};
-    const errors: Record<string, string> = {};
-    for (const [k, raw] of Object.entries(jsonFields)) {
-      try { parsed[k] = JSON.parse(raw); } catch { errors[k] = "Invalid JSON"; }
-    }
-    if (Object.keys(errors).length > 0) { setJsonErrors(errors); return; }
-
     setSaving(true);
     const body = {
       ...form,
       registrationFee: Number(form.registrationFee) || 0,
-      ...parsed,
+      categories: categories.filter(c => c.name.trim()),
+      rules: rules.filter(r => r.trim()),
+      judges: judges.filter(j => j.name.trim()),
+      faqs: faqs.filter(f => f.q.trim()),
+      regionalHubs: regionalHubs.filter(h => h.city.trim()),
+      organizer,
       ...(editTarget ? { id: editTarget.id } : {}),
     };
     await fetch("/api/admin/competitions", {
@@ -216,18 +228,79 @@ export default function AdminCompetitionsPage() {
 
               <RichTextEditor label="Full Description" value={form.description} onChange={(html) => setForm((p) => ({ ...p, description: html }))} />
 
-              {Object.entries(jsonFields).map(([field, val]) => (
-                <div key={field}>
-                  <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>
-                    {field} <span className="normal-case font-normal" style={{ color: "rgba(148,163,184,0.35)" }}>(JSON)</span>
-                  </label>
-                  <textarea rows={6} style={{ ...S.input, ...S.mono, resize: "vertical", borderColor: jsonErrors[field] ? "#F87171" : S.input.border }}
-                    value={val} onChange={(e) => setJsonFields((p) => ({ ...p, [field]: e.target.value }))} />
-                  {jsonErrors[field] && (
-                    <p className="flex items-center gap-1.5 text-xs mt-1.5" style={{ color: "#F87171" }}><AlertCircle size={12} /> {jsonErrors[field]}</p>
-                  )}
+              <RepeaterField
+                label="Categories"
+                hint="Competition divisions/classes (e.g. Miss Traditional India, Mr. Traditional India)"
+                columns={[
+                  { key: "name", label: "Category name", span: 2 },
+                  { key: "ageGroup", label: "Age group (e.g. 18-28 years)" },
+                  { key: "fee", label: "Fee (₹)", type: "number" },
+                ]}
+                value={categories}
+                onChange={setCategories}
+                emptyRow={EMPTY_CATEGORY}
+                addLabel="Add category"
+              />
+
+              <SimpleListEditor
+                label="Rules & Eligibility"
+                value={rules}
+                onChange={setRules}
+                placeholder="Add a rule..."
+              />
+
+              <RepeaterField
+                label="Judges"
+                columns={[
+                  { key: "name", label: "Name" },
+                  { key: "role", label: "Role/Title" },
+                  { key: "desc", label: "Bio/description", type: "textarea", span: 2 },
+                ]}
+                value={judges}
+                onChange={setJudges}
+                emptyRow={EMPTY_JUDGE}
+                addLabel="Add judge"
+              />
+
+              <RepeaterField
+                label="FAQs"
+                columns={[
+                  { key: "q", label: "Question", span: 2 },
+                  { key: "a", label: "Answer", type: "textarea", span: 2 },
+                ]}
+                value={faqs}
+                onChange={setFaqs}
+                emptyRow={EMPTY_FAQ}
+                addLabel="Add FAQ"
+              />
+
+              <RepeaterField
+                label="Regional Hubs / Tour Stops"
+                hint="Audition or leg stops across cities — leave empty if not applicable"
+                columns={[
+                  { key: "city", label: "City" },
+                  { key: "venue", label: "Venue" },
+                  { key: "date", label: "Date" },
+                ]}
+                value={regionalHubs}
+                onChange={setRegionalHubs}
+                emptyRow={EMPTY_HUB}
+                addLabel="Add regional hub"
+              />
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "rgba(148,163,184,0.5)" }}>Organizer</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input style={S.input} placeholder="Organization name" value={organizer.name}
+                    onChange={(e) => setOrganizer((o) => ({ ...o, name: e.target.value }))} />
+                  <input style={S.input} placeholder="Contact / description" value={organizer.contact}
+                    onChange={(e) => setOrganizer((o) => ({ ...o, contact: e.target.value }))} />
+                  <input style={S.input} placeholder="Email" value={organizer.email}
+                    onChange={(e) => setOrganizer((o) => ({ ...o, email: e.target.value }))} />
+                  <input style={S.input} placeholder="Phone" value={organizer.phone}
+                    onChange={(e) => setOrganizer((o) => ({ ...o, phone: e.target.value }))} />
                 </div>
-              ))}
+              </div>
 
               <div className="flex gap-3 mt-2">
                 <button type="button" onClick={() => setPanelOpen(false)}

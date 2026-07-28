@@ -7,12 +7,36 @@ import {
 } from "lucide-react";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import RepeaterField from "@/components/admin/RepeaterField";
+import ScheduleDaysEditor, { ScheduleDay } from "@/components/admin/ScheduleDaysEditor";
 
 interface TicketPrice {
+  [key: string]: unknown;
   type: string;
   price: number;
   available: number;
   description: string;
+}
+
+interface SponsorshipTier {
+  [key: string]: unknown;
+  tier: string;
+  amount: string;
+  benefits: string;
+}
+
+interface StallOption {
+  [key: string]: unknown;
+  type: string;
+  size: string;
+  rate: string;
+  includes: string;
+}
+
+interface AdRate {
+  [key: string]: unknown;
+  category: string;
+  amount: string;
 }
 
 interface Organizer {
@@ -20,6 +44,19 @@ interface Organizer {
   contact: string;
   email: string;
   phone: string;
+}
+
+interface Headliner {
+  [key: string]: unknown;
+  name: string;
+  role: string;
+  img: string;
+}
+
+interface Faq {
+  [key: string]: unknown;
+  q: string;
+  a: string;
 }
 
 interface Event {
@@ -40,18 +77,30 @@ interface Event {
   organizer: Organizer;
   rating: number;
   review_count: number;
+  sponsorship_tiers: SponsorshipTier[];
+  stall_options: StallOption[];
+  ad_rates: AdRate[];
+  date_is_tentative: boolean;
+  headliners: Headliner[];
+  faqs: Faq[];
+  schedule_days: ScheduleDay[];
   created_at: string;
 }
 
 interface Taxonomy { value: string }
 
 const EMPTY_TICKET: TicketPrice = { type: "General Entry", price: 0, available: 0, description: "" };
+const EMPTY_TIER: SponsorshipTier = { tier: "", amount: "", benefits: "" };
+const EMPTY_STALL: StallOption = { type: "", size: "", rate: "", includes: "" };
+const EMPTY_AD_RATE: AdRate = { category: "", amount: "" };
 const EMPTY_ORGANIZER: Organizer = { name: "", contact: "", email: "", phone: "" };
+const EMPTY_HEADLINER: Headliner = { name: "", role: "", img: "" };
+const EMPTY_FAQ: Faq = { q: "", a: "" };
 
 const EMPTY_FORM = {
   name: "", slug: "", category: "", city: "", venue: "",
   eventDate: "", eventTime: "18:00", bannerUrl: "", summary: "", description: "",
-  isFeatured: false, isUpcoming: true, rating: "4.6", reviewCount: "25",
+  isFeatured: false, isUpcoming: true, rating: "4.6", reviewCount: "25", dateIsTentative: false,
 };
 
 const S = {
@@ -79,6 +128,12 @@ export default function AdminEventsPage() {
   const [editTarget, setEditTarget] = useState<Event | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [ticketPrices, setTicketPrices] = useState<TicketPrice[]>([]);
+  const [sponsorshipTiers, setSponsorshipTiers] = useState<SponsorshipTier[]>([]);
+  const [stallOptions, setStallOptions] = useState<StallOption[]>([]);
+  const [adRates, setAdRates] = useState<AdRate[]>([]);
+  const [headliners, setHeadliners] = useState<Headliner[]>([]);
+  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [scheduleDays, setScheduleDays] = useState<ScheduleDay[]>([]);
   const [organizer, setOrganizer] = useState<Organizer>(EMPTY_ORGANIZER);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -106,6 +161,12 @@ export default function AdminEventsPage() {
     setEditTarget(null);
     setForm({ ...EMPTY_FORM, category: categories[0] || "", city: cities[0] || "" });
     setTicketPrices([{ ...EMPTY_TICKET }]);
+    setSponsorshipTiers([]);
+    setStallOptions([]);
+    setAdRates([]);
+    setHeadliners([]);
+    setFaqs([]);
+    setScheduleDays([]);
     setOrganizer({ ...EMPTY_ORGANIZER });
     setPanelOpen(true);
   };
@@ -118,8 +179,15 @@ export default function AdminEventsPage() {
       summary: ev.summary || "", description: ev.description || "",
       isFeatured: ev.is_featured, isUpcoming: ev.is_upcoming,
       rating: String(ev.rating ?? 4.6), reviewCount: String(ev.review_count ?? 25),
+      dateIsTentative: ev.date_is_tentative ?? false,
     });
     setTicketPrices(Array.isArray(ev.ticket_prices) && ev.ticket_prices.length > 0 ? ev.ticket_prices : [{ ...EMPTY_TICKET }]);
+    setSponsorshipTiers(Array.isArray(ev.sponsorship_tiers) ? ev.sponsorship_tiers : []);
+    setStallOptions(Array.isArray(ev.stall_options) ? ev.stall_options : []);
+    setAdRates(Array.isArray(ev.ad_rates) ? ev.ad_rates : []);
+    setHeadliners(Array.isArray(ev.headliners) ? ev.headliners : []);
+    setFaqs(Array.isArray(ev.faqs) ? ev.faqs : []);
+    setScheduleDays(Array.isArray(ev.schedule_days) ? ev.schedule_days : []);
     setOrganizer(ev.organizer && ev.organizer.name !== undefined ? ev.organizer : { ...EMPTY_ORGANIZER });
     setPanelOpen(true);
   };
@@ -133,6 +201,12 @@ export default function AdminEventsPage() {
       rating: Number(form.rating) || 0,
       reviewCount: Number(form.reviewCount) || 0,
       ticketPrices: ticketPrices.filter(t => t.type.trim()),
+      sponsorshipTiers: sponsorshipTiers.filter(t => t.tier.trim()),
+      stallOptions: stallOptions.filter(s => s.type.trim()),
+      adRates: adRates.filter(a => a.category.trim()),
+      headliners: headliners.filter(h => h.name.trim()),
+      faqs: faqs.filter(f => f.q.trim()),
+      scheduleDays: scheduleDays.filter(d => d.dayLabel.trim()),
       organizer,
       ...(editTarget ? { id: editTarget.id } : {}),
     };
@@ -191,7 +265,7 @@ export default function AdminEventsPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: "rgba(99,102,241,0.06)" }}>
+            <tbody className="divide-y divide-[rgba(99,102,241,0.06)]">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}><td colSpan={5} className="px-5 py-4">
@@ -218,6 +292,12 @@ export default function AdminEventsPage() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5 text-xs" style={{ color: "rgba(148,163,184,0.7)" }}>
                       <CalendarDays size={11} /> {ev.event_date?.slice(0, 10)}
+                      {ev.date_is_tentative && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                          style={{ background: "rgba(245,158,11,0.12)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.25)" }}>
+                          Tentative
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
                       <MapPin size={11} /> {ev.city}
@@ -337,6 +417,20 @@ export default function AdminEventsPage() {
                 </div>
               ))}
 
+              <label className="flex items-center gap-2.5 cursor-pointer -mt-2">
+                <div
+                  className="relative w-9 h-5 rounded-full transition-colors flex-shrink-0"
+                  style={{ background: form.dateIsTentative ? "#F59E0B" : "rgba(99,102,241,0.15)" }}
+                  onClick={() => setForm(prev => ({ ...prev, dateIsTentative: !prev.dateIsTentative }))}
+                >
+                  <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                    style={{ transform: form.dateIsTentative ? "translateX(16px)" : "translateX(0)" }} />
+                </div>
+                <span className="text-xs font-medium" style={{ color: "rgba(148,163,184,0.7)" }}>
+                  Date is tentative / not yet confirmed
+                </span>
+              </label>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wider block mb-1.5"
@@ -386,36 +480,62 @@ export default function AdminEventsPage() {
                 </div>
               </div>
 
-              {/* Ticket prices */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold uppercase tracking-wider" style={{ color: "rgba(148,163,184,0.5)" }}>Ticket Prices</label>
-                  <button type="button" onClick={() => setTicketPrices(p => [...p, { ...EMPTY_TICKET }])}
-                    className="flex items-center gap-1 text-xs font-semibold" style={{ color: "#818CF8", background: "none", border: "none", cursor: "pointer" }}>
-                    <Plus size={12} /> Add tier
-                  </button>
-                </div>
-                <div className="flex flex-col gap-3">
-                  {ticketPrices.map((tp, i) => (
-                    <div key={i} className="p-3 rounded-xl flex flex-col gap-2" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                      <div className="flex gap-2">
-                        <input style={S.input} placeholder="Ticket type (e.g. VIP Pass)" value={tp.type}
-                          onChange={(e) => setTicketPrices(p => p.map((t, idx) => idx === i ? { ...t, type: e.target.value } : t))} />
-                        <button type="button" onClick={() => setTicketPrices(p => p.filter((_, idx) => idx !== i))}
-                          style={{ color: "#F87171", background: "none", border: "none", cursor: "pointer" }}><X size={14} /></button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input type="number" style={S.input} placeholder="Price (₹)" value={tp.price}
-                          onChange={(e) => setTicketPrices(p => p.map((t, idx) => idx === i ? { ...t, price: Number(e.target.value) } : t))} />
-                        <input type="number" style={S.input} placeholder="Available" value={tp.available}
-                          onChange={(e) => setTicketPrices(p => p.map((t, idx) => idx === i ? { ...t, available: Number(e.target.value) } : t))} />
-                      </div>
-                      <input style={S.input} placeholder="Description" value={tp.description}
-                        onChange={(e) => setTicketPrices(p => p.map((t, idx) => idx === i ? { ...t, description: e.target.value } : t))} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <RepeaterField
+                label="Ticket Prices"
+                hint="Consumer ticket tiers (General, VIP, Student, etc.)"
+                columns={[
+                  { key: "type", label: "Ticket type (e.g. VIP Pass)", span: 2 },
+                  { key: "price", label: "Price (₹)", type: "number" },
+                  { key: "available", label: "Available", type: "number" },
+                  { key: "description", label: "Description", type: "textarea", span: 2 },
+                ]}
+                value={ticketPrices}
+                onChange={setTicketPrices}
+                emptyRow={EMPTY_TICKET}
+                addLabel="Add ticket tier"
+              />
+
+              <RepeaterField
+                label="Sponsorship Tiers"
+                hint="Corporate sponsorship packages (Title Sponsor, Co-Sponsor, etc.) — leave empty if not applicable"
+                columns={[
+                  { key: "tier", label: "Tier name (e.g. Title Sponsor)", span: 2 },
+                  { key: "amount", label: "Amount (e.g. ₹75,00,000)", span: 2 },
+                  { key: "benefits", label: "Benefits", type: "textarea", span: 2 },
+                ]}
+                value={sponsorshipTiers}
+                onChange={setSponsorshipTiers}
+                emptyRow={EMPTY_TIER}
+                addLabel="Add sponsorship tier"
+              />
+
+              <RepeaterField
+                label="Stall / Booth Booking Options"
+                hint="Exhibitor stall packages — leave empty if not applicable"
+                columns={[
+                  { key: "type", label: "Type (e.g. Premium Raw Space)" },
+                  { key: "size", label: "Size (e.g. 100 sq.ft)" },
+                  { key: "rate", label: "Rate (e.g. ₹75,000)" },
+                  { key: "includes", label: "Includes" },
+                ]}
+                value={stallOptions}
+                onChange={setStallOptions}
+                emptyRow={EMPTY_STALL}
+                addLabel="Add stall option"
+              />
+
+              <RepeaterField
+                label="Directory / Ad Rates"
+                hint="Publication/directory advertising rates — leave empty if not applicable"
+                columns={[
+                  { key: "category", label: "Category (e.g. Cover Page Front)", span: 2 },
+                  { key: "amount", label: "Amount (e.g. ₹5,00,000)", span: 2 },
+                ]}
+                value={adRates}
+                onChange={setAdRates}
+                emptyRow={EMPTY_AD_RATE}
+                addLabel="Add ad rate"
+              />
 
               {/* Organizer */}
               <div>
@@ -423,7 +543,7 @@ export default function AdminEventsPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <input style={S.input} placeholder="Organization name" value={organizer.name}
                     onChange={(e) => setOrganizer(o => ({ ...o, name: e.target.value }))} />
-                  <input style={S.input} placeholder="Contact person" value={organizer.contact}
+                  <input style={S.input} placeholder="Contact person / short description (shown publicly)" value={organizer.contact}
                     onChange={(e) => setOrganizer(o => ({ ...o, contact: e.target.value }))} />
                   <input style={S.input} placeholder="Email" value={organizer.email}
                     onChange={(e) => setOrganizer(o => ({ ...o, email: e.target.value }))} />
@@ -431,6 +551,39 @@ export default function AdminEventsPage() {
                     onChange={(e) => setOrganizer(o => ({ ...o, phone: e.target.value }))} />
                 </div>
               </div>
+
+              <RepeaterField
+                label="Headliners"
+                hint="Featured artists/performers shown on the event page — leave empty if not applicable"
+                columns={[
+                  { key: "name", label: "Name" },
+                  { key: "role", label: "Role (e.g. Folk Headliner)" },
+                  { key: "img", label: "Photo URL", span: 2 },
+                ]}
+                value={headliners}
+                onChange={setHeadliners}
+                emptyRow={EMPTY_HEADLINER}
+                addLabel="Add headliner"
+              />
+
+              <RepeaterField
+                label="FAQs"
+                hint="Also used to answer visitor questions in the on-page assistant"
+                columns={[
+                  { key: "q", label: "Question", span: 2 },
+                  { key: "a", label: "Answer", type: "textarea", span: 2 },
+                ]}
+                value={faqs}
+                onChange={setFaqs}
+                emptyRow={EMPTY_FAQ}
+                addLabel="Add FAQ"
+              />
+
+              <ScheduleDaysEditor
+                label="Program Schedule"
+                value={scheduleDays}
+                onChange={setScheduleDays}
+              />
 
               <div className="flex gap-6">
                 {[

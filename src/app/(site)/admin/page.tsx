@@ -144,7 +144,7 @@ export default function AdminOverviewPage() {
             <h2 className="font-bold text-white text-sm">Recent Activity</h2>
             <Activity size={14} style={{ color: "rgba(148,163,184,0.4)" }} />
           </div>
-          <div className="divide-y" style={{ borderColor: "rgba(99,102,241,0.08)" }}>
+          <div className="divide-y divide-[rgba(99,102,241,0.08)]">
             {stats.recentActivity.map((item, i) => (
               <div key={i} className="flex items-center gap-4 px-6 py-3.5">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"

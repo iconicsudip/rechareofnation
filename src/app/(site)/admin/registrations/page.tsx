@@ -167,7 +167,7 @@ export default function AdminRegistrationsPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: "rgba(99,102,241,0.06)" }}>
+            <tbody className="divide-y divide-[rgba(99,102,241,0.06)]">
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <tr key={i}><td colSpan={8} className="px-5 py-4">
