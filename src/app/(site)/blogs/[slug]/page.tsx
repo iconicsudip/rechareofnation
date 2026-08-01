@@ -163,12 +163,13 @@ export default function BlogDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Inline Article Secondary Image */}
+            {/* Inline Article Secondary Image — reuses this article's real imageUrl
+                (previously a fixed stock photo identical on every article) */}
             <div className="rounded-[24px] overflow-hidden border border-slate-200/80 aspect-[16/9] w-full bg-slate-50 mt-4 shadow-sm">
-              <img 
-                src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80" 
-                alt="Secondary article scene" 
-                className="w-full h-full object-cover" 
+              <img
+                src={blog.imageUrl}
+                alt={blog.title}
+                className="w-full h-full object-cover"
               />
             </div>
 

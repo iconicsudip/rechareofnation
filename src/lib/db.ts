@@ -583,6 +583,78 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
       ASSOCIATE: { name: 'Associate Partner', price: 400000, baseImpressions: 700000, space: '50 sq.ft Shared Pavilion', allotments: '6 Full Pass Badges', entitlements: ['Logo on all official co-branded marketing materials', 'In-app sponsor directory inclusion', 'Distribution of corporate flyers in visitor goodie bags'], placements: 'App Partner Section, Shared Banners, Standard PR & Media coverage' },
     },
   },
+  {
+    key: 'homepage_hubs',
+    value: {
+      hubs: [
+        { category: 'Cultural Programs', desc: 'Grand cultural beats & live stage arts.' },
+        { category: 'Dance Competitions', desc: 'Elite choreography clashes & dance battles.' },
+        { category: 'Trade Expos', desc: 'Smart city tech, gadgets & showcases.' },
+        { category: 'Food Festivals', desc: 'Culinary trails, street food fairs & tastings.' },
+        { category: 'Fashion Shows', desc: 'Runway showcases & style spectacles.' },
+        { category: 'Educational Events', desc: 'Masterclasses & interactive learning jams.' },
+        { category: 'Business Expo', desc: 'Strategic leadership summits & founder mixers.' },
+      ],
+    },
+  },
+  {
+    key: 'homepage_stats',
+    value: {
+      stats: [
+        { value: '50+', label: 'Premium Events Hosted' },
+        { value: '250K+', label: 'Tickets Booked Successfully' },
+        { value: '7+', label: 'Cities Live Nationwide' },
+        { value: '12+', label: 'Event Categories' },
+      ],
+    },
+  },
+  {
+    key: 'homepage_newsletter',
+    value: {
+      eyebrow: 'VIP GATEWAY',
+      heading: 'GET SECRET PRE-SALE ACCESS ALERTS',
+      description: 'Enter your corporate or student email to secure discount codes and early-bird notifications before tickets sell out.',
+      ctaLabel: 'JOIN CREW',
+      successMessage: 'Secret alert pass activated. Welcome to the crew!',
+    },
+  },
+  {
+    key: 'sponsors_page',
+    value: {
+      heroBadge: 'Brand Alignment & Ecosystem Expansion',
+      heroTitle: "CATALYZING INDIA'S LIVE & EXPERIENTIAL MARKETS",
+      heroDescription: 'Recharge Nation is proud to collaborate with industry-leading corporate brands driving technological development, sustainability, and cultural preservation. Together, we power secure smart admissions, high-speed regional networking, and luxury handloom revival across South Asia.',
+      stats: [
+        { label: 'Total Audience Reach', value: '15 Lakhs+' },
+        { label: 'Allied Brands', value: '50+ Active' },
+        { label: 'Weaver Payouts', value: '₹85,00,000+' },
+        { label: 'Gate Transits', value: '99.98% Smooth' },
+      ],
+      enlistEyebrow: 'B2B Co-Creation & Media',
+      enlistHeading: 'ENLIST YOUR BRAND',
+      enlistDescription: 'Gain premier brand recall and highly localized exposure to massive energetic audiences. We offer physical experiential stalls, interactive app integrations, visual custom stage banners, and direct category sponsorships.',
+      enlistBullets: [
+        'Access over 2,00,000+ highly active demographics',
+        'Custom physical experiential display zones',
+        'Live app telemetry-integrated promotional badges',
+      ],
+    },
+  },
+  {
+    key: 'gallery_page',
+    value: {
+      eyebrow: 'Moments Captured',
+      heading: 'Experience Highlights',
+      description: 'Witness spectacular frames from our biggest past editions. Concert arenas, traditional runways, and dense technology presentations.',
+    },
+  },
+  {
+    key: 'blogs_page',
+    value: {
+      heading: 'Blog',
+      description: 'Curated road trip itineraries, expert driving guides, and premium destination logs across Mewar and Rajasthan.',
+    },
+  },
 ];
 
 const MOCK_COMPETITIONS = [
@@ -983,16 +1055,14 @@ export async function ensureSchema() {
     `;
   }
 
-  // Auto-seed site_content
-  const siteContentCount = await sql`SELECT COUNT(*) as count FROM site_content`;
-  if (Number(siteContentCount[0].count) === 0) {
-    for (const sc of MOCK_SITE_CONTENT) {
-      await sql`
-        INSERT INTO site_content (key, value)
-        VALUES (${sc.key}, ${JSON.stringify(sc.value)})
-      `;
-    }
-    console.log("[DB INIT] Seeded site_content table.");
+  // Auto-seed site_content — per-key upsert so newly introduced keys get seeded
+  // on future deploys without ever overwriting a key an admin has already edited.
+  for (const sc of MOCK_SITE_CONTENT) {
+    await sql`
+      INSERT INTO site_content (key, value)
+      VALUES (${sc.key}, ${JSON.stringify(sc.value)})
+      ON CONFLICT (key) DO NOTHING
+    `;
   }
 
   // Auto-seed competitions

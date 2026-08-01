@@ -20,12 +20,14 @@ import {
   BookOpen,
   Trophy,
   Tags,
+  Ticket,
 } from "lucide-react";
 import { useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/events", label: "Events", icon: CalendarDays },
+  { href: "/admin/bookings", label: "Ticket Bookings", icon: Ticket },
   { href: "/admin/competitions", label: "Competitions", icon: Trophy },
   { href: "/admin/registrations", label: "Registrations", icon: ClipboardList },
   { href: "/admin/scanner", label: "QR Scanner", icon: QrCode },

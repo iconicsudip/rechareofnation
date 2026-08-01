@@ -21,6 +21,29 @@ interface HeroSlide {
 }
 
 interface Testimonial { quote: string; author: string; role: string }
+interface HubItem { category: string; desc: string }
+interface StatItem { value: string; label: string }
+interface NewsletterContent { eyebrow: string; heading: string; description: string; ctaLabel: string; successMessage: string }
+
+const DEFAULT_NEWSLETTER: NewsletterContent = {
+  eyebrow: "VIP GATEWAY",
+  heading: "GET SECRET PRE-SALE ACCESS ALERTS",
+  description: "Enter your corporate or student email to secure discount codes and early-bird notifications before tickets sell out.",
+  ctaLabel: "JOIN CREW",
+  successMessage: "Secret alert pass activated. Welcome to the crew!",
+};
+
+// Fixed icon/color palette cycled by index for taxonomy-driven category chips & hub cards
+// (taxonomy values are arbitrary strings with no natural icon mapping)
+const CATEGORY_STYLE_PALETTE = [
+  { icon: Flame, chipBg: "bg-red-50/65", chipBorder: "border-red-100", chipText: "text-red-600", hubBg: "bg-red-50/80", hubText: "text-red-500", hubBorder: "border-red-100/50" },
+  { icon: Trophy, chipBg: "bg-amber-50/65", chipBorder: "border-amber-100", chipText: "text-amber-600", hubBg: "bg-amber-50/80", hubText: "text-amber-500", hubBorder: "border-amber-100/50" },
+  { icon: Laptop, chipBg: "bg-cyan-50/65", chipBorder: "border-cyan-100", chipText: "text-cyan-600", hubBg: "bg-cyan-50/80", hubText: "text-cyan-500", hubBorder: "border-cyan-100/50" },
+  { icon: BookOpen, chipBg: "bg-purple-50/65", chipBorder: "border-purple-100", chipText: "text-purple-600", hubBg: "bg-purple-50/80", hubText: "text-purple-500", hubBorder: "border-purple-100/50" },
+  { icon: Briefcase, chipBg: "bg-indigo-50/65", chipBorder: "border-indigo-100", chipText: "text-indigo-600", hubBg: "bg-indigo-50/80", hubText: "text-indigo-500", hubBorder: "border-indigo-100/50" },
+  { icon: GraduationCap, chipBg: "bg-emerald-50/65", chipBorder: "border-emerald-100", chipText: "text-emerald-600", hubBg: "bg-emerald-50/80", hubText: "text-emerald-500", hubBorder: "border-emerald-100/50" },
+  { icon: Globe, chipBg: "bg-orange-50/65", chipBorder: "border-orange-100", chipText: "text-orange-600", hubBg: "bg-orange-50/80", hubText: "text-orange-500", hubBorder: "border-orange-100/50" },
+];
 
 export default function HomePage() {
   const router = useRouter();
@@ -49,6 +72,10 @@ export default function HomePage() {
   const [arenas, setArenas] = useState<CompetitionRecord[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [cities, setCities] = useState<string[]>([]);
+  const [eventCategories, setEventCategories] = useState<string[]>([]);
+  const [hubs, setHubs] = useState<HubItem[]>([]);
+  const [stats, setStats] = useState<StatItem[]>([]);
+  const [newsletterContent, setNewsletterContent] = useState<NewsletterContent>(DEFAULT_NEWSLETTER);
 
   // Next slide automation
   useEffect(() => {
@@ -62,7 +89,11 @@ export default function HomePage() {
   // Fetch list data
   useEffect(() => {
     const fetchData = async () => {
-      const [allSponsors, allGallery, hero, testimonialContent, partnerContent, events, competitions, blogList, cityList] = await Promise.all([
+      const [
+        allSponsors, allGallery, hero, testimonialContent, partnerContent,
+        events, competitions, blogList, cityList, categoryList,
+        hubsContent, statsContent, newsletterData,
+      ] = await Promise.all([
         ApiClient.getSponsors(),
         ApiClient.getGalleryItems(),
         ApiClient.getSiteContent<{ slides: HeroSlide[] }>('homepage_hero'),
@@ -72,6 +103,10 @@ export default function HomePage() {
         ApiClient.getCompetitions(),
         ApiClient.getBlogs(),
         ApiClient.getTaxonomy('city'),
+        ApiClient.getTaxonomy('event_category'),
+        ApiClient.getSiteContent<{ hubs: HubItem[] }>('homepage_hubs'),
+        ApiClient.getSiteContent<{ stats: StatItem[] }>('homepage_stats'),
+        ApiClient.getSiteContent<NewsletterContent>('homepage_newsletter'),
       ]);
       setSponsors(allSponsors);
       setGallery(allGallery);
@@ -82,7 +117,13 @@ export default function HomePage() {
       setArenas(competitions);
       setBlogs(blogList);
       setCities(cityList);
-      if (cityList.length > 0) setTrendingCity(cityList[0]);
+      setEventCategories(categoryList);
+      setHubs(hubsContent?.hubs ?? []);
+      setStats(statsContent?.stats ?? []);
+      setNewsletterContent(newsletterData ?? DEFAULT_NEWSLETTER);
+      const cityListWithEvents = cityList.filter((c) => events.some((e) => e.city === c));
+      if (cityListWithEvents.length > 0) setTrendingCity(cityListWithEvents[0]);
+      else if (cityList.length > 0) setTrendingCity(cityList[0]);
     };
     fetchData();
   }, []);
@@ -113,6 +154,7 @@ export default function HomePage() {
   const carnivals = allEvents.filter(e => e.category === "Cultural Programs").slice(0, 4);
   const expos = allEvents.filter(e => e.category === "Trade Expos").slice(0, 4);
   const trendingEventsForCity = allEvents.filter(e => e.city === trendingCity).slice(0, 3);
+  const citiesWithEvents = cities.filter(city => allEvents.some(e => e.city === city));
 
   return (
     <div className="flex flex-col text-left">
@@ -179,13 +221,9 @@ export default function HomePage() {
               onChange={(e) => setSearchCategory(e.target.value)}
             >
               <option value="All">All Categories / Segments</option>
-              <option value="Festivals">Festivals</option>
-              <option value="Competitions">Competitions</option>
-              <option value="Expos">Expos</option>
-              <option value="Workshops">Workshops</option>
-              <option value="Corporate">Corporate</option>
-              <option value="School & College">School & College</option>
-              <option value="Business Networking">Business Networking</option>
+              {eventCategories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
             </select>
           </div>
 
@@ -197,11 +235,9 @@ export default function HomePage() {
               onChange={(e) => setSearchCity(e.target.value)}
             >
               <option value="All">All Cities</option>
-              <option value="New Delhi">New Delhi</option>
-              <option value="Mumbai">Mumbai</option>
-              <option value="Bengaluru">Bengaluru</option>
-              <option value="Chennai">Chennai</option>
-              <option value="Kolkata">Kolkata</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
             </select>
           </div>
 
@@ -228,29 +264,38 @@ export default function HomePage() {
         </form>
       </div>
 
+      {/* 2B. TRUST / STATS BAR */}
+      {stats.length > 0 && (
+        <section className="pt-10 pb-2 bg-[#fbfcfd]">
+          <div className="container">
+            <div className="bg-white border border-slate-200/80 shadow-[0_15px_50px_rgba(0,0,0,0.04)] rounded-[22px] px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4">
+              {stats.map((stat, idx) => (
+                <div key={idx} className="text-center px-2">
+                  <p className="text-2xl sm:text-3xl font-black font-primary text-slate-900 tracking-tight">{stat.value}</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 font-primary mt-2">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 3. BROWSE SEGMENT FAST-TRACKS */}
       <section className="py-12 bg-[#fbfcfd]">
         <div className="container">
           <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Browse Segment Fast-Tracks</span>
           <div className="flex flex-wrap gap-2.5 mt-3">
-            {[
-              { name: "Festivals", icon: Flame, bg: "bg-red-50/65", border: "border-red-100", text: "text-red-600" },
-              { name: "Competitions", icon: Trophy, bg: "bg-amber-50/65", border: "border-amber-100", text: "text-amber-600" },
-              { name: "Expos", icon: Laptop, bg: "bg-cyan-50/65", border: "border-cyan-100", text: "text-cyan-600" },
-              { name: "Workshops", icon: BookOpen, bg: "bg-purple-50/65", border: "border-purple-100", text: "text-purple-600" },
-              { name: "Corporate", icon: Briefcase, bg: "bg-indigo-50/65", border: "border-indigo-100", text: "text-indigo-600" },
-              { name: "School & College", icon: GraduationCap, bg: "bg-emerald-50/65", border: "border-emerald-100", text: "text-emerald-600" },
-              { name: "Business Networking", icon: Globe, bg: "bg-orange-50/65", border: "border-orange-100", text: "text-orange-600" }
-            ].map((seg) => {
-              const Icon = seg.icon;
+            {eventCategories.map((cat, idx) => {
+              const style = CATEGORY_STYLE_PALETTE[idx % CATEGORY_STYLE_PALETTE.length];
+              const Icon = style.icon;
               return (
                 <Link
-                  key={seg.name}
-                  href={`/events?category=${seg.name}`}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full border ${seg.bg} ${seg.border} ${seg.text} text-xs font-bold hover:scale-102 transition-transform duration-200`}
+                  key={cat}
+                  href={`/events?category=${cat}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full border ${style.chipBg} ${style.chipBorder} ${style.chipText} text-xs font-bold hover:scale-102 transition-transform duration-200`}
                 >
                   <Icon size={12} />
-                  <span>{seg.name}</span>
+                  <span>{cat}</span>
                 </Link>
               );
             })}
@@ -259,43 +304,38 @@ export default function HomePage() {
       </section>
 
       {/* 4. DISCOVER NATIONAL HUBS */}
-      <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
-        <div className="container">
-          <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 mb-8">
-            <div>
-              <h2 className="text-[20px] font-black tracking-tight text-slate-900 font-primary uppercase">DISCOVER NATIONAL HUBS</h2>
-              <p className="text-slate-500 text-xs mt-1 font-secondary">Explore specialized arenas across the country. Tap a card to enter.</p>
+      {hubs.length > 0 && (
+        <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
+          <div className="container">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 mb-8">
+              <div>
+                <h2 className="text-[20px] font-black tracking-tight text-slate-900 font-primary uppercase">DISCOVER NATIONAL HUBS</h2>
+                <p className="text-slate-500 text-xs mt-1 font-secondary">Explore specialized arenas across the country. Tap a card to enter.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {hubs.map((hub, idx) => {
+                const style = CATEGORY_STYLE_PALETTE[idx % CATEGORY_STYLE_PALETTE.length];
+                const Icon = style.icon;
+                return (
+                  <Link
+                    key={hub.category}
+                    href={`/events?category=${hub.category}`}
+                    className="bg-white p-5 rounded-[22px] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center justify-center text-center min-h-[210px] group"
+                  >
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${style.hubBg} border ${style.hubBorder} group-hover:scale-105 transition-transform duration-300`}>
+                      <Icon size={18} className={style.hubText} />
+                    </div>
+                    <h4 className="font-extrabold text-slate-900 text-[12.5px] font-primary uppercase tracking-wider mt-4">{hub.category}</h4>
+                    <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-2.5 max-w-[130px] mx-auto">{hub.desc}</p>
+                  </Link>
+                );
+              })}
             </div>
           </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            {[
-              { title: "Festivals", icon: Flame, desc: "Grand cultural beats & live stage arts.", bg: "bg-red-50/80", text: "text-red-500", border: "border-red-100/50" },
-              { title: "Competitions", icon: Trophy, desc: "National pageants & skill face-offs.", bg: "bg-amber-50/80", text: "text-amber-500", border: "border-amber-100/50" },
-              { title: "Expos", icon: Laptop, desc: "Smart city tech, gadgets & showcases.", bg: "bg-cyan-50/80", text: "text-cyan-500", border: "border-cyan-100/50" },
-              { title: "Workshops", icon: BookOpen, desc: "Masterclasses & interactive craft jams.", bg: "bg-purple-50/80", text: "text-purple-500", border: "border-purple-100/50" },
-              { title: "Corporate", icon: Briefcase, desc: "Strategic leadership summits & panels.", bg: "bg-indigo-50/80", text: "text-indigo-500", border: "border-indigo-100/50" },
-              { title: "School & College", icon: GraduationCap, desc: "Inter-collegiate fests & youth talent.", bg: "bg-emerald-50/80", text: "text-emerald-500", border: "border-emerald-100/50" },
-              { title: "Business Networking", icon: Globe, desc: "High-tier connections & founder mixers.", bg: "bg-orange-50/80", text: "text-orange-500", border: "border-orange-100/50" }
-            ].map((hub, idx) => {
-              const Icon = hub.icon;
-              return (
-                <Link 
-                  key={idx} 
-                  href={`/events?category=${hub.title}`}
-                  className="bg-white p-5 rounded-[22px] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center justify-center text-center min-h-[210px] group"
-                >
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${hub.bg} border ${hub.border} group-hover:scale-105 transition-transform duration-300`}>
-                    <Icon size={18} className={hub.text} />
-                  </div>
-                  <h4 className="font-extrabold text-slate-900 text-[12.5px] font-primary uppercase tracking-wider mt-4">{hub.title}</h4>
-                  <p className="text-slate-500 text-[10.5px] leading-relaxed font-secondary mt-2.5 max-w-[130px] mx-auto">{hub.desc}</p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 5. SPOTLIGHT HEADLINERS */}
       <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
@@ -462,6 +502,7 @@ export default function HomePage() {
       </section>
 
       {/* 9. TRENDING NEAR YOU (WHAT'S HOT IN CITY) */}
+      {citiesWithEvents.length > 0 && (
       <section className="bg-[#0b0f19] dark-bg py-16 px-4">
         <div className="container flex flex-col gap-10">
           
@@ -475,7 +516,7 @@ export default function HomePage() {
 
             {/* City Selector Tabs */}
             <div className="flex bg-[#0f172a] border border-gray-800 p-1 rounded-xl overflow-x-auto max-w-full shrink-0">
-              {cities.map((city) => (
+              {citiesWithEvents.map((city) => (
                 <button
                   key={city}
                   onClick={() => setTrendingCity(city)}
@@ -534,6 +575,7 @@ export default function HomePage() {
 
         </div>
       </section>
+      )}
 
       {/* 10. SEASON SNAPSHOTS (GALLERY PREVIEW) */}
       <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
@@ -697,18 +739,18 @@ export default function HomePage() {
           <div className="p-8 md:p-12 text-center rounded-[24px] bg-[#0f172a] dark-bg border border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col items-center gap-4 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-bl-full filter blur-xl"></div>
             
-            <span className="text-[9px] font-primary tracking-widest text-pink-500 font-bold uppercase">VIP GATEWAY</span>
+            <span className="text-[9px] font-primary tracking-widest text-pink-500 font-bold uppercase">{newsletterContent.eyebrow}</span>
             <h2 className="text-xl sm:text-2xl font-black text-white font-primary uppercase tracking-tight max-w-md leading-tight">
-              GET SECRET PRE-SALE ACCESS ALERTS
+              {newsletterContent.heading}
             </h2>
             <p className="text-gray-400 text-xs sm:text-sm max-w-sm font-secondary leading-relaxed">
-              Enter your corporate or student email to secure discount codes and early-bird notifications before tickets sell out.
+              {newsletterContent.description}
             </p>
 
             {newsletterSubscribed ? (
               <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl p-4 text-xs max-w-sm flex items-center gap-2">
                 <CheckCircle size={16} />
-                <span>Secret alert pass activated. Welcome to the crew!</span>
+                <span>{newsletterContent.successMessage}</span>
               </div>
             ) : (
               <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row w-full gap-3 max-w-md mt-2 relative z-10">
@@ -725,7 +767,7 @@ export default function HomePage() {
                   className="py-3.5 px-8 rounded-xl font-bold text-xs shadow-lg transition-all font-primary uppercase tracking-wide cursor-pointer text-white flex items-center justify-center shrink-0"
                   style={{ backgroundColor: '#ec4899' }}
                 >
-                  JOIN CREW
+                  {newsletterContent.ctaLabel}
                 </button>
               </form>
             )}

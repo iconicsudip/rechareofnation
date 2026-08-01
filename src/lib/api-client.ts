@@ -547,44 +547,51 @@ export const ApiClient = {
     bookingData: Omit<TicketBooking, 'id' | 'bookingRef' | 'createdAt' | 'status' | 'qrCodeValue'>
   ): Promise<TicketBooking> => {
     const user = ApiClient.getCurrentUser();
+    let response: Response;
     try {
-      const response = await fetch('/api/user/bookings', {
+      response = await fetch('/api/user/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...bookingData, userId: user?.id })
       });
-      const data = await response.json();
-      if (response.ok && data.success && data.booking) {
-        const db = data.booking;
-        const booking: TicketBooking = {
-          id: db.id, bookingRef: db.booking_ref, eventId: db.event_id,
-          eventName: db.event_name, eventDate: String(db.event_date ?? '').slice(0, 10),
-          eventVenue: db.event_venue, eventBanner: db.event_banner,
-          visitorName: db.visitor_name, visitorEmail: db.visitor_email,
-          visitorMobile: db.visitor_mobile, visitorCity: db.visitor_city,
-          ticketType: db.ticket_type, quantity: db.quantity,
-          totalAmount: parseFloat(db.total_amount), specialRequests: db.special_requests,
-          paymentId: db.payment_id, paymentMethod: db.payment_method,
-          status: db.status, createdAt: db.created_at, qrCodeValue: db.qr_hash
-        };
-        const all = getStorageItem<TicketBooking[]>('rn_bookings', []);
-        all.push(booking);
-        setStorageItem('rn_bookings', all);
-        return booking;
-      }
     } catch (err) {
-      console.warn('Backend booking failed, using localStorage fallback:', err);
+      // Genuine network failure (e.g. offline) — degrade to a local-only booking.
+      console.warn('Backend booking request failed, using localStorage fallback:', err);
+      const all = getStorageItem<TicketBooking[]>('rn_bookings', []);
+      const bookingRef = 'RN-BK-' + Math.floor(100000 + Math.random() * 900000);
+      const newBooking: TicketBooking = {
+        ...bookingData, id: 'bk-' + Math.random().toString(36).substr(2, 9),
+        bookingRef, createdAt: new Date().toISOString(), status: 'confirmed',
+        qrCodeValue: `RECHARGE-TICKET:${bookingRef}:${bookingData.visitorEmail}`
+      };
+      all.push(newBooking);
+      setStorageItem('rn_bookings', all);
+      return newBooking;
     }
-    const all = getStorageItem<TicketBooking[]>('rn_bookings', []);
-    const bookingRef = 'RN-BK-' + Math.floor(100000 + Math.random() * 900000);
-    const newBooking: TicketBooking = {
-      ...bookingData, id: 'bk-' + Math.random().toString(36).substr(2, 9),
-      bookingRef, createdAt: new Date().toISOString(), status: 'confirmed',
-      qrCodeValue: `RECHARGE-TICKET:${bookingRef}:${bookingData.visitorEmail}`
+
+    const data = await response.json();
+    if (!response.ok || !data.success || !data.booking) {
+      // The server reached a real decision (e.g. sold out, validation error) —
+      // surface it instead of silently fabricating a "successful" booking.
+      throw new Error(data.error || 'Booking could not be completed. Please try again.');
+    }
+
+    const db = data.booking;
+    const booking: TicketBooking = {
+      id: db.id, bookingRef: db.booking_ref, eventId: db.event_id,
+      eventName: db.event_name, eventDate: String(db.event_date ?? '').slice(0, 10),
+      eventVenue: db.event_venue, eventBanner: db.event_banner,
+      visitorName: db.visitor_name, visitorEmail: db.visitor_email,
+      visitorMobile: db.visitor_mobile, visitorCity: db.visitor_city,
+      ticketType: db.ticket_type, quantity: db.quantity,
+      totalAmount: parseFloat(db.total_amount), specialRequests: db.special_requests,
+      paymentId: db.payment_id, paymentMethod: db.payment_method,
+      status: db.status, createdAt: db.created_at, qrCodeValue: db.qr_hash
     };
-    all.push(newBooking);
+    const all = getStorageItem<TicketBooking[]>('rn_bookings', []);
+    all.push(booking);
     setStorageItem('rn_bookings', all);
-    return newBooking;
+    return booking;
   },
 
   getRegistrations: (): CompetitionRegistration[] => {

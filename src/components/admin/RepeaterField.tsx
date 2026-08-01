@@ -1,11 +1,12 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import ImageUploadField from "./ImageUploadField";
 
 export interface RepeaterColumn {
   key: string;
   label: string;
-  type?: "text" | "number" | "textarea";
+  type?: "text" | "number" | "textarea" | "image";
   placeholder?: string;
   span?: 1 | 2; // grid column span within a row (default 1)
 }
@@ -63,7 +64,13 @@ export default function RepeaterField<T extends Record<string, unknown>>({
             <div className="grid grid-cols-2 gap-2">
               {columns.map((col) => (
                 <div key={col.key} className={col.span === 2 ? "col-span-2" : ""}>
-                  {col.type === "textarea" ? (
+                  {col.type === "image" ? (
+                    <ImageUploadField
+                      label={col.label}
+                      value={(row[col.key] as string) ?? ""}
+                      onChange={(url) => updateRow(i, col.key, url)}
+                    />
+                  ) : col.type === "textarea" ? (
                     <textarea
                       rows={2}
                       style={{ ...S.input, resize: "vertical" }}

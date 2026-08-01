@@ -967,9 +967,20 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  // Booking details form
-  const [selectedTicket, setSelectedTicket] = useState<TicketPriceInfo | null>(event.ticketPrices[0] || null);
+  // Booking details form — default to the first in-stock tier where possible,
+  // so a visitor doesn't land on a sold-out selection with no way forward.
+  const [selectedTicket, setSelectedTicket] = useState<TicketPriceInfo | null>(
+    event.ticketPrices.find((t) => t.available > 0) || event.ticketPrices[0] || null
+  );
   const [quantity, setQuantity] = useState(1);
+
+  // Keep quantity in bounds if the visitor switches to a tier with less stock
+  // than what they'd already dialed up.
+  useEffect(() => {
+    const maxQty = Math.max(1, Math.min(10, selectedTicket?.available ?? 10));
+    setQuantity((q) => Math.min(q, maxQty));
+  }, [selectedTicket]);
+
   const [visitorName, setVisitorName] = useState(user?.name || "");
   const [visitorEmail, setVisitorEmail] = useState(user?.email || "");
   const [visitorMobile, setVisitorMobile] = useState(user?.mobile || "");
@@ -1019,7 +1030,7 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
         setCompletedBooking(booking);
         setStep(5); // Go to final confirmation screen
       } catch (err) {
-        setError("Booking failed. Please try again.");
+        setError(err instanceof Error ? err.message : "Booking failed. Please try again.");
       } finally {
         setIsProcessing(false);
       }
@@ -1033,12 +1044,12 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0B0F19]/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-lg glass-panel relative rounded-2xl border-indigo-500/25 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-lg bg-white relative rounded-[28px] shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Top Header */}
-        <div className="px-6 py-4 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
-          <h3 className="font-bold text-white font-primary text-base">Book Audience Pass</h3>
-          <button onClick={onClose} className="p-1 hover:bg-[rgba(255,255,255,0.05)] rounded-full text-gray-400 hover:text-white transition-colors">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <h3 className="font-black text-slate-900 font-primary text-sm uppercase tracking-wider">Book Audience Pass</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-900 transition-colors cursor-pointer">
             <X size={18} />
           </button>
         </div>
@@ -1046,7 +1057,7 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
         {/* Content Area */}
         <div className="p-6 overflow-y-auto flex-grow">
           {error && (
-            <div className="mb-4 p-4 bg-pink-500/10 border border-pink-500/30 text-pink-400 rounded-xl text-xs flex items-start gap-2.5">
+            <div className="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs flex items-start gap-2.5">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -1055,32 +1066,41 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
           {/* STEP 1: Select Ticket Tier */}
           {step === 1 && (
             <div className="flex flex-col gap-4">
-              <h4 className="text-sm font-semibold text-gray-300">1. Select Ticket Tier</h4>
+              <h4 className="text-[10px] font-primary font-bold uppercase tracking-widest text-indigo-600">1. Select Ticket Tier</h4>
               <div className="flex flex-col gap-3">
-                {event.ticketPrices.map((ticket) => (
-                  <div 
-                    key={ticket.type} 
-                    onClick={() => setSelectedTicket(ticket)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer flex justify-between items-start gap-4 ${
-                      selectedTicket?.type === ticket.type 
-                        ? "border-cyan-500 bg-cyan-500/5" 
-                        : "border-[rgba(255,255,255,0.06)] bg-gray-900/20 hover:border-gray-700"
-                    }`}
-                  >
-                    <div>
-                      <h5 className="font-bold text-sm text-white">{ticket.type}</h5>
-                      <p className="text-gray-400 text-xs mt-1 leading-normal">{ticket.description}</p>
+                {event.ticketPrices.map((ticket) => {
+                  const soldOut = ticket.available <= 0;
+                  const selected = selectedTicket?.type === ticket.type;
+                  return (
+                    <div
+                      key={ticket.type}
+                      onClick={() => !soldOut && setSelectedTicket(ticket)}
+                      className={`p-4 rounded-2xl border transition-all flex justify-between items-start gap-4 ${
+                        soldOut
+                          ? "border-slate-200 bg-slate-50 text-slate-400 opacity-60 cursor-not-allowed"
+                          : selected
+                            ? "border-indigo-600 bg-slate-950 text-white shadow-md cursor-pointer"
+                            : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100/60 text-slate-800 cursor-pointer"
+                      }`}
+                    >
+                      <div>
+                        <h5 className="font-bold text-sm">{ticket.type}</h5>
+                        <p className={`text-xs mt-1 leading-normal ${selected && !soldOut ? "text-white/70" : "text-slate-500"}`}>{ticket.description}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-black text-base">₹{ticket.price}</span>
+                        <span className={`text-[10px] block mt-0.5 font-bold ${soldOut ? "text-rose-500" : selected ? "text-white/50" : "text-slate-400"}`}>
+                          {soldOut ? "SOLD OUT" : `${ticket.available} left`}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <span className="font-bold text-white text-base">₹{ticket.price}</span>
-                      <span className="text-[10px] text-gray-500 block mt-0.5">{ticket.available} left</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-              <button 
+              <button
                 onClick={() => setStep(2)}
-                className="btn btn-primary w-full py-3.5 font-bold mt-4"
+                disabled={!selectedTicket || selectedTicket.available <= 0}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 text-white rounded-2xl py-3.5 font-primary font-bold text-xs uppercase tracking-wider transition-colors w-full mt-4 cursor-pointer"
               >
                 Proceed to Quantity
               </button>
@@ -1088,62 +1108,70 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
           )}
 
           {/* STEP 2: Choose Quantity */}
-          {step === 2 && (
+          {step === 2 && (() => {
+            const maxQty = Math.max(1, Math.min(10, selectedTicket?.available ?? 10));
+            return (
             <div className="flex flex-col gap-4 text-center py-6">
-              <h4 className="text-sm font-semibold text-gray-300 text-left">2. Choose Quantity</h4>
-              
-              <div className="glass-panel p-6 max-w-xs mx-auto w-full flex items-center justify-between border-[rgba(255,255,255,0.06)] rounded-xl mt-4">
-                <button 
+              <h4 className="text-[10px] font-primary font-bold uppercase tracking-widest text-indigo-600 text-left">2. Choose Quantity</h4>
+
+              <div className="bg-slate-50 border border-slate-200 p-6 max-w-xs mx-auto w-full flex items-center justify-between rounded-2xl mt-4">
+                <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-full border border-gray-700 hover:border-white text-white flex items-center justify-center font-bold text-lg"
+                  className="w-10 h-10 rounded-full border border-slate-300 hover:border-indigo-600 hover:text-indigo-600 text-slate-600 flex items-center justify-center font-bold text-lg cursor-pointer transition-colors"
                 >
                   -
                 </button>
-                <span className="text-3xl font-black text-white">{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(Math.min(10, quantity + 1))}
-                  className="w-10 h-10 rounded-full border border-gray-700 hover:border-white text-white flex items-center justify-center font-bold text-lg"
+                <span className="text-3xl font-black text-slate-900">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
+                  disabled={quantity >= maxQty}
+                  className="w-10 h-10 rounded-full border border-slate-300 hover:border-indigo-600 hover:text-indigo-600 text-slate-600 flex items-center justify-center font-bold text-lg cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-slate-300 disabled:hover:text-slate-600"
                 >
                   +
                 </button>
               </div>
-              
-              <p className="text-xs text-gray-500 mt-2">Maximum of 10 tickets allowed per transaction.</p>
-              
+
+              <p className="text-xs text-slate-400 mt-2">
+                {maxQty < 10
+                  ? `Only ${maxQty} ${selectedTicket?.type} pass(es) left for this booking.`
+                  : "Maximum of 10 tickets allowed per transaction."}
+              </p>
+
               <div className="flex gap-3 mt-6">
-                <button onClick={() => setStep(1)} className="btn btn-secondary py-3 px-6 text-sm font-semibold">
+                <button onClick={() => setStep(1)} className="border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-2xl py-3 px-6 text-sm font-bold cursor-pointer transition-colors">
                   Back
                 </button>
-                <button onClick={() => setStep(3)} className="btn btn-primary py-3 flex-grow text-sm font-bold">
+                <button onClick={() => setStep(3)} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl py-3 flex-grow text-sm font-bold cursor-pointer transition-colors">
                   Enter Visitor Details
                 </button>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* STEP 3: Enter Visitor Details */}
           {step === 3 && (
             <form onSubmit={(e) => { e.preventDefault(); setStep(4); }} className="flex flex-col gap-4">
-              <h4 className="text-sm font-semibold text-gray-300">3. Visitor Information</h4>
-              
-              <div className="form-group">
-                <label className="form-label">Full Name *</label>
-                <input 
-                  type="text" 
-                  placeholder="Visitor name" 
-                  className="form-input"
+              <h4 className="text-[10px] font-primary font-bold uppercase tracking-widest text-indigo-600">3. Visitor Information</h4>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-slate-600">Full Name *</label>
+                <input
+                  type="text"
+                  placeholder="Visitor name"
+                  className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Email Address *</label>
-                <input 
-                  type="email" 
-                  placeholder="visitor@example.com" 
-                  className="form-input"
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-slate-600">Email Address *</label>
+                <input
+                  type="email"
+                  placeholder="visitor@example.com"
+                  className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                   value={visitorEmail}
                   onChange={(e) => setVisitorEmail(e.target.value)}
                   required
@@ -1151,23 +1179,23 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="form-group">
-                  <label className="form-label">Mobile Number *</label>
-                  <input 
-                    type="tel" 
-                    placeholder="99999 88888" 
-                    className="form-input"
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-600">Mobile Number *</label>
+                  <input
+                    type="tel"
+                    placeholder="99999 88888"
+                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     value={visitorMobile}
                     onChange={(e) => setVisitorMobile(e.target.value)}
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">City *</label>
-                  <input 
-                    type="text" 
-                    placeholder="Bangalore" 
-                    className="form-input"
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-600">City *</label>
+                  <input
+                    type="text"
+                    placeholder="Bangalore"
+                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
                     value={visitorCity}
                     onChange={(e) => setVisitorCity(e.target.value)}
                     required
@@ -1175,21 +1203,21 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Special Requests (Optional)</label>
-                <textarea 
-                  placeholder="Wheelchair assistance, front rows for elderly etc." 
-                  className="form-input h-20 resize-none"
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-slate-600">Special Requests (Optional)</label>
+                <textarea
+                  placeholder="Wheelchair assistance, front rows for elderly etc."
+                  className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors h-20 resize-none"
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
                 />
               </div>
 
               <div className="flex gap-3 mt-4">
-                <button type="button" onClick={() => setStep(2)} className="btn btn-secondary py-3 px-6 text-sm font-semibold">
+                <button type="button" onClick={() => setStep(2)} className="border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-2xl py-3 px-6 text-sm font-bold cursor-pointer transition-colors">
                   Back
                 </button>
-                <button type="submit" className="btn btn-primary py-3 flex-grow text-sm font-bold">
+                <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl py-3 flex-grow text-sm font-bold cursor-pointer transition-colors">
                   Review & Pay
                 </button>
               </div>
@@ -1199,53 +1227,53 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
           {/* STEP 4: Review & Payment Simulator */}
           {step === 4 && (
             <div className="flex flex-col gap-5">
-              <h4 className="text-sm font-semibold text-gray-300">4. Review & Payment</h4>
-              
+              <h4 className="text-[10px] font-primary font-bold uppercase tracking-widest text-indigo-600">4. Review & Payment</h4>
+
               {/* Order breakdown */}
-              <div className="glass-panel p-5 rounded-xl border-[rgba(255,255,255,0.06)] bg-gray-900/10 flex flex-col gap-3">
-                <div className="flex justify-between text-xs text-gray-400">
+              <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex flex-col gap-3">
+                <div className="flex justify-between text-xs text-slate-500">
                   <span>Event</span>
-                  <span className="font-bold text-white">{event.name}</span>
+                  <span className="font-bold text-slate-900">{event.name}</span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-400">
+                <div className="flex justify-between text-xs text-slate-500">
                   <span>Ticket Type</span>
-                  <span className="font-bold text-white">{selectedTicket?.type}</span>
+                  <span className="font-bold text-slate-900">{selectedTicket?.type}</span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-400">
+                <div className="flex justify-between text-xs text-slate-500">
                   <span>Quantity</span>
-                  <span className="font-bold text-white">{quantity}</span>
+                  <span className="font-bold text-slate-900">{quantity}</span>
                 </div>
-                <div className="border-t border-[rgba(255,255,255,0.06)] pt-3 flex justify-between text-sm">
-                  <span className="font-bold text-white">Total Amount</span>
-                  <span className="font-black text-cyan-400 text-base">₹{totalAmount}</span>
+                <div className="border-t border-slate-200 pt-3 flex justify-between text-sm">
+                  <span className="font-bold text-slate-900">Total Amount</span>
+                  <span className="font-black text-indigo-600 text-base">₹{totalAmount}</span>
                 </div>
               </div>
 
               {/* Razorpay Interface Simulator */}
-              <div className="border border-indigo-500/20 rounded-xl overflow-hidden bg-slate-900/90 relative p-5 flex flex-col gap-4">
-                <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-                  <span className="text-xs font-bold tracking-widest text-gray-400">RAZORPAY CHECKOUT</span>
-                  <div className="w-12 h-4 bg-gray-700/50 rounded flex items-center justify-center text-[7px] text-gray-300 font-bold">SECURE</div>
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white relative p-5 flex flex-col gap-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <span className="text-xs font-bold tracking-widest text-slate-400">RAZORPAY CHECKOUT</span>
+                  <div className="bg-emerald-50 text-emerald-600 border border-emerald-200 rounded px-2 py-0.5 text-[7px] font-bold">SECURE</div>
                 </div>
 
                 {isProcessing ? (
                   <div className="py-10 flex flex-col items-center gap-3">
-                    <div className="w-10 h-10 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-xs text-gray-400 font-semibold animate-pulse">Processing secure payment overlay...</span>
+                    <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs text-slate-400 font-semibold animate-pulse">Processing secure payment overlay...</span>
                   </div>
                 ) : (
                   <>
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] text-gray-500 font-bold uppercase">Select Payment Channel</label>
+                      <label className="text-[10px] text-slate-400 font-bold uppercase">Select Payment Channel</label>
                       <div className="grid grid-cols-2 gap-2">
                         {["UPI", "Credit/Debit Card", "Net Banking", "Wallets"].map(method => (
-                          <div 
-                            key={method} 
+                          <div
+                            key={method}
                             onClick={() => setPaymentMethod(method)}
-                            className={`p-3 rounded-lg border text-center text-xs font-bold cursor-pointer transition-all ${
-                              paymentMethod === method 
-                                ? "border-cyan-400 bg-cyan-400/5 text-white" 
-                                : "border-gray-800 text-gray-400 hover:border-gray-700"
+                            className={`p-3 rounded-xl border text-center text-xs font-bold cursor-pointer transition-all ${
+                              paymentMethod === method
+                                ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                                : "border-slate-200 text-slate-500 hover:border-slate-300"
                             }`}
                           >
                             {method}
@@ -1254,9 +1282,9 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
                       </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={handlePayment}
-                      className="btn btn-primary w-full py-3.5 text-xs font-black shadow-neon-pink"
+                      className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white rounded-2xl py-3.5 text-xs font-black uppercase tracking-wide shadow-md w-full transition-all cursor-pointer"
                     >
                       PAY ₹{totalAmount} WITH RAZORPAY
                     </button>
@@ -1265,7 +1293,7 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
               </div>
 
               {!isProcessing && (
-                <button onClick={() => setStep(3)} className="btn btn-secondary py-3 text-xs font-semibold">
+                <button onClick={() => setStep(3)} className="border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-2xl py-3 text-xs font-bold cursor-pointer transition-colors">
                   Go Back
                 </button>
               )}
@@ -1275,55 +1303,55 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
           {/* STEP 5: Success Pass */}
           {step === 5 && completedBooking && (
             <div className="flex flex-col items-center gap-6 text-center py-4 print-area">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl animate-bounce">
+              <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-2xl animate-bounce">
                 ✓
               </div>
               <div>
-                <h4 className="text-xl font-extrabold text-white font-primary">Booking Confirmed!</h4>
-                <p className="text-gray-400 text-xs mt-1">A simulated ticket confirmation mail has been triggered via SMTP.</p>
+                <h4 className="text-xl font-extrabold text-slate-900 font-primary">Booking Confirmed!</h4>
+                <p className="text-slate-500 text-xs mt-1">A simulated ticket confirmation mail has been triggered via SMTP.</p>
               </div>
 
               {/* Printable Ticket Pass Layout */}
-              <div className="w-full border border-dashed border-gray-700 rounded-xl bg-gray-900/50 p-6 flex flex-col gap-4 text-left relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 rounded-bl-full"></div>
+              <div className="w-full border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50 p-6 flex flex-col gap-4 text-left relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-500/5 rounded-bl-full"></div>
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-cyan-400 font-bold">RECHARGE NATION ENTRY PASS</span>
-                    <h5 className="font-extrabold text-white text-base leading-snug font-primary mt-1 line-clamp-1">{completedBooking.eventName}</h5>
+                    <span className="text-[9px] uppercase tracking-wider text-indigo-600 font-bold">RECHARGE NATION ENTRY PASS</span>
+                    <h5 className="font-extrabold text-slate-900 text-base leading-snug font-primary mt-1 line-clamp-1">{completedBooking.eventName}</h5>
                   </div>
                   <div className="text-right">
-                    <span className="text-[8px] text-gray-500 block uppercase font-bold">REF NUMBER</span>
-                    <span className="font-primary text-xs font-bold text-white">{completedBooking.bookingRef}</span>
+                    <span className="text-[8px] text-slate-400 block uppercase font-bold">REF NUMBER</span>
+                    <span className="font-primary text-xs font-bold text-slate-900">{completedBooking.bookingRef}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-xs py-2 border-y border-[rgba(255,255,255,0.06)]">
+                <div className="grid grid-cols-2 gap-4 text-xs py-2 border-y border-slate-200">
                   <div>
-                    <span className="text-[8px] text-gray-500 uppercase block">Attendee</span>
-                    <span className="font-bold text-white line-clamp-1">{completedBooking.visitorName}</span>
+                    <span className="text-[8px] text-slate-400 uppercase block">Attendee</span>
+                    <span className="font-bold text-slate-900 line-clamp-1">{completedBooking.visitorName}</span>
                   </div>
                   <div>
-                    <span className="text-[8px] text-gray-500 uppercase block">Ticket Tier</span>
-                    <span className="font-bold text-cyan-400">{completedBooking.ticketType} x {completedBooking.quantity}</span>
+                    <span className="text-[8px] text-slate-400 uppercase block">Ticket Tier</span>
+                    <span className="font-bold text-indigo-600">{completedBooking.ticketType} x {completedBooking.quantity}</span>
                   </div>
                   <div>
-                    <span className="text-[8px] text-gray-500 uppercase block">Date & Venue</span>
-                    <span className="font-bold text-gray-300">{completedBooking.eventDate}</span>
+                    <span className="text-[8px] text-slate-400 uppercase block">Date & Venue</span>
+                    <span className="font-bold text-slate-700">{completedBooking.eventDate}</span>
                   </div>
                   <div>
-                    <span className="text-[8px] text-gray-500 uppercase block">Gate Location</span>
-                    <span className="font-bold text-gray-300">{completedBooking.eventVenue}</span>
+                    <span className="text-[8px] text-slate-400 uppercase block">Gate Location</span>
+                    <span className="font-bold text-slate-700">{completedBooking.eventVenue}</span>
                   </div>
                 </div>
 
                 {/* Simulated QR Code */}
                 <div className="flex items-center justify-between gap-4 mt-2">
-                  <div className="flex flex-col gap-1 text-[10px] text-gray-400">
+                  <div className="flex flex-col gap-1 text-[10px] text-slate-500">
                     <span>* Bring this pass with you for scan-in.</span>
                     <span>* Food/Beverage is subject to pass terms.</span>
                   </div>
                   {/* Styled Mock SVG QR Code */}
-                  <div className="w-16 h-16 bg-white p-1.5 rounded flex items-center justify-center shrink-0">
+                  <div className="w-16 h-16 bg-white border border-slate-200 p-1.5 rounded flex items-center justify-center shrink-0">
                     <svg viewBox="0 0 100 100" className="w-full h-full text-black">
                       <rect width="25" height="25" fill="black"/>
                       <rect x="75" width="25" height="25" fill="black"/>
@@ -1338,18 +1366,18 @@ function TicketBookingWizard({ event, user, onClose }: WizardProps) {
               </div>
 
               <div className="flex gap-2 w-full mt-4">
-                <button 
+                <button
                   onClick={handlePrint}
-                  className="btn btn-secondary py-3 flex-grow text-xs font-semibold flex items-center justify-center gap-1.5"
+                  className="border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-2xl py-3 flex-grow text-xs font-bold cursor-pointer transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Printer size={14} /> Download PDF Ticket
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     onClose();
                     router.push("/dashboard");
                   }}
-                  className="btn btn-primary py-3 px-6 text-xs font-bold"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl py-3 px-6 text-xs font-bold cursor-pointer transition-colors"
                 >
                   Go to Dashboard
                 </button>

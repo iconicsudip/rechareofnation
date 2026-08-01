@@ -47,6 +47,41 @@ const FALLBACK_TIERS: Record<string, TierData> = {
   ASSOCIATE: FALLBACK_TIER
 };
 
+interface SponsorsPageContent {
+  heroBadge: string;
+  heroTitle: string;
+  heroDescription: string;
+  stats: { label: string; value: string }[];
+  enlistEyebrow: string;
+  enlistHeading: string;
+  enlistDescription: string;
+  enlistBullets: string[];
+}
+
+// Mirrors the copy currently seeded in `site_content` (key: sponsors_page) so
+// the page renders identically before the fetch below resolves — no flash.
+const FALLBACK_SPONSORS_CONTENT: SponsorsPageContent = {
+  heroBadge: "Brand Alignment & Ecosystem Expansion",
+  heroTitle: "CATALYZING INDIA'S LIVE & EXPERIENTIAL MARKETS",
+  heroDescription:
+    "Recharge Nation is proud to collaborate with industry-leading corporate brands driving technological development, sustainability, and cultural preservation. Together, we power secure smart admissions, high-speed regional networking, and luxury handloom revival across South Asia.",
+  stats: [
+    { label: "Total Audience Reach", value: "15 Lakhs+" },
+    { label: "Allied Brands", value: "50+ Active" },
+    { label: "Weaver Payouts", value: "₹85,00,000+" },
+    { label: "Gate Transits", value: "99.98% Smooth" }
+  ],
+  enlistEyebrow: "B2B Co-Creation & Media",
+  enlistHeading: "ENLIST YOUR BRAND",
+  enlistDescription:
+    "Gain premier brand recall and highly localized exposure to massive energetic audiences. We offer physical experiential stalls, interactive app integrations, visual custom stage banners, and direct category sponsorships.",
+  enlistBullets: [
+    "Access over 2,00,000+ highly active demographics",
+    "Custom physical experiential display zones",
+    "Live app telemetry-integrated promotional badges"
+  ]
+};
+
 // Renders a stylized text lockup in place of a broken <img> when a sponsor
 // has no logoUrl (e.g. Paytm Checkout).
 const renderLogoFallback = (name: string) => {
@@ -75,6 +110,9 @@ export default function SponsorsPage() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [isShowcaseLoading, setIsShowcaseLoading] = useState(true);
 
+  // CMS-driven page copy (hero + enlist panel)
+  const [pageContent, setPageContent] = useState<SponsorsPageContent>(FALLBACK_SPONSORS_CONTENT);
+
   // Form states
   const [companyName, setCompanyName] = useState("");
   const [contactPerson, setContactPerson] = useState("");
@@ -86,12 +124,14 @@ export default function SponsorsPage() {
   useEffect(() => {
     const fetchData = async () => {
       setIsShowcaseLoading(true);
-      const [sponsorsData, tiersData] = await Promise.all([
+      const [sponsorsData, tiersData, sponsorsPageData] = await Promise.all([
         ApiClient.getSponsors(),
         ApiClient.getSiteContent<Record<string, TierData>>("sponsorship_tiers"),
+        ApiClient.getSiteContent<SponsorsPageContent>("sponsors_page"),
       ]);
       setSponsors(sponsorsData);
       if (tiersData) setTiers(tiersData);
+      if (sponsorsPageData) setPageContent(sponsorsPageData);
       setIsShowcaseLoading(false);
     };
     fetchData();
@@ -152,26 +192,18 @@ export default function SponsorsPage() {
             <div className="inline-flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-4 py-1.5 rounded-full w-fit">
               <Sparkles className="w-4 h-4 text-pink-500" />
               <span className="text-[10px] md:text-xs font-semibold tracking-wider text-pink-500 uppercase">
-                Brand Alignment & Ecosystem Expansion
+                {pageContent.heroBadge}
               </span>
             </div>
 
             {/* Title */}
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black font-primary leading-tight tracking-tight">
-              CATALYZING INDIA&apos;S{" "}
-              <span className="text-pink-500">LIVE &</span>{" "}
-              <span className="bg-gradient-to-r from-pink-500 via-indigo-400 to-transparent bg-clip-text text-transparent opacity-80">
-                EXPERIENTIAL
-              </span>{" "}
-              MARKETS
+              {pageContent.heroTitle}
             </h1>
 
             {/* Description */}
             <p className="text-slate-400 text-sm md:text-base leading-relaxed font-secondary max-w-3xl">
-              Recharge Nation is proud to collaborate with industry-leading corporate brands driving
-              technological development, sustainability, and cultural preservation. Together, we power
-              secure smart admissions, high-speed regional networking, and luxury handloom revival
-              across South Asia.
+              {pageContent.heroDescription}
             </p>
 
             {/* Divider */}
@@ -179,22 +211,12 @@ export default function SponsorsPage() {
 
             {/* Stats Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-2">
-              <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-secondary">Total Audience Reach</p>
-                <p className="text-lg md:text-2xl font-black font-primary mt-1 text-white">15 Lakhs+</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-secondary">Allied Brands</p>
-                <p className="text-lg md:text-2xl font-black font-primary mt-1 text-white">50+ Active</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-secondary">Weaver Payouts</p>
-                <p className="text-lg md:text-2xl font-black font-primary mt-1 text-white">₹85,00,000+</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-secondary">Gate Transits</p>
-                <p className="text-lg md:text-2xl font-black font-primary mt-1 text-white">99.98% Smooth</p>
-              </div>
+              {pageContent.stats.map((stat, idx) => (
+                <div key={idx}>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-secondary">{stat.label}</p>
+                  <p className="text-lg md:text-2xl font-black font-primary mt-1 text-white">{stat.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -716,28 +738,22 @@ export default function SponsorsPage() {
             {/* Left Side: Information */}
             <div className="flex flex-col gap-6 text-left font-secondary">
               <span className="text-[10px] md:text-xs font-bold tracking-widest text-[#FF0055] uppercase font-secondary">
-                B2B Co-Creation & Media
+                {pageContent.enlistEyebrow}
               </span>
               <h2 className="text-3xl md:text-4xl font-black font-primary tracking-tight">
-                ENLIST YOUR BRAND
+                {pageContent.enlistHeading}
               </h2>
               <p className="text-slate-400 text-xs md:text-sm leading-relaxed max-w-md">
-                Gain premier brand recall and highly localized exposure to massive energetic audiences. We offer physical experiential stalls, interactive app integrations, visual custom stage banners, and direct category sponsorships.
+                {pageContent.enlistDescription}
               </p>
 
               <ul className="flex flex-col gap-4 mt-2 font-primary text-xs text-slate-350">
-                <li className="flex gap-2 items-center">
-                  <span>✓</span>
-                  <span>Access over 2,00,000+ highly active demographics</span>
-                </li>
-                <li className="flex gap-2 items-center">
-                  <span>✓</span>
-                  <span>Custom physical experiential display zones</span>
-                </li>
-                <li className="flex gap-2 items-center">
-                  <span>✓</span>
-                  <span>Live app telemetry-integrated promotional badges</span>
-                </li>
+                {pageContent.enlistBullets.map((bullet, idx) => (
+                  <li key={idx} className="flex gap-2 items-center">
+                    <span>✓</span>
+                    <span>{bullet}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 

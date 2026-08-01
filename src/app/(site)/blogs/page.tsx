@@ -6,18 +6,36 @@ import { Search } from "lucide-react";
 import { ApiClient, Blog } from "@/lib/api-client";
 import BlogCard from "@/components/BlogCard";
 
-const CATEGORIES = ["All", "Luxury Stays", "Travel Guide", "Technical Driving"] as const;
-type CategoryFilter = typeof CATEGORIES[number];
+interface BlogsPageContent {
+  heading: string;
+  description: string;
+}
+
+// Mirrors the copy currently seeded in `site_content` (key: blogs_page) so
+// the header renders identically before the fetch below resolves — no flash.
+const FALLBACK_BLOGS_CONTENT: BlogsPageContent = {
+  heading: "Blog",
+  description:
+    "Curated road trip itineraries, expert driving guides, and premium destination logs across Mewar and Rajasthan.",
+};
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("All");
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageContent, setPageContent] = useState<BlogsPageContent>(FALLBACK_BLOGS_CONTENT);
 
   useEffect(() => {
     const fetchBlogs = async () => {
-      const data = await ApiClient.getBlogs();
+      const [data, taxonomy, blogsPageData] = await Promise.all([
+        ApiClient.getBlogs(),
+        ApiClient.getTaxonomy('blog_category'),
+        ApiClient.getSiteContent<BlogsPageContent>('blogs_page'),
+      ]);
       setBlogs(data);
+      setCategories(["All", ...taxonomy]);
+      if (blogsPageData) setPageContent(blogsPageData);
     };
     fetchBlogs();
   }, []);
@@ -108,10 +126,10 @@ export default function BlogsPage() {
           {/* Header */}
           <div className="flex flex-col gap-2 text-left">
             <h1 className="text-3xl md:text-5xl font-black font-primary text-slate-900 tracking-tight uppercase">
-              Blog
+              {pageContent.heading}
             </h1>
             <p className="text-slate-550 text-xs md:text-sm max-w-2xl leading-relaxed font-secondary">
-              Curated road trip itineraries, expert driving guides, and premium destination logs across Mewar and Rajasthan.
+              {pageContent.description}
             </p>
           </div>
 
@@ -119,7 +137,7 @@ export default function BlogsPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-6">
             {/* Category pills */}
             <div className="flex flex-wrap items-center gap-2">
-              {CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}

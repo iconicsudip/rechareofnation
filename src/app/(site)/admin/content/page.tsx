@@ -22,6 +22,12 @@ const KEY_META: Record<string, { label: string; description: string }> = {
   legal_terms: { label: "Terms & Conditions", description: "Full legal document body." },
   legal_privacy: { label: "Privacy Policy", description: "Full legal document body." },
   sponsorship_tiers: { label: "Sponsorship Tiers", description: "Pricing packages shown on the sponsors page." },
+  homepage_hubs: { label: "Homepage National Hubs", description: "The curated category hub cards on the homepage — each links to a real event category." },
+  homepage_stats: { label: "Homepage Stats Bar", description: "The trust/stat tiles strip on the homepage." },
+  homepage_newsletter: { label: "Homepage Newsletter Banner", description: "The VIP gateway email signup banner copy." },
+  sponsors_page: { label: "Sponsors Page", description: "Hero copy, stat tiles, and the Enlist Your Brand panel." },
+  gallery_page: { label: "Gallery Page", description: "Hero eyebrow, heading, and description." },
+  blogs_page: { label: "Blogs Page", description: "Hero heading and description." },
 };
 
 const KEY_ORDER = Object.keys(KEY_META);
@@ -43,6 +49,8 @@ const EMPTY_SECTION = { title: "", body: "" };
 const EMPTY_FOOTER_LINK = { label: "", href: "" };
 const EMPTY_TIER_KEYS = ["TITLE", "PLATINUM", "GOLD", "ASSOCIATE"];
 const EMPTY_TIER = { name: "", price: 0, baseImpressions: 0, space: "", allotments: "", entitlements: [] as string[], placements: "" };
+const EMPTY_HUB = { category: "", desc: "" };
+const EMPTY_STAT = { value: "", label: "" };
 
 interface FooterColumn { title: string; links: { label: string; href: string }[] }
 
@@ -251,7 +259,7 @@ export default function AdminContentPage() {
                   { key: "titleLine2", label: "Title line 2" },
                   { key: "accent", label: "Accent label", span: 2 },
                   { key: "desc", label: "Description", type: "textarea", span: 2 },
-                  { key: "image", label: "Image URL", span: 2 },
+                  { key: "image", label: "Slide Image", type: "image", span: 2 },
                   { key: "tier", label: "Tier label" },
                   { key: "multipass", label: "Multipass label" },
                   { key: "eventDate", label: "Event date text" },
@@ -357,6 +365,57 @@ export default function AdminContentPage() {
                 value={structured as Record<string, typeof EMPTY_TIER>}
                 onChange={(v) => setStructured(v)}
               />
+            )}
+
+            {activeKey === "homepage_hubs" && (
+              <RepeaterField
+                label="Hub Cards"
+                hint="Category must exactly match a value from Categories & Cities → Event Categories, or the card's link won't find any events."
+                columns={[
+                  { key: "category", label: "Event category (must match taxonomy exactly)", span: 2 },
+                  { key: "desc", label: "Short description", type: "textarea", span: 2 },
+                ]}
+                value={(structured.hubs as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ hubs: v })}
+                emptyRow={EMPTY_HUB}
+                addLabel="Add hub card"
+              />
+            )}
+
+            {activeKey === "homepage_stats" && (
+              <RepeaterField
+                label="Stat Tiles"
+                columns={[
+                  { key: "value", label: "Value (e.g. 250K+)" },
+                  { key: "label", label: "Label (e.g. Tickets Booked Successfully)" },
+                ]}
+                value={(structured.stats as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ stats: v })}
+                emptyRow={EMPTY_STAT}
+                addLabel="Add stat tile"
+              />
+            )}
+
+            {activeKey === "sponsors_page" && (
+              <>
+                <RepeaterField
+                  label="Hero Stat Tiles"
+                  columns={[
+                    { key: "label", label: "Label (e.g. Total Audience Reach)" },
+                    { key: "value", label: "Value (e.g. 15 Lakhs+)" },
+                  ]}
+                  value={(structured.stats as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ stats: v })}
+                  emptyRow={EMPTY_STAT}
+                  addLabel="Add stat tile"
+                />
+                <SimpleListEditor
+                  label="Enlist Panel Bullet Points"
+                  value={(structured.enlistBullets as string[]) ?? []}
+                  onChange={(v) => setStruct({ enlistBullets: v })}
+                  placeholder="Add a bullet point..."
+                />
+              </>
             )}
           </div>
         )}

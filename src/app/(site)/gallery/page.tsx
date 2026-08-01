@@ -4,6 +4,21 @@ import { useState, useEffect } from "react";
 import { Play, Eye, X, ChevronDown, ChevronUp } from "lucide-react";
 import { ApiClient, GalleryItem } from "@/lib/api-client";
 
+interface GalleryPageContent {
+  eyebrow: string;
+  heading: string;
+  description: string;
+}
+
+// Mirrors the copy currently seeded in `site_content` (key: gallery_page) so
+// the header renders identically before the fetch below resolves — no flash.
+const FALLBACK_GALLERY_CONTENT: GalleryPageContent = {
+  eyebrow: "Moments Captured",
+  heading: "Experience Highlights",
+  description:
+    "Witness spectacular frames from our biggest past editions. Concert arenas, traditional runways, and dense technology presentations.",
+};
+
 export default function GalleryPage() {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
@@ -11,16 +26,19 @@ export default function GalleryPage() {
   const [selectedMedia, setSelectedMedia] = useState<GalleryItem | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageContent, setPageContent] = useState<GalleryPageContent>(FALLBACK_GALLERY_CONTENT);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const [items, taxonomy] = await Promise.all([
+      const [items, taxonomy, galleryPageData] = await Promise.all([
         ApiClient.getGalleryItems(),
         ApiClient.getTaxonomy('gallery_category'),
+        ApiClient.getSiteContent<GalleryPageContent>('gallery_page'),
       ]);
       setGalleryItems(items);
       setCategories(["All", ...taxonomy]);
+      if (galleryPageData) setPageContent(galleryPageData);
       setIsLoading(false);
     };
     fetchData();
@@ -100,13 +118,13 @@ export default function GalleryPage() {
         {/* Header */}
         <div className="flex flex-col gap-3 max-w-2xl mx-auto">
           <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-pink-500 font-primary">
-            Moments Captured
+            {pageContent.eyebrow}
           </span>
           <h1 className="text-3xl md:text-5xl font-black font-primary text-slate-900 tracking-tight">
-            Experience Highlights
+            {pageContent.heading}
           </h1>
           <p className="text-slate-550 text-xs md:text-sm leading-relaxed font-secondary">
-            Witness spectacular frames from our biggest past editions. Concert arenas, traditional runways, and dense technology presentations.
+            {pageContent.description}
           </p>
         </div>
 
