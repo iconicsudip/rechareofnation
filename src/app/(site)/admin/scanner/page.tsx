@@ -20,6 +20,9 @@ type ScanResult = {
   };
 };
 
+type QrStage = { id: string; name: string; order: number };
+type ScannerEvent = { id: string; name: string; qr_stages: QrStage[] };
+
 export default function AdminScannerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,17 +38,41 @@ export default function AdminScannerPage() {
   const [processing, setProcessing] = useState(false);
   const [scanCount, setScanCount] = useState(0);
 
+  const [setupEvents, setSetupEvents] = useState<ScannerEvent[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>("");
+  const [setupLoading, setSetupLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/scanner/setup")
+      .then(res => res.json())
+      .then(data => {
+        if (data.events) {
+          setSetupEvents(data.events);
+        }
+        setSetupLoading(false);
+      })
+      .catch(() => setSetupLoading(false));
+  }, []);
+
+  const selectedEvent = setupEvents.find(e => e.id === selectedEventId);
+  const isSetupComplete = !!selectedEventId;
+
   const processQRHash = useCallback(async (hash: string) => {
     if (hash === lastHash || processing) return;
     setLastHash(hash);
     setProcessing(true);
-    setScanResult(null);
-
+    setScanning(false);
+    
     try {
       const res = await fetch("/api/admin/qr-scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qrHash: hash, scannedBy: "admin", scannedByName: "Admin Scanner" }),
+        body: JSON.stringify({ 
+          qrHash: hash, 
+          eventId: selectedEventId,
+          scannedBy: "admin", 
+          scannedByName: "Admin Scanner" 
+        }),
       });
       const data: ScanResult = await res.json();
       setScanResult(data);
@@ -164,7 +191,33 @@ export default function AdminScannerPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {!isSetupComplete && (
+        <div className="p-6 rounded-2xl" style={S.card}>
+          <h2 className="text-lg font-bold text-white mb-4">Scanner Setup</h2>
+          {setupLoading ? (
+            <div className="text-sm text-indigo-300">Loading assignments...</div>
+          ) : setupEvents.length === 0 ? (
+            <div className="text-sm text-red-300">You have not been assigned to any active events.</div>
+          ) : (
+            <div className="flex flex-col gap-4 max-w-md">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-indigo-300 mb-1.5">Select Event</label>
+                <select 
+                  style={S.input} 
+                  value={selectedEventId} 
+                  onChange={(e) => setSelectedEventId(e.target.value)}
+                >
+                  <option value="">-- Choose Event --</option>
+                  {setupEvents.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {isSetupComplete && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Camera View */}
         <div style={S.card} className="overflow-hidden">
           <div className="relative bg-black" style={{ aspectRatio: "4/3" }}>
@@ -346,6 +399,7 @@ export default function AdminScannerPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Scanline animation */}
       <style>{`

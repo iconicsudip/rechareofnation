@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       SELECT id, name, email, role, is_verified FROM users
       WHERE email = ${email}
         AND password_hash = ${hashPassword(password)}
-        AND role = 'admin'
+        AND role IN ('admin', 'scanner', 'coordinator')
     `;
 
     if (users.length === 0) {

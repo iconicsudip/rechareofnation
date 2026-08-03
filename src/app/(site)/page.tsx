@@ -60,6 +60,7 @@ export default function HomePage() {
   const [searchCategory, setSearchCategory] = useState("All");
   const [searchCity, setSearchCity] = useState("All");
   const [searchDate, setSearchDate] = useState("All");
+  const [isLoading, setIsLoading] = useState(true);
 
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
@@ -124,6 +125,7 @@ export default function HomePage() {
       const cityListWithEvents = cityList.filter((c) => events.some((e) => e.city === c));
       if (cityListWithEvents.length > 0) setTrendingCity(cityListWithEvents[0]);
       else if (cityList.length > 0) setTrendingCity(cityList[0]);
+      setIsLoading(false);
     };
     fetchData();
   }, []);
@@ -155,6 +157,17 @@ export default function HomePage() {
   const expos = allEvents.filter(e => e.category === "Trade Expos").slice(0, 4);
   const trendingEventsForCity = allEvents.filter(e => e.city === trendingCity).slice(0, 3);
   const citiesWithEvents = cities.filter(city => allEvents.some(e => e.city === city));
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0b0f19]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-[#ec4899] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[#ec4899] font-primary font-bold tracking-widest text-[10px] uppercase animate-pulse">Initializing Portal...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col text-left">

@@ -19,6 +19,7 @@ interface PassData {
   venue?: string;
   status: string;
   qrHash: string;
+  scanHistory?: any[];
 }
 
 type Tab = "tickets" | "registrations" | "settings";
@@ -88,6 +89,20 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
               </div>
             ))}
           </div>
+
+          {pass.scanHistory && pass.scanHistory.length > 0 && (
+            <div className="w-full mt-2 bg-[rgba(16,185,129,0.1)] border border-[rgba(52,211,153,0.2)] rounded-xl p-3 flex flex-col gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 text-left">Completed Stages</span>
+              <div className="flex flex-col gap-1.5 text-xs text-emerald-300 text-left">
+                {pass.scanHistory.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle size={12} />
+                    <span>{s.stageName || s.stageId} ({new Date(s.timestamp).toLocaleTimeString()})</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button onClick={() => window.print()}
             className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
@@ -179,6 +194,7 @@ export default function DashboardPage() {
       venue: type === "ticket" ? (item.event_venue || item.eventVenue) : (item.competition_venue || item.competitionVenue),
       status: item.status || "confirmed",
       qrHash: item.qr_hash || item.qrCodeValue || `RN-PASS-${item.id}`,
+      scanHistory: item.scan_history || [],
     });
   };
 

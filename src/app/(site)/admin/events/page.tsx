@@ -84,12 +84,13 @@ interface Event {
   headliners: Headliner[];
   faqs: Faq[];
   schedule_days: ScheduleDay[];
+  qr_stages: { id: string; name: string; order: number }[];
   created_at: string;
 }
 
 interface Taxonomy { value: string }
 
-const EMPTY_TICKET: TicketPrice = { type: "General Entry", price: 0, available: 0, description: "" };
+const EMPTY_TICKET: TicketPrice = { type: "", price: 0, available: 0, description: "" };
 const EMPTY_TIER: SponsorshipTier = { tier: "", amount: "", benefits: "" };
 const EMPTY_STALL: StallOption = { type: "", size: "", rate: "", includes: "" };
 const EMPTY_AD_RATE: AdRate = { category: "", amount: "" };
@@ -102,6 +103,7 @@ const EMPTY_FORM = {
   eventDate: "", eventTime: "18:00", bannerUrl: "", summary: "", description: "",
   isFeatured: false, isUpcoming: true, rating: "4.6", reviewCount: "25", dateIsTentative: false,
 };
+const DEFAULT_QR_STAGES = [{ id: "entry", name: "Entry Gate", order: 1 }];
 
 const S = {
   card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
@@ -135,6 +137,7 @@ export default function AdminEventsPage() {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [scheduleDays, setScheduleDays] = useState<ScheduleDay[]>([]);
   const [organizer, setOrganizer] = useState<Organizer>(EMPTY_ORGANIZER);
+  const [qrStages, setQrStages] = useState<{ id: string; name: string; order: number }[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
@@ -167,6 +170,7 @@ export default function AdminEventsPage() {
     setHeadliners([]);
     setFaqs([]);
     setScheduleDays([]);
+    setQrStages([...DEFAULT_QR_STAGES]);
     setOrganizer({ ...EMPTY_ORGANIZER });
     setPanelOpen(true);
   };
@@ -188,6 +192,7 @@ export default function AdminEventsPage() {
     setHeadliners(Array.isArray(ev.headliners) ? ev.headliners : []);
     setFaqs(Array.isArray(ev.faqs) ? ev.faqs : []);
     setScheduleDays(Array.isArray(ev.schedule_days) ? ev.schedule_days : []);
+    setQrStages(Array.isArray(ev.qr_stages) && ev.qr_stages.length > 0 ? ev.qr_stages : [...DEFAULT_QR_STAGES]);
     setOrganizer(ev.organizer && ev.organizer.name !== undefined ? ev.organizer : { ...EMPTY_ORGANIZER });
     setPanelOpen(true);
   };
@@ -207,6 +212,7 @@ export default function AdminEventsPage() {
       headliners: headliners.filter(h => h.name.trim()),
       faqs: faqs.filter(f => f.q.trim()),
       scheduleDays: scheduleDays.filter(d => d.dayLabel.trim()),
+      qrStages: qrStages.filter(q => q.id.trim() && q.name.trim()),
       organizer,
       ...(editTarget ? { id: editTarget.id } : {}),
     };
@@ -481,10 +487,10 @@ export default function AdminEventsPage() {
               </div>
 
               <RepeaterField
-                label="Ticket Prices"
-                hint="Consumer ticket tiers (General, VIP, Student, etc.)"
+                label="Event Tiers / Prices"
+                hint="Can be anything (General Tickets, VIP, Sponsorships, etc.)"
                 columns={[
-                  { key: "type", label: "Ticket type (e.g. VIP Pass)", span: 2 },
+                  { key: "type", label: "Tier type (e.g. VIP Pass, Title Sponsor)", span: 2 },
                   { key: "price", label: "Price (₹)", type: "number" },
                   { key: "available", label: "Available", type: "number" },
                   { key: "description", label: "Description", type: "textarea", span: 2 },
@@ -583,6 +589,20 @@ export default function AdminEventsPage() {
                 label="Program Schedule"
                 value={scheduleDays}
                 onChange={setScheduleDays}
+              />
+
+              <RepeaterField
+                label="Dynamic QR Scan Stages"
+                hint="Define the scanning checkpoints for this event (e.g., Entry, Food Coupon, Certificate). Scanners will select a stage when scanning."
+                columns={[
+                  { key: "id", label: "Stage ID (e.g., entry, food, exit)" },
+                  { key: "name", label: "Display Name (e.g., Entry Gate)", span: 2 },
+                  { key: "order", label: "Order", type: "number" },
+                ]}
+                value={qrStages}
+                onChange={setQrStages as any}
+                emptyRow={{ id: "", name: "", order: 1 }}
+                addLabel="Add stage"
               />
 
               <div className="flex gap-6">

@@ -50,6 +50,7 @@ const S = {
 export default function AdminAssignersPage() {
   const [assigners, setAssigners] = useState<Assigner[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterEvent, setFilterEvent] = useState("");
   const [search, setSearch] = useState("");
@@ -59,19 +60,22 @@ export default function AdminAssignersPage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    eventId: "", userName: "", userEmail: "", assignerRole: "Scanner", userId: "",
+    eventId: "", userId: "", assignerRole: "Scanner",
   });
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [aRes, eRes] = await Promise.all([
+    const [aRes, eRes, uRes] = await Promise.all([
       fetch(`/api/admin/assigners?eventId=${filterEvent}`),
       fetch("/api/admin/events?page=1&search="),
+      fetch("/api/admin/users?all=true")
     ]);
     const aData = await aRes.json();
     const eData = await eRes.json();
+    const uData = await uRes.json();
     setAssigners(aData.assigners || []);
     setEvents(eData.events || []);
+    setUsers(uData.users || []);
     setLoading(false);
   }, [filterEvent]);
 
@@ -81,26 +85,27 @@ export default function AdminAssignersPage() {
     e.preventDefault();
     setFormError(null);
     if (!form.eventId) { setFormError("Please select an event."); return; }
-    if (!form.userName || !form.userEmail) { setFormError("Name and email are required."); return; }
+    if (!form.userId) { setFormError("Please select a user."); return; }
 
     setSaving(true);
     const selectedEvent = events.find(ev => ev.id === form.eventId);
+    const selectedUser = users.find(u => u.id === form.userId);
     const res = await fetch("/api/admin/assigners", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         eventId: form.eventId,
         eventName: selectedEvent?.name || "",
-        userId: form.userId || `manual-${Date.now()}`,
-        userName: form.userName,
-        userEmail: form.userEmail,
+        userId: form.userId,
+        userName: selectedUser?.name || "Unknown",
+        userEmail: selectedUser?.email || "unknown@example.com",
         assignerRole: form.assignerRole,
         assignedBy: "admin",
       }),
     });
     const data = await res.json();
     if (!res.ok) { setFormError(data.error || "Failed to assign."); }
-    else { setPanelOpen(false); setForm({ eventId: "", userName: "", userEmail: "", assignerRole: "Scanner", userId: "" }); load(); }
+    else { setPanelOpen(false); setForm({ eventId: "", userId: "", assignerRole: "Scanner" }); load(); }
     setSaving(false);
   };
 
@@ -261,17 +266,13 @@ export default function AdminAssignersPage() {
                 </select>
               </div>
 
-              {[
-                { label: "Staff Name *", key: "userName", type: "text", required: true },
-                { label: "Staff Email *", key: "userEmail", type: "email", required: true },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>{f.label}</label>
-                  <input type={f.type} required={f.required} style={S.input}
-                    value={(form as Record<string, string>)[f.key]}
-                    onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} />
-                </div>
-              ))}
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>Select Staff Member *</label>
+                <select style={S.input} value={form.userId} onChange={e => setForm(p => ({ ...p, userId: e.target.value }))} required>
+                  <option value="">— Choose User —</option>
+                  {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                </select>
+              </div>
 
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "rgba(148,163,184,0.5)" }}>Assigner Role *</label>

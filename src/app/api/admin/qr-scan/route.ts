@@ -8,10 +8,10 @@ export async function POST(request: NextRequest) {
   try {
     await ensureSchema();
     const body = await request.json();
-    const { qrHash, scannedBy, scannedByName } = body;
+    const { qrHash, eventId, scannedBy, scannedByName } = body;
 
-    if (!qrHash) {
-      return NextResponse.json({ result: 'denied', reason: 'Invalid QR code' }, { status: 400 });
+    if (!qrHash || !eventId) {
+      return NextResponse.json({ result: 'denied', reason: 'Missing QR code or event selection.' }, { status: 400 });
     }
 
     // Check ticket bookings first
@@ -22,30 +22,63 @@ export async function POST(request: NextRequest) {
     if (tickets.length > 0) {
       const ticket = tickets[0];
 
-      if (ticket.scanned_at) {
-        // Already scanned
+      if (ticket.event_id && ticket.event_id !== eventId) {
+        return NextResponse.json({ result: 'denied', reason: 'This pass belongs to a different event.' });
+      }
+
+      const events = await sql`SELECT qr_stages FROM events WHERE id = ${ticket.event_id || eventId}`;
+      let qrStages = [{ id: "entry", name: "Entry Gate", order: 1 }];
+      if (events.length > 0 && Array.isArray(events[0].qr_stages)) {
+        qrStages = events[0].qr_stages;
+      }
+
+      // Sort stages by order
+      qrStages.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+
+      const history = Array.isArray(ticket.scan_history) ? ticket.scan_history : [];
+      
+      // Auto-detect next stage
+      let nextStage = null;
+      for (const stage of qrStages) {
+        if (!history.find((h: any) => h.stageId === stage.id)) {
+          nextStage = stage;
+          break;
+        }
+      }
+
+      if (!nextStage) {
+        // All stages scanned
         await sql`
           INSERT INTO qr_scan_logs (qr_hash, scan_type, scanned_by, scanned_by_name, attendee_name, event_name, result, reason)
-          VALUES (${qrHash}, 'ticket', ${scannedBy}, ${scannedByName}, ${ticket.visitor_name}, ${ticket.event_name}, 'denied', 'Already scanned at ' || ${ticket.scanned_at})
+          VALUES (${qrHash}, 'ticket', ${scannedBy}, ${scannedByName}, ${ticket.visitor_name}, ${ticket.event_name}, 'denied', 'All stages already passed')
         `;
         return NextResponse.json({
           result: 'denied',
-          reason: `Already scanned at ${new Date(ticket.scanned_at).toLocaleString()}`,
+          reason: `All stages have already been passed.`,
           attendee: { name: ticket.visitor_name, type: ticket.ticket_type, event: ticket.event_name }
         });
       }
 
-      // Mark as scanned
+      // Mark as scanned for this stage
+      history.push({
+        stageId: nextStage.id,
+        stageName: nextStage.name,
+        timestamp: new Date().toISOString(),
+        scannedBy,
+        scannedByName
+      });
+
       await sql`
-        UPDATE ticket_bookings SET scanned_at = NOW(), scanned_by = ${scannedBy} WHERE id = ${ticket.id}
+        UPDATE ticket_bookings SET scan_history = ${JSON.stringify(history)}::jsonb WHERE id = ${ticket.id}
       `;
       await sql`
-        INSERT INTO qr_scan_logs (qr_hash, scan_type, scanned_by, scanned_by_name, attendee_name, event_name, result)
-        VALUES (${qrHash}, 'ticket', ${scannedBy}, ${scannedByName}, ${ticket.visitor_name}, ${ticket.event_name}, 'allowed')
+        INSERT INTO qr_scan_logs (qr_hash, scan_type, stage_id, scanned_by, scanned_by_name, attendee_name, event_name, result)
+        VALUES (${qrHash}, 'ticket', ${nextStage.id}, ${scannedBy}, ${scannedByName}, ${ticket.visitor_name}, ${ticket.event_name}, 'allowed')
       `;
       return NextResponse.json({
         result: 'allowed',
         type: 'ticket',
+        reason: `Marked as passed for: ${nextStage.name}`,
         attendee: {
           name: ticket.visitor_name,
           email: ticket.visitor_email,
@@ -79,24 +112,45 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      if (reg.scanned_at) {
+      // Competitions don't have dynamic stages yet, use default "entry"
+      const qrStages = [{ id: "entry", name: "Entry Gate", order: 1 }];
+      const history = Array.isArray(reg.scan_history) ? reg.scan_history : [];
+      
+      let nextStage = null;
+      for (const stage of qrStages) {
+        if (!history.find((h: any) => h.stageId === stage.id)) {
+          nextStage = stage;
+          break;
+        }
+      }
+
+      if (!nextStage) {
         return NextResponse.json({
           result: 'denied',
-          reason: `Already scanned at ${new Date(reg.scanned_at).toLocaleString()}`,
+          reason: `All stages have already been passed.`,
           attendee: { name: reg.full_name, type: reg.category, event: reg.competition_name }
         });
       }
 
+      history.push({
+        stageId: nextStage.id,
+        stageName: nextStage.name,
+        timestamp: new Date().toISOString(),
+        scannedBy,
+        scannedByName
+      });
+
       await sql`
-        UPDATE competition_registrations SET scanned_at = NOW(), scanned_by = ${scannedBy} WHERE id = ${reg.id}
+        UPDATE competition_registrations SET scan_history = ${JSON.stringify(history)}::jsonb WHERE id = ${reg.id}
       `;
       await sql`
-        INSERT INTO qr_scan_logs (qr_hash, scan_type, scanned_by, scanned_by_name, attendee_name, event_name, result)
-        VALUES (${qrHash}, 'registration', ${scannedBy}, ${scannedByName}, ${reg.full_name}, ${reg.competition_name}, 'allowed')
+        INSERT INTO qr_scan_logs (qr_hash, scan_type, stage_id, scanned_by, scanned_by_name, attendee_name, event_name, result)
+        VALUES (${qrHash}, 'registration', ${nextStage.id}, ${scannedBy}, ${scannedByName}, ${reg.full_name}, ${reg.competition_name}, 'allowed')
       `;
       return NextResponse.json({
         result: 'allowed',
         type: 'registration',
+        reason: `Marked as passed for: ${nextStage.name}`,
         attendee: {
           name: reg.full_name,
           email: reg.email,

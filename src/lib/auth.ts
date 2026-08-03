@@ -55,7 +55,7 @@ export function verifyAdminSession(token: string | undefined | null): AdminSessi
   try {
     const payload = JSON.parse(base64UrlDecode(encoded)) as AdminSessionPayload;
     if (!payload.exp || payload.exp < Date.now()) return null;
-    if (payload.role !== 'admin') return null;
+    if (!['admin', 'scanner', 'coordinator'].includes(payload.role)) return null;
     return payload;
   } catch {
     return null;

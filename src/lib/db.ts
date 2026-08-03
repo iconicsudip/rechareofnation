@@ -794,6 +794,7 @@ export async function ensureSchema() {
       is_upcoming BOOLEAN DEFAULT true,
       is_active BOOLEAN DEFAULT true,
       ticket_prices JSONB DEFAULT '[]',
+      qr_stages JSONB DEFAULT '[{"id":"entry","name":"Entry Gate","order":1}]',
       organizer JSONB DEFAULT '{}',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -824,6 +825,7 @@ export async function ensureSchema() {
       qr_hash TEXT UNIQUE NOT NULL,
       scanned_at TIMESTAMPTZ,
       scanned_by TEXT,
+      scan_history JSONB DEFAULT '[]',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
@@ -857,6 +859,7 @@ export async function ensureSchema() {
       qr_hash TEXT UNIQUE NOT NULL,
       scanned_at TIMESTAMPTZ,
       scanned_by TEXT,
+      scan_history JSONB DEFAULT '[]',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
@@ -881,6 +884,7 @@ export async function ensureSchema() {
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
       qr_hash TEXT NOT NULL,
       scan_type TEXT NOT NULL,
+      stage_id TEXT,
       scanned_by TEXT,
       scanned_by_name TEXT,
       attendee_name TEXT,
@@ -978,6 +982,11 @@ export async function ensureSchema() {
 
   // Schema migrations for existing tables
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) DEFAULT 4.6`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS qr_stages JSONB DEFAULT '[{"id":"entry","name":"Entry Gate","order":1}]'`;
+  await sql`ALTER TABLE ticket_bookings ADD COLUMN IF NOT EXISTS scan_history JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE competition_registrations ADD COLUMN IF NOT EXISTS scan_history JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE qr_scan_logs ADD COLUMN IF NOT EXISTS stage_id TEXT`;
+
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 25`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS sponsorship_tiers JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS stall_options JSONB DEFAULT '[]'`;
