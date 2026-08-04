@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Search, Filter, XCircle, RefreshCw, ScanLine,
   ChevronLeft, ChevronRight, Eye, X, Ban,
+  CheckCircle,
 } from "lucide-react";
 
 interface Booking {
@@ -25,6 +26,22 @@ interface Booking {
   scanned_at: string | null;
   scanned_by: string | null;
   created_at: string;
+  qr_hash?: string;
+  scan_history?: any[];
+}
+
+function QRImage({ value, size = 120 }: { value: string; size?: number }) {
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=ffffff&color=000000&margin=2`;
+  return (
+    <img
+      src={url}
+      alt="QR Code"
+      width={size}
+      height={size}
+      className="rounded-xl bg-white p-2"
+      style={{ imageRendering: "pixelated" }}
+    />
+  );
 }
 
 const S = {
@@ -254,6 +271,32 @@ export default function AdminBookingsPage() {
                   <div className="text-white font-semibold capitalize">{val || "—"}</div>
                 </div>
               ))}
+            </div>
+            
+            <div className="p-5 border-t border-[rgba(99,102,241,0.15)] flex flex-col md:flex-row gap-6">
+              {viewBooking.qr_hash && (
+                <div className="flex-shrink-0 flex flex-col items-center">
+                  <div className="text-[10px] uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(148,163,184,0.4)" }}>QR Pass</div>
+                  <QRImage value={viewBooking.qr_hash} size={110} />
+                </div>
+              )}
+              <div className="flex-1">
+                <div className="text-[10px] uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(148,163,184,0.4)" }}>Scan Activity</div>
+                {viewBooking.scan_history && viewBooking.scan_history.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {viewBooking.scan_history.map((s: any, i: number) => (
+                      <div key={i} className="flex items-center gap-2 p-2 rounded-lg text-xs"
+                        style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#34D399" }}>
+                        <CheckCircle size={12} />
+                        <span>{s.stageName || s.stageId}</span>
+                        <span className="ml-auto opacity-70">{new Date(s.timestamp).toLocaleString("en-IN")}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>No check-in scans recorded yet.</div>
+                )}
+              </div>
             </div>
             {viewBooking.status === "confirmed" && (
               <div className="p-5 pt-0">
