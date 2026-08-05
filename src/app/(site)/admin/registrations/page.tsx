@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   Search, Filter, CheckCircle, XCircle, Clock, RefreshCw,
-  ChevronLeft, ChevronRight, Eye, X,
+  ChevronLeft, ChevronRight, Eye, X, ScanLine,
 } from "lucide-react";
 
 interface Registration {
@@ -177,7 +177,7 @@ export default function AdminRegistrationsPage() {
                     style={{ accentColor: "#4F46E5" }}
                   />
                 </th>
-                {["Participant", "Competition", "Category", "Status", "Payment", "Date", "Actions"].map((h) => (
+                {["Participant", "Competition", "Category", "Status", "Payment", "Check-in", "Date", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider"
                     style={{ color: "rgba(148,163,184,0.5)" }}>{h}</th>
                 ))}
@@ -186,12 +186,12 @@ export default function AdminRegistrationsPage() {
             <tbody className="divide-y divide-[rgba(99,102,241,0.06)]">
               {loading ? (
                 [...Array(6)].map((_, i) => (
-                  <tr key={i}><td colSpan={8} className="px-5 py-4">
+                  <tr key={i}><td colSpan={9} className="px-5 py-4">
                     <div className="h-4 rounded animate-pulse w-2/3" style={{ background: "rgba(99,102,241,0.08)" }} />
                   </td></tr>
                 ))
               ) : regs.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-12 text-center text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>
+                <tr><td colSpan={9} className="px-5 py-12 text-center text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>
                   No registrations found.
                 </td></tr>
               ) : regs.map((reg) => {
@@ -230,6 +230,16 @@ export default function AdminRegistrationsPage() {
                       }`}>
                         {reg.payment_status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {(reg.scan_history?.length ?? 0) > 0 ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 w-fit"
+                          style={{ background: "rgba(6,182,212,0.1)", color: "#22D3EE", border: "1px solid rgba(34,211,238,0.2)" }}>
+                          <ScanLine size={10} /> {reg.scan_history!.length} scan{reg.scan_history!.length === 1 ? "" : "s"}
+                        </span>
+                      ) : (
+                        <span className="text-[10px]" style={{ color: "rgba(148,163,184,0.35)" }}>Not yet</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-xs" style={{ color: "rgba(148,163,184,0.5)" }}>
                       {new Date(reg.created_at).toLocaleDateString("en-IN")}

@@ -185,10 +185,10 @@ export default function AdminBookingsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {b.scanned_at ? (
+                      {(b.scan_history?.length ?? 0) > 0 || b.scanned_at ? (
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 w-fit"
                           style={{ background: "rgba(6,182,212,0.1)", color: "#22D3EE", border: "1px solid rgba(34,211,238,0.2)" }}>
-                          <ScanLine size={10} /> Scanned
+                          <ScanLine size={10} /> {b.scan_history?.length ?? 0} scan{(b.scan_history?.length ?? 0) === 1 ? "" : "s"}
                         </span>
                       ) : (
                         <span className="text-[10px]" style={{ color: "rgba(148,163,184,0.35)" }}>Not yet</span>
@@ -263,7 +263,9 @@ export default function AdminBookingsPage() {
                 ["Amount", `₹${Number(viewBooking.total_amount).toLocaleString()}`],
                 ["Payment Method", viewBooking.payment_method],
                 ["Payment ID", viewBooking.payment_id],
-                ["Check-in", viewBooking.scanned_at ? new Date(viewBooking.scanned_at).toLocaleString("en-IN") : "Not yet scanned"],
+                ["Check-in", (viewBooking.scan_history?.length ?? 0) > 0
+                  ? `${viewBooking.scan_history!.length} stage(s) scanned`
+                  : "Not yet scanned"],
               ].map(([label, val]) => (
                 <div key={label}>
                   <div className="text-[10px] uppercase font-bold tracking-wider mb-0.5"

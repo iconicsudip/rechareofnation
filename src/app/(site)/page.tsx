@@ -49,7 +49,9 @@ export default function HomePage() {
   const router = useRouter();
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [trendingCity, setTrendingCity] = useState("New Delhi");
+  // Empty until either an explicit auto-pick (once city+event data has both
+  // arrived) or a manual tab click sets it — see the effect below.
+  const [trendingCity, setTrendingCity] = useState("");
   
   // Custom API seeded lists states
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
@@ -60,7 +62,6 @@ export default function HomePage() {
   const [searchCategory, setSearchCategory] = useState("All");
   const [searchCity, setSearchCity] = useState("All");
   const [searchDate, setSearchDate] = useState("All");
-  const [isLoading, setIsLoading] = useState(true);
 
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
@@ -87,48 +88,40 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
-  // Fetch list data
+  // Fetch every section's data independently — the page renders instantly with
+  // its static shell, and each section pops in on its own as soon as ITS call
+  // resolves, instead of the whole page waiting on the slowest one.
   useEffect(() => {
-    const fetchData = async () => {
-      const [
-        allSponsors, allGallery, hero, testimonialContent, partnerContent,
-        events, competitions, blogList, cityList, categoryList,
-        hubsContent, statsContent, newsletterData,
-      ] = await Promise.all([
-        ApiClient.getSponsors(),
-        ApiClient.getGalleryItems(),
-        ApiClient.getSiteContent<{ slides: HeroSlide[] }>('homepage_hero'),
-        ApiClient.getSiteContent<{ testimonials: Testimonial[] }>('homepage_testimonials'),
-        ApiClient.getSiteContent<{ logos: string[] }>('homepage_partner_logos'),
-        ApiClient.getEvents(),
-        ApiClient.getCompetitions(),
-        ApiClient.getBlogs(),
-        ApiClient.getTaxonomy('city'),
-        ApiClient.getTaxonomy('event_category'),
-        ApiClient.getSiteContent<{ hubs: HubItem[] }>('homepage_hubs'),
-        ApiClient.getSiteContent<{ stats: StatItem[] }>('homepage_stats'),
-        ApiClient.getSiteContent<NewsletterContent>('homepage_newsletter'),
-      ]);
-      setSponsors(allSponsors);
-      setGallery(allGallery);
-      setHeroSlides(hero?.slides ?? []);
-      setTestimonials(testimonialContent?.testimonials ?? []);
-      setPartnerLogos(partnerContent?.logos ?? []);
-      setAllEvents(events);
-      setArenas(competitions);
-      setBlogs(blogList);
-      setCities(cityList);
-      setEventCategories(categoryList);
-      setHubs(hubsContent?.hubs ?? []);
-      setStats(statsContent?.stats ?? []);
-      setNewsletterContent(newsletterData ?? DEFAULT_NEWSLETTER);
-      const cityListWithEvents = cityList.filter((c) => events.some((e) => e.city === c));
-      if (cityListWithEvents.length > 0) setTrendingCity(cityListWithEvents[0]);
-      else if (cityList.length > 0) setTrendingCity(cityList[0]);
-      setIsLoading(false);
-    };
-    fetchData();
+    ApiClient.getSiteContent<{ slides: HeroSlide[] }>('homepage_hero')
+      .then((hero) => setHeroSlides(hero?.slides ?? []));
+    ApiClient.getSiteContent<{ stats: StatItem[] }>('homepage_stats')
+      .then((statsContent) => setStats(statsContent?.stats ?? []));
+    ApiClient.getTaxonomy('event_category').then(setEventCategories);
+    ApiClient.getTaxonomy('city').then(setCities);
+    ApiClient.getSiteContent<{ hubs: HubItem[] }>('homepage_hubs')
+      .then((hubsContent) => setHubs(hubsContent?.hubs ?? []));
+    ApiClient.getEvents().then(setAllEvents).catch(() => setAllEvents([]));
+    ApiClient.getCompetitions().then(setArenas);
+    ApiClient.getGalleryItems().then(setGallery);
+    ApiClient.getSiteContent<{ logos: string[] }>('homepage_partner_logos')
+      .then((partnerContent) => setPartnerLogos(partnerContent?.logos ?? []));
+    ApiClient.getSiteContent<{ testimonials: Testimonial[] }>('homepage_testimonials')
+      .then((testimonialContent) => setTestimonials(testimonialContent?.testimonials ?? []));
+    ApiClient.getBlogs().then(setBlogs);
+    ApiClient.getSiteContent<NewsletterContent>('homepage_newsletter')
+      .then((newsletterData) => setNewsletterContent(newsletterData ?? DEFAULT_NEWSLETTER));
+    ApiClient.getSponsors().then(setSponsors);
   }, []);
+
+  // Auto-pick the first city with real events once both cities and events have
+  // arrived (in whichever order) — but only until something (auto-pick or a
+  // manual tab click) has already set one, so we never fight a user's choice.
+  useEffect(() => {
+    if (trendingCity) return;
+    if (cities.length === 0 || allEvents.length === 0) return;
+    const cityListWithEvents = cities.filter((c) => allEvents.some((e) => e.city === c));
+    setTrendingCity(cityListWithEvents[0] || cities[0]);
+  }, [cities, allEvents, trendingCity]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,17 +150,6 @@ export default function HomePage() {
   const expos = allEvents.filter(e => e.category === "Trade Expos").slice(0, 4);
   const trendingEventsForCity = allEvents.filter(e => e.city === trendingCity).slice(0, 3);
   const citiesWithEvents = cities.filter(city => allEvents.some(e => e.city === city));
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0b0f19]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-[#ec4899] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[#ec4899] font-primary font-bold tracking-widest text-[10px] uppercase animate-pulse">Initializing Portal...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col text-left">
