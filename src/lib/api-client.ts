@@ -606,46 +606,53 @@ export const ApiClient = {
     regData: Omit<CompetitionRegistration, 'id' | 'participantId' | 'createdAt' | 'qrCodeValue' | 'isEmailVerified'>
   ): Promise<CompetitionRegistration> => {
     const user = ApiClient.getCurrentUser();
+    let response: Response;
     try {
-      const response = await fetch('/api/user/registrations', {
+      response = await fetch('/api/user/registrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...regData, userId: user?.id })
       });
-      const data = await response.json();
-      if (response.ok && data.success && data.registration) {
-        const db = data.registration;
-        const reg: CompetitionRegistration = {
-          id: db.id, participantId: db.participant_id, competitionId: db.competition_id,
-          competitionName: db.competition_name, competitionDate: db.competition_date,
-          competitionVenue: db.competition_venue, competitionBanner: db.competition_banner,
-          fullName: db.full_name, dob: db.dob, age: db.age, gender: db.gender,
-          email: db.email, mobile: db.mobile, city: db.city, state: db.state,
-          address: db.address, organization: db.organization, category: db.category,
-          emergencyContact: db.emergency_contact, uploads: db.uploads || {},
-          paymentId: db.payment_id, paymentStatus: db.payment_status,
-          status: db.status, createdAt: db.created_at, qrCodeValue: db.qr_hash, isEmailVerified: true
-        };
-        const all = getStorageItem<CompetitionRegistration[]>('rn_registrations', []);
-        all.push(reg);
-        setStorageItem('rn_registrations', all);
-        return reg;
-      }
     } catch (err) {
-      console.warn('Backend registration failed, using localStorage fallback:', err);
+      // Genuine network failure (e.g. offline) — degrade to a local-only registration.
+      console.warn('Backend registration request failed, using localStorage fallback:', err);
+      const all = getStorageItem<CompetitionRegistration[]>('rn_registrations', []);
+      const randDigits = Math.floor(1000 + Math.random() * 9000);
+      const categoryCode = regData.category.substring(0, 4).toUpperCase().replace(/s/g, '');
+      const participantId = `RN-2026-${categoryCode}-${randDigits}`;
+      const newReg: CompetitionRegistration = {
+        ...regData, id: 'reg-' + Math.random().toString(36).substr(2, 9),
+        participantId, isEmailVerified: true, createdAt: new Date().toISOString(),
+        qrCodeValue: `RECHARGE-PARTICIPANT:${participantId}:${regData.email}`
+      };
+      all.push(newReg);
+      setStorageItem('rn_registrations', all);
+      return newReg;
     }
-    const all = getStorageItem<CompetitionRegistration[]>('rn_registrations', []);
-    const randDigits = Math.floor(1000 + Math.random() * 9000);
-    const categoryCode = regData.category.substring(0, 4).toUpperCase().replace(/s/g, '');
-    const participantId = `RN-2026-${categoryCode}-${randDigits}`;
-    const newReg: CompetitionRegistration = {
-      ...regData, id: 'reg-' + Math.random().toString(36).substr(2, 9),
-      participantId, isEmailVerified: true, createdAt: new Date().toISOString(),
-      qrCodeValue: `RECHARGE-PARTICIPANT:${participantId}:${regData.email}`
+
+    const data = await response.json();
+    if (!response.ok || !data.success || !data.registration) {
+      // The server reached a real decision (validation error, etc.) — surface
+      // it instead of silently fabricating a "successful" registration.
+      throw new Error(data.error || 'Registration could not be completed. Please try again.');
+    }
+
+    const db = data.registration;
+    const reg: CompetitionRegistration = {
+      id: db.id, participantId: db.participant_id, competitionId: db.competition_id,
+      competitionName: db.competition_name, competitionDate: db.competition_date,
+      competitionVenue: db.competition_venue, competitionBanner: db.competition_banner,
+      fullName: db.full_name, dob: db.dob, age: db.age, gender: db.gender,
+      email: db.email, mobile: db.mobile, city: db.city, state: db.state,
+      address: db.address, organization: db.organization, category: db.category,
+      emergencyContact: db.emergency_contact, uploads: db.uploads || {},
+      paymentId: db.payment_id, paymentStatus: db.payment_status,
+      status: db.status, createdAt: db.created_at, qrCodeValue: db.qr_hash, isEmailVerified: true
     };
-    all.push(newReg);
+    const all = getStorageItem<CompetitionRegistration[]>('rn_registrations', []);
+    all.push(reg);
     setStorageItem('rn_registrations', all);
-    return newReg;
+    return reg;
   },
 
   submitContactForm: async (data: { name: string; email: string; phone: string; subject: string; message: string }): Promise<{ success: boolean }> => {

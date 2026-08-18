@@ -1513,7 +1513,7 @@ function CompetitionRegistrationWizard({ event, user, onClose }: WizardProps) {
       setCompletedReg(reg);
       setStep(6); // Success Pass
     } catch (err) {
-      setError("Failed to submit registration. Please check your inputs.");
+      setError(err instanceof Error ? err.message : "Failed to submit registration. Please check your inputs.");
     } finally {
       setIsProcessing(false);
     }
