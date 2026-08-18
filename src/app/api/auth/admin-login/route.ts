@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const users = await sql`
       SELECT id, name, email, role, is_verified FROM users
-      WHERE email = ${email}
+      WHERE email = ${email.trim().toLowerCase()}
         AND password_hash = ${hashPassword(password)}
         AND role IN ('admin', 'scanner', 'coordinator')
     `;
