@@ -45,7 +45,7 @@ export default function TermsConditionsPage() {
           <ScrollText size={12} /> Legal Documentation
         </span>
         <h1 className="text-4xl md:text-5xl font-black font-primary text-slate-900 tracking-tight">{content?.heading}</h1>
-        <p className="text-slate-400 text-xs">Last Updated: {content?.lastUpdated}</p>
+        <p className="text-slate-400 text-xs">{content?.lastUpdated}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -82,7 +82,7 @@ export default function TermsConditionsPage() {
                 </span>
                 {section.title.replace(/^\d+[.)]\s*/, "")}
               </h3>
-              <div className="pl-10 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2" dangerouslySetInnerHTML={{ __html: section.body }} />
+              <div className="pl-10 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-3 [&_li]:leading-relaxed [&_br]:hidden" dangerouslySetInnerHTML={{ __html: section.body }} />
             </div>
           ))}
         </div>
