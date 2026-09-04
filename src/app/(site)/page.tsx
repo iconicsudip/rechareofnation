@@ -532,8 +532,8 @@ export default function HomePage() {
                   <img src={evt.bannerUrl} alt={evt.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
 
                   {/* Rating Badge Overlay */}
-                  <div className="absolute top-3.5 left-3.5 bg-gray-950/80 backdrop-blur-sm px-2.5 py-1 rounded flex items-center gap-1.5 text-[10px] text-amber-400 font-bold font-primary">
-                    <Star size={11} fill="currentColor" />
+                  <div className="absolute top-3.5 left-3.5 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[10.5px] text-white font-bold font-primary shadow-lg shadow-black/20 border border-white/10">
+                    <Star size={11} className="text-amber-400 fill-amber-400" />
                     <span>{evt.rating}</span>
                   </div>
                 </div>

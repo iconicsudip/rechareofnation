@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle, ShieldCheck } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle, ShieldCheck, MessageCircle } from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
 
 interface ContactInfoContent {
@@ -68,20 +68,24 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="container py-12 flex flex-col gap-16">
+    <div className="container py-16 md:py-20 flex flex-col gap-16">
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto flex flex-col gap-3">
-        <span className="text-sm font-semibold uppercase tracking-widest text-pink-500">{content?.eyebrow}</span>
-        <h1 className="text-4xl md:text-5xl font-black font-primary text-slate-900">{content?.heading}</h1>
-        <p className="text-slate-500 text-sm mt-2">{content?.subheading}</p>
+      <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
+        <span className="inline-flex items-center gap-2 bg-pink-50 border border-pink-100 text-pink-600 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary">
+          <MessageCircle size={12} /> {content?.eyebrow}
+        </span>
+        <h1 className="text-4xl md:text-5xl font-black font-primary text-slate-900 tracking-tight">{content?.heading}</h1>
+        <p className="text-slate-500 text-sm max-w-lg">{content?.subheading}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
         {/* Left Column: Details (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4">
-            <MapPin className="text-indigo-600 shrink-0 mt-1" size={20} />
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-indigo-50 border border-indigo-100">
+              <MapPin className="text-indigo-600" size={18} />
+            </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm font-primary">Office Address</h4>
               <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">
@@ -90,8 +94,10 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4">
-            <Phone className="text-indigo-600 shrink-0 mt-1" size={20} />
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-pink-50 border border-pink-100">
+              <Phone className="text-pink-600" size={18} />
+            </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm font-primary">Calling Helpline</h4>
               <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">
@@ -101,8 +107,10 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4">
-            <Mail className="text-indigo-600 shrink-0 mt-1" size={20} />
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-emerald-50 border border-emerald-100">
+              <Mail className="text-emerald-600" size={18} />
+            </div>
             <div>
               <h4 className="font-bold text-slate-900 text-sm font-primary">Email Support</h4>
               <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   await ensureSchema();
-  const competitions = await sql`SELECT * FROM competitions ORDER BY created_at DESC`;
+  const competitions = await sql`SELECT * FROM competitions WHERE is_active = true ORDER BY created_at DESC`;
   return NextResponse.json({ competitions });
 }
 
