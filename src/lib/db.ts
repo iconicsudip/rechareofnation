@@ -547,13 +547,10 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
       columns: [
         { title: 'For Audiences', links: [
           { label: 'All Live Events', href: '/events' },
-          { label: 'Abhyudaya Mega Fest', href: '/events/recharge-cultural-odyssey-2026' },
           { label: 'Exhibitions & Expos', href: '/events?category=Trade%20Expos' },
           { label: 'My Ticket Badges', href: '/dashboard' },
         ] },
         { title: 'For Participants', links: [
-          { label: 'Mr/Miss Traditional 2026', href: '/competitions' },
-          { label: 'Nataraja Dance Clash', href: '/events/national-vibe-rhythm-dance-cup' },
           { label: 'Become a Sponsor', href: '/sponsors' },
           { label: 'Download Participant ID', href: '/dashboard' },
           { label: 'Admin Portal Access', href: '/admin/login' },

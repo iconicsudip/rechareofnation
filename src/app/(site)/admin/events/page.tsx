@@ -564,7 +564,7 @@ export default function AdminEventsPage() {
                 columns={[
                   { key: "name", label: "Name" },
                   { key: "role", label: "Role (e.g. Folk Headliner)" },
-                  { key: "img", label: "Photo URL", span: 2 },
+                  { key: "img", label: "Photo", type: "image", span: 2 },
                 ]}
                 value={headliners}
                 onChange={setHeadliners}

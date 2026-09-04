@@ -56,6 +56,10 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [content, setContent] = useState<FooterContent>(defaultFooterContent);
+  // Real entities to link to in place of hardcoded event/competition names —
+  // stay null (and the link stays hidden) until real data confirms one exists.
+  const [featuredEvent, setFeaturedEvent] = useState<{ name: string; slug: string } | null>(null);
+  const [topCompetition, setTopCompetition] = useState<{ name: string; slug: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,10 +68,39 @@ export default function Footer() {
       if (!cancelled && data) setContent(data);
     };
     fetchContent();
+    ApiClient.getEvents().then((events) => {
+      if (cancelled) return;
+      const featured = events.find((e) => e.isFeatured) ?? null;
+      setFeaturedEvent(featured ? { name: featured.name, slug: featured.slug } : null);
+    }).catch(() => {});
+    ApiClient.getCompetitions().then((comps) => {
+      if (cancelled) return;
+      const top = comps[0] ?? null;
+      setTopCompetition(top ? { name: top.name, slug: top.slug } : null);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // Stale references to specific events/competitions from the original demo
+  // content don't survive real data changing — drop any admin-authored link
+  // that points at one of those slugs, and let the dynamic entities above
+  // (which hide themselves when nothing real exists) take their place.
+  const STALE_HREFS = new Set([
+    "/events/recharge-cultural-odyssey-2026",
+    "/events/national-vibe-rhythm-dance-cup",
+  ]);
+  const dynamicColumns = content.columns.map((column, colIdx) => {
+    const links = column.links.filter((l) => !STALE_HREFS.has(l.href) && l.label !== "Mr/Miss Traditional 2026");
+    if (colIdx === 0 && featuredEvent) {
+      links.splice(1, 0, { label: featuredEvent.name, href: `/events/${featuredEvent.slug}` });
+    }
+    if (colIdx === 1 && topCompetition) {
+      links.unshift({ label: topCompetition.name, href: "/competitions" });
+    }
+    return { ...column, links };
+  });
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -130,7 +163,7 @@ export default function Footer() {
           </div>
 
           {/* Columns 2 & 3: For Audiences / For Participants (data-driven) */}
-          {content.columns.map((column, colIdx) => (
+          {dynamicColumns.map((column, colIdx) => (
             <div key={column.title}>
               <h4 className="text-white font-primary font-semibold text-xs uppercase tracking-wider mb-5">{column.title}</h4>
               <div className="flex flex-col gap-3 text-xs">

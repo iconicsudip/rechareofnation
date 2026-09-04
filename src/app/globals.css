@@ -549,9 +549,57 @@ body .text-gray-500:not(:hover):not(.group:hover *):not(.peer:hover *):not(foote
 }
 .rn-rich-text-editor h2,
 .rn-rich-text-content h2 {
-  font-size: 1.35em;
+  font-size: 1.4em;
   font-weight: 800;
-  margin: 0.9em 0 0.5em;
+  margin: 1.4em 0 0.6em;
+  padding-bottom: 0.45em;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.15);
+}
+.rn-rich-text-editor h2:first-child,
+.rn-rich-text-content h2:first-child {
+  margin-top: 0;
+}
+/* h3/h4 previously fell back to plain bold text indistinguishable from a
+   paragraph — give the level hierarchy real visual weight, using accent
+   colors (not neutral text colors) so this reads correctly whether the
+   surrounding context is light (public content) or dark (admin editor). */
+.rn-rich-text-editor h3,
+.rn-rich-text-content h3 {
+  font-size: 1.08em;
+  font-weight: 800;
+  color: #4F46E5;
+  margin: 1.3em 0 0.4em;
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+}
+.rn-rich-text-editor h3::before,
+.rn-rich-text-content h3::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.rn-rich-text-editor h4,
+.rn-rich-text-content h4 {
+  font-size: 0.96em;
+  font-weight: 700;
+  margin: 1.1em 0 0.35em;
+}
+.rn-rich-text-editor blockquote,
+.rn-rich-text-content blockquote {
+  border-left: 3px solid #EC4899;
+  background: rgba(236, 72, 153, 0.06);
+  padding: 0.75em 1.15em;
+  margin: 1em 0;
+  border-radius: 0 12px 12px 0;
+  font-style: italic;
+}
+.rn-rich-text-editor li,
+.rn-rich-text-content li {
+  margin-bottom: 0.35em;
 }
 .rn-rich-text-editor ul,
 .rn-rich-text-content ul {

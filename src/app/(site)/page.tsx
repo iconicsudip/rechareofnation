@@ -140,10 +140,27 @@ export default function HomePage() {
 
   const activeHero = heroSlides[currentSlide];
 
-  // Derived curated sections from real event data
-  const spotlightEvents = allEvents.filter(e => e.isFeatured).slice(0, 4);
-  const carnivals = allEvents.filter(e => e.category === "Cultural Programs").slice(0, 4);
-  const expos = allEvents.filter(e => e.category === "Trade Expos").slice(0, 4);
+  // Derived curated sections from real event data. Categories are free-text
+  // admin/taxonomy values, not a fixed enum — matching on one exact category
+  // name left these sections empty whenever real inventory used a different
+  // (but thematically equivalent) category. Match broader theme buckets
+  // instead so these sections actually populate from whatever categories
+  // real events are currently using.
+  const CARNIVAL_CATEGORIES = new Set([
+    "Cultural Programs", "Dance Competitions", "Singing Competitions",
+    "Fashion Shows", "Food Festivals", "Art & Craft", "Talent Hunt", "Sports",
+  ]);
+  const EXPO_CATEGORIES = new Set(["Trade Expos", "Business Expo", "Startup Conference", "Educational Events"]);
+
+  // Featured events first; if there aren't 4, backfill with the
+  // highest-rated remaining events so this never looks sparse while real
+  // events exist.
+  const featured = allEvents.filter(e => e.isFeatured);
+  const backfill = allEvents.filter(e => !e.isFeatured).sort((a, b) => b.rating - a.rating);
+  const spotlightEvents = [...featured, ...backfill].slice(0, 4);
+
+  const carnivals = allEvents.filter(e => CARNIVAL_CATEGORIES.has(e.category)).slice(0, 4);
+  const expos = allEvents.filter(e => EXPO_CATEGORIES.has(e.category)).slice(0, 4);
   const trendingEventsForCity = allEvents.filter(e => e.city === trendingCity).slice(0, 3);
   const citiesWithEvents = cities.filter(city => allEvents.some(e => e.city === city));
 
@@ -329,6 +346,7 @@ export default function HomePage() {
       )}
 
       {/* 5. SPOTLIGHT HEADLINERS */}
+      {spotlightEvents.length > 0 && (
       <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
           <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
@@ -360,8 +378,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* 6. NATIONAL ARENAS */}
+      {arenas.length > 0 && (
       <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
           <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
@@ -391,8 +411,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* 7. MEGA CARNIVALS */}
+      {carnivals.length > 0 && (
       <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
           <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
@@ -442,8 +464,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* 8. INNOVATION TRADE EXPOS */}
+      {expos.length > 0 && (
       <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
         <div className="container">
           <div className="flex items-end justify-between border-b border-slate-200/80 pb-4 mb-8">
@@ -491,6 +515,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* 9. TRENDING NEAR YOU (WHAT'S HOT IN CITY) */}
       {citiesWithEvents.length > 0 && (

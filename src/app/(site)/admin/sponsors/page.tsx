@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, Star, Globe, X, Check, RefreshCw } from "lucide-react";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 
 interface Sponsor {
   id: string;
@@ -165,7 +166,6 @@ export default function AdminSponsorsPage() {
             <div className="flex flex-col gap-3">
               {[
                 { label: "Sponsor Name *", key: "name", placeholder: "e.g. Airtel" },
-                { label: "Logo URL", key: "logo_url", placeholder: "https://..." },
                 { label: "Website URL", key: "website_url", placeholder: "https://example.com" },
               ].map(f => (
                 <div key={f.key}>
@@ -174,6 +174,7 @@ export default function AdminSponsorsPage() {
                     onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} />
                 </div>
               ))}
+              <ImageUploadField label="Logo" value={form.logo_url} onChange={(url) => setForm(p => ({ ...p, logo_url: url }))} />
               <div>
                 <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(148,163,184,0.7)" }}>Tier *</label>
                 <select style={{ ...S.input, cursor: "pointer" }} value={form.tier}
