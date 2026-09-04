@@ -113,14 +113,14 @@ export default function AdminSponsorsPage() {
                     style={{ background: tc.bg, color: tc.color, border: `1px solid ${tc.border}` }}>
                     {sp.tier}
                   </span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1">
                     <button onClick={() => openEdit(sp)}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer"
                       style={{ background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
                       <Pencil size={12} />
                     </button>
                     <button onClick={() => setDeleteId(sp.id)}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer"
                       style={{ background: "rgba(239,68,68,0.1)", color: "#F87171" }}>
                       <Trash2 size={12} />
                     </button>

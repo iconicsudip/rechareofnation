@@ -202,7 +202,7 @@ export default function AdminAssignersPage() {
                         style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8" }}>Cancel</button>
                     </div>
                   ) : (
-                    <button onClick={() => setDeleteId(a.id)} className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg transition-opacity"
+                    <button onClick={() => setDeleteId(a.id)} className="p-1.5 rounded-lg cursor-pointer"
                       style={{ background: "rgba(239,68,68,0.1)", color: "#F87171" }}>
                       <Trash2 size={13} />
                     </button>

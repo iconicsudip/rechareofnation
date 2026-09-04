@@ -103,23 +103,22 @@ export default function AdminGalleryPage() {
       ) : (
         <div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="relative group overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(99,102,241,0.12)" }}>
-              <div className="w-full h-32" style={{ background: "rgba(255,255,255,0.04)" }}>
+            <div key={item.id} className="relative overflow-hidden rounded-2xl flex flex-col" style={{ border: "1px solid rgba(99,102,241,0.12)" }}>
+              <div className="w-full h-32 relative" style={{ background: "rgba(255,255,255,0.04)" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.thumbnail_url || item.url} alt={item.title} className="w-full h-full object-cover" />
+                {item.type === "video" && (
+                  <div className="absolute top-2 left-2"><PlayCircle size={16} className="text-white drop-shadow" /></div>
+                )}
+                {/* Always-visible action buttons — not hover-gated, so this works on touch devices too */}
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <button onClick={() => openEdit(item)} className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer" style={{ background: "rgba(15,23,42,0.75)", color: "#818CF8" }}><Pencil size={12} /></button>
+                  <button onClick={() => setDeleteId(item.id)} className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer" style={{ background: "rgba(15,23,42,0.75)", color: "#F87171" }}><Trash2 size={12} /></button>
+                </div>
               </div>
-              {item.type === "video" && (
-                <div className="absolute top-2 left-2"><PlayCircle size={16} className="text-white drop-shadow" /></div>
-              )}
-              <div className="absolute inset-0 flex flex-col justify-between p-2.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(0,0,0,0.55)" }}>
-                <div className="flex justify-end gap-1">
-                  <button onClick={() => openEdit(item)} className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "rgba(99,102,241,0.5)", color: "#fff" }}><Pencil size={11} /></button>
-                  <button onClick={() => setDeleteId(item.id)} className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "rgba(239,68,68,0.6)", color: "#fff" }}><Trash2 size={11} /></button>
-                </div>
-                <div>
-                  <div className="text-white text-[11px] font-semibold line-clamp-2">{item.title}</div>
-                  <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)" }}>{item.event}</div>
-                </div>
+              <div className="p-2.5" style={{ background: "rgba(15,23,42,0.4)" }}>
+                <div className="text-white text-[11px] font-semibold line-clamp-2">{item.title}</div>
+                <div className="text-[10px] mt-0.5" style={{ color: "rgba(148,163,184,0.6)" }}>{item.event}</div>
               </div>
             </div>
           ))}
