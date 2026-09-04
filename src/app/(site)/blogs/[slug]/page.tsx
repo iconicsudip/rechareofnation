@@ -31,7 +31,7 @@ export default function BlogDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen bg-[#F8FAFC] py-20 text-center text-slate-550 text-sm font-secondary">
+      <div className="w-full min-h-screen bg-[#F8FAFC] py-20 text-center text-slate-500 text-sm font-secondary">
         Loading Article Details...
       </div>
     );
@@ -55,7 +55,7 @@ export default function BlogDetailPage({ params }: PageProps) {
   const popularBlogs = allBlogs.filter(b => b.id !== blog.id).slice(3, 5);
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-12 text-slate-850 font-secondary text-left">
+    <div className="w-full min-h-screen bg-[#F8FAFC] py-12 text-slate-800 font-secondary text-left">
       <div className="container max-w-7xl mx-auto px-4 flex flex-col">
         
         {/* Breadcrumb navigation */}
@@ -100,7 +100,7 @@ export default function BlogDetailPage({ params }: PageProps) {
             </span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-bold flex items-center gap-1">
-              <Clock size={12} className="text-slate-450" /> {blog.readTime || "2 min read"}
+              <Clock size={12} className="text-slate-400" /> {blog.readTime || "2 min read"}
             </span>
           </div>
 

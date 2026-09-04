@@ -22,10 +22,12 @@ export default function EventCard(evt: EventCardProps) {
       
       {/* Image Container */}
       <div className="h-44 relative overflow-hidden bg-slate-100 shrink-0">
-        <img 
-          src={evt.bannerUrl} 
-          alt={evt.name} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" 
+        <img
+          src={evt.bannerUrl}
+          alt={evt.name}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
         />
         <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none z-0"></div>
         

@@ -80,8 +80,8 @@ function VerifyContent() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col text-center">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-450 uppercase mb-2 block text-center">Enter Verification Code</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all max-w-[240px] mx-auto w-full">
+            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-2 block text-center">Enter Verification Code</label>
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all max-w-[240px] mx-auto w-full">
               <KeyRound className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="text" 

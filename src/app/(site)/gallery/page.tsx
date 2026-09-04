@@ -61,15 +61,15 @@ export default function GalleryPage() {
       
       {/* Lightbox Modal */}
       {selectedMedia && (
-        <div className="fixed inset-0 z-50 bg-[#070b19]/95 backdrop-blur-md flex items-center justify-center p-4">
-          <button 
-            onClick={() => setSelectedMedia(null)} 
-            className="absolute top-6 right-6 text-slate-400 hover:text-white p-2.5 bg-slate-900/60 rounded-full border border-slate-800 transition-all hover:scale-105 cursor-pointer"
+        <div className="fixed inset-0 z-50 bg-[#070b19]/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <button
+            onClick={() => setSelectedMedia(null)}
+            className="fixed top-6 right-6 text-slate-400 hover:text-white p-2.5 bg-slate-900/60 rounded-full border border-slate-800 transition-all hover:scale-105 cursor-pointer z-10"
           >
             <X size={20} />
           </button>
-          
-          <div className="max-w-4xl w-full flex flex-col gap-4 text-center">
+
+          <div className="max-w-4xl w-full flex flex-col gap-4 text-center my-auto">
             {selectedMedia.type === "video" ? (
               // Simulated Player
               <div className="h-[250px] sm:h-[450px] relative rounded-3xl overflow-hidden border border-slate-800 bg-black">
@@ -79,7 +79,7 @@ export default function GalleryPage() {
                   className="w-full h-full object-cover opacity-60 filter blur-sm scale-105"
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                  <div className="w-16 h-16 rounded-full bg-pink-500 text-white flex items-center justify-center text-xl shadow-lg shadow-pink-550/20 animate-pulse">
+                  <div className="w-16 h-16 rounded-full bg-pink-500 text-white flex items-center justify-center text-xl shadow-lg shadow-pink-500/20 animate-pulse">
                     ▶
                   </div>
                   <span className="text-[10px] text-pink-500 font-bold uppercase tracking-widest mt-2 font-primary">
@@ -123,7 +123,7 @@ export default function GalleryPage() {
           <h1 className="text-3xl md:text-5xl font-black font-primary text-slate-900 tracking-tight">
             {pageContent.heading}
           </h1>
-          <p className="text-slate-550 text-xs md:text-sm leading-relaxed font-secondary">
+          <p className="text-slate-500 text-xs md:text-sm leading-relaxed font-secondary">
             {pageContent.description}
           </p>
         </div>
@@ -183,7 +183,7 @@ export default function GalleryPage() {
                     {item.event}
                   </span>
 
-                  <h4 className="text-white text-xs md:text-sm font-bold font-primary leading-snug drop-shadow-sm group-hover:text-pink-250 transition-colors">
+                  <h4 className="text-white text-xs md:text-sm font-bold font-primary leading-snug drop-shadow-sm group-hover:text-pink-200 transition-colors">
                     {item.title}
                   </h4>
                 </div>

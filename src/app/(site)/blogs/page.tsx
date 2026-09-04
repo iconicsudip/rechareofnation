@@ -78,7 +78,7 @@ export default function BlogsPage() {
                 <span className="text-[9px] font-primary font-bold tracking-widest text-white/75 uppercase">
                   PUBLISHED ON {blogs[0].publishedAt}
                 </span>
-                <h2 className="text-xl md:text-3xl font-black font-primary uppercase text-white leading-tight mt-2 max-w-2xl group-hover:text-pink-450 transition-colors">
+                <h2 className="text-xl md:text-3xl font-black font-primary uppercase text-white leading-tight mt-2 max-w-2xl group-hover:text-pink-400 transition-colors">
                   {blogs[0].title}
                 </h2>
                 <span className="mt-4 bg-white/10 border border-white/20 text-white rounded-full px-4 py-1 text-[9px] font-primary font-bold uppercase tracking-wider">
@@ -109,7 +109,7 @@ export default function BlogsPage() {
                     <span className="bg-white/10 border border-white/20 text-white rounded-full px-3 py-0.5 text-[8px] font-primary font-bold uppercase tracking-wider">
                       {blog.category}
                     </span>
-                    <h3 className="text-sm md:text-base font-black font-primary uppercase text-white leading-snug mt-2 group-hover:text-pink-450 transition-colors line-clamp-2">
+                    <h3 className="text-sm md:text-base font-black font-primary uppercase text-white leading-snug mt-2 group-hover:text-pink-400 transition-colors line-clamp-2">
                       {blog.title}
                     </h3>
                   </div>
@@ -128,7 +128,7 @@ export default function BlogsPage() {
             <h1 className="text-3xl md:text-5xl font-black font-primary text-slate-900 tracking-tight uppercase">
               {pageContent.heading}
             </h1>
-            <p className="text-slate-550 text-xs md:text-sm max-w-2xl leading-relaxed font-secondary">
+            <p className="text-slate-500 text-xs md:text-sm max-w-2xl leading-relaxed font-secondary">
               {pageContent.description}
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function BlogsPage() {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-full pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-450 focus:outline-none focus:border-pink-500 transition-all font-secondary"
+                className="w-full bg-white border border-slate-200 rounded-full pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pink-500 transition-all font-secondary"
               />
             </div>
           </div>

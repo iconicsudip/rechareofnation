@@ -89,10 +89,10 @@ const renderLogoFallback = (name: string) => {
   const firstWord = words[0] || name;
   const restWords = words.slice(1).join(" ");
   return (
-    <div className="font-black text-slate-450 font-primary tracking-tighter text-md flex flex-col">
+    <div className="font-black text-slate-400 font-primary tracking-tighter text-md flex flex-col">
       <span>{firstWord}</span>
       {restWords && (
-        <span className="text-[10px] text-slate-350 tracking-wider font-secondary font-primary">
+        <span className="text-[10px] text-slate-300 tracking-wider font-secondary font-primary">
           {restWords}
         </span>
       )}
@@ -532,7 +532,7 @@ export default function SponsorsPage() {
                             href={sponsor.websiteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-[#0c1222] hover:bg-slate-850 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                            className="bg-[#0c1222] hover:bg-slate-800 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
                           >
                             VISIT SITE
                           </a>
@@ -578,7 +578,7 @@ export default function SponsorsPage() {
                             <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
                               {sponsor.name}
                             </h4>
-                            <p className="text-slate-550 text-xs leading-relaxed font-secondary line-clamp-2">
+                            <p className="text-slate-500 text-xs leading-relaxed font-secondary line-clamp-2">
                               {sponsor.description}
                             </p>
                           </div>
@@ -640,7 +640,7 @@ export default function SponsorsPage() {
                             <h4 className="text-base font-black text-slate-900 font-primary leading-tight">
                               {sponsor.name}
                             </h4>
-                            <p className="text-slate-550 text-xs leading-relaxed font-secondary line-clamp-2">
+                            <p className="text-slate-500 text-xs leading-relaxed font-secondary line-clamp-2">
                               {sponsor.description}
                             </p>
                           </div>
@@ -747,7 +747,7 @@ export default function SponsorsPage() {
                 {pageContent.enlistDescription}
               </p>
 
-              <ul className="flex flex-col gap-4 mt-2 font-primary text-xs text-slate-350">
+              <ul className="flex flex-col gap-4 mt-2 font-primary text-xs text-slate-300">
                 {pageContent.enlistBullets.map((bullet, idx) => (
                   <li key={idx} className="flex gap-2 items-center">
                     <span>✓</span>

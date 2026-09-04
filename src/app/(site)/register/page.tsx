@@ -69,7 +69,7 @@ function RegisterContent() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="md:col-span-2 flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Full Name *</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <User className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="text" 
@@ -84,7 +84,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Email Address *</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="email" 
@@ -99,7 +99,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Password *</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <Lock className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="password" 
@@ -114,7 +114,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Mobile Number</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <Phone className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="tel" 
@@ -128,7 +128,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">School / College / Organization</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <Building className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="text" 
@@ -142,7 +142,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">City</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <MapPin className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="text" 
@@ -156,7 +156,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">State</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <MapPin className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="text" 
@@ -182,7 +182,7 @@ function RegisterContent() {
 
         <div className="mt-8 text-center text-xs text-slate-500 font-secondary">
           Already have an account?{" "}
-          <Link href={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-indigo-600 hover:text-indigo-750 font-bold underline font-primary transition-colors">
+          <Link href={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-indigo-600 hover:text-indigo-700 font-bold underline font-primary transition-colors">
             Sign In Here
           </Link>
         </div>

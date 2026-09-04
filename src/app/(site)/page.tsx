@@ -8,7 +8,7 @@ import {
   HelpCircle, Eye, Mail, Award, CheckCircle, Ticket, Layers, 
   Laptop, Briefcase, GraduationCap, Globe, Shield, RefreshCw, ChevronLeft, BookOpen, Send
 } from "lucide-react";
-import { ApiClient, Sponsor, GalleryItem, Event, CompetitionRecord, Blog } from "@/lib/api-client";
+import { ApiClient, GalleryItem, Event, CompetitionRecord, Blog } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import CompetitionCard from "@/components/CompetitionCard";
@@ -54,7 +54,6 @@ export default function HomePage() {
   const [trendingCity, setTrendingCity] = useState("");
   
   // Custom API seeded lists states
-  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   
   // Search state
@@ -92,25 +91,22 @@ export default function HomePage() {
   // its static shell, and each section pops in on its own as soon as ITS call
   // resolves, instead of the whole page waiting on the slowest one.
   useEffect(() => {
-    ApiClient.getSiteContent<{ slides: HeroSlide[] }>('homepage_hero')
-      .then((hero) => setHeroSlides(hero?.slides ?? []));
-    ApiClient.getSiteContent<{ stats: StatItem[] }>('homepage_stats')
-      .then((statsContent) => setStats(statsContent?.stats ?? []));
+    // One request for all 6 site_content keys this page needs, instead of 6
+    // separate round-trips to the same table.
+    ApiClient.getAllSiteContent().then((all) => {
+      setHeroSlides((all.homepage_hero as { slides: HeroSlide[] } | undefined)?.slides ?? []);
+      setStats((all.homepage_stats as { stats: StatItem[] } | undefined)?.stats ?? []);
+      setHubs((all.homepage_hubs as { hubs: HubItem[] } | undefined)?.hubs ?? []);
+      setPartnerLogos((all.homepage_partner_logos as { logos: string[] } | undefined)?.logos ?? []);
+      setTestimonials((all.homepage_testimonials as { testimonials: Testimonial[] } | undefined)?.testimonials ?? []);
+      setNewsletterContent((all.homepage_newsletter as NewsletterContent | undefined) ?? DEFAULT_NEWSLETTER);
+    });
     ApiClient.getTaxonomy('event_category').then(setEventCategories);
     ApiClient.getTaxonomy('city').then(setCities);
-    ApiClient.getSiteContent<{ hubs: HubItem[] }>('homepage_hubs')
-      .then((hubsContent) => setHubs(hubsContent?.hubs ?? []));
     ApiClient.getEvents().then(setAllEvents).catch(() => setAllEvents([]));
     ApiClient.getCompetitions().then(setArenas);
     ApiClient.getGalleryItems().then(setGallery);
-    ApiClient.getSiteContent<{ logos: string[] }>('homepage_partner_logos')
-      .then((partnerContent) => setPartnerLogos(partnerContent?.logos ?? []));
-    ApiClient.getSiteContent<{ testimonials: Testimonial[] }>('homepage_testimonials')
-      .then((testimonialContent) => setTestimonials(testimonialContent?.testimonials ?? []));
     ApiClient.getBlogs().then(setBlogs);
-    ApiClient.getSiteContent<NewsletterContent>('homepage_newsletter')
-      .then((newsletterData) => setNewsletterContent(newsletterData ?? DEFAULT_NEWSLETTER));
-    ApiClient.getSponsors().then(setSponsors);
   }, []);
 
   // Auto-pick the first city with real events once both cities and events have
@@ -181,10 +177,10 @@ export default function HomePage() {
                   {activeHero.desc}
                 </p>
                 <div className="flex flex-wrap gap-4 mt-2">
-                  <Link href={`/events/${activeHero.slug}`} className="btn btn-primary bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold text-xs tracking-wide rounded-xl px-8 py-3.5 shadow-neon-pink">
+                  <Link href={`/events/${activeHero.slug}`} className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 transition-all text-white font-bold text-xs tracking-wide rounded-xl px-8 py-3.5 shadow-neon-pink">
                     BOOK PASS
                   </Link>
-                  <Link href="/events" className="btn btn-secondary bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold text-xs rounded-xl px-6 py-3.5">
+                  <Link href="/events" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 transition-all border border-white/10 text-white font-semibold text-xs rounded-xl px-6 py-3.5">
                     EXPLORE ALL
                   </Link>
                 </div>
@@ -340,7 +336,7 @@ export default function HomePage() {
               <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">SPOTLIGHT HEADLINERS</h2>
               <p className="text-slate-500 text-xs mt-1 font-secondary">Our highest-rated national highlights. Slide left or right to explore.</p>
             </div>
-            <Link href="/events" className="text-xs font-bold text-pink-500 hover:text-pink-650 transition-colors uppercase tracking-wider flex items-center gap-1">
+            <Link href="/events" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider flex items-center gap-1">
               <span>See All</span>
               <ChevronRight size={12} />
             </Link>
@@ -414,7 +410,7 @@ export default function HomePage() {
             {carnivals.map((fest) => (
               <div key={fest.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
                 <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
-                  <img src={fest.bannerUrl} alt={fest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                  <img src={fest.bannerUrl} alt={fest.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
                   <span className="absolute top-3 left-3 bg-rose-500 text-white font-primary text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">MEGA FEST</span>
                 </div>
 
@@ -465,7 +461,7 @@ export default function HomePage() {
             {expos.map((expo) => (
               <div key={expo.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
                 <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
-                  <img src={expo.bannerUrl} alt={expo.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                  <img src={expo.bannerUrl} alt={expo.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
                   <span className="absolute top-3 left-3 bg-indigo-600 text-white font-primary text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">TRADE EXPO</span>
                 </div>
 
@@ -533,7 +529,7 @@ export default function HomePage() {
                 className="bg-[#0f172a] dark-bg border border-gray-800 rounded-3xl overflow-hidden flex flex-col h-full hover:border-pink-500/40 transition-colors duration-300 group"
               >
                 <div className="h-44 relative overflow-hidden">
-                  <img src={evt.bannerUrl} alt={evt.name} className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+                  <img src={evt.bannerUrl} alt={evt.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
 
                   {/* Rating Badge Overlay */}
                   <div className="absolute top-3.5 left-3.5 bg-gray-950/80 backdrop-blur-sm px-2.5 py-1 rounded flex items-center gap-1.5 text-[10px] text-amber-400 font-bold font-primary">
@@ -591,7 +587,7 @@ export default function HomePage() {
                 key={item.id}
                 className="relative h-44 rounded-xl overflow-hidden group border border-slate-100 shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:-translate-y-0.5 transition-transform duration-350"
               >
-                <img src={item.thumbnailUrl || item.url} alt={item.title} className="w-full h-full object-cover" />
+                <img src={item.thumbnailUrl || item.url} alt={item.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-transparent"></div>
 
                 <div className="absolute bottom-3 left-3 flex flex-col gap-0.5 text-left z-10">
@@ -636,7 +632,29 @@ export default function HomePage() {
             <h2 className="text-2xl font-black text-slate-900 font-primary uppercase">TRUSTED BY THOUSANDS</h2>
           </div>
 
-          <div className="h-[480px] overflow-hidden relative grid grid-cols-1 md:grid-cols-3 gap-6 select-none">
+          {/* Mobile: a plain stacked list — the 3-column auto-scroll marquee below
+              is a desktop-only effect (each column self-animates via a CSS
+              transform loop, clipped by this container's fixed height; on a
+              single mobile column the other two columns would just be cut off
+              by that same clip, so we swap to a normal list instead). */}
+          <div className="flex md:hidden flex-col gap-4">
+            {testimonials.slice(0, 4).map((t, idx) => (
+              <div key={idx} className="bg-[#fbfcfd] border border-slate-200/80 rounded-[20px] p-6 flex flex-col gap-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] text-left">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-0.5 text-amber-500">
+                    {[...Array(5)].map((_, i) => <Star key={i} size={11} fill="currentColor" className="text-amber-500" />)}
+                  </div>
+                  <p className="text-slate-600 italic text-[10.5px] leading-relaxed font-secondary">&quot;{t.quote}&quot;</p>
+                </div>
+                <div className="border-t border-slate-100 pt-3 flex flex-col gap-0.5">
+                  <h4 className="font-bold text-slate-800 text-[11px] font-primary uppercase tracking-tight">{t.author}</h4>
+                  <p className="text-slate-400 text-[8.5px] uppercase font-primary font-medium">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden md:grid h-[480px] overflow-hidden relative grid-cols-1 md:grid-cols-3 gap-6 select-none">
             <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
             <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div>
 
@@ -706,7 +724,7 @@ export default function HomePage() {
               <h2 className="text-[20px] font-black text-slate-900 font-primary uppercase">RECHARGE CHRONICLE</h2>
               <p className="text-slate-500 text-xs mt-1 font-secondary">Editorial briefings on handloom couture, event tech scaling, and crowd design.</p>
             </div>
-            <Link href="/blogs" className="text-xs font-bold text-pink-500 hover:text-pink-650 transition-colors uppercase tracking-wider">
+            <Link href="/blogs" className="text-xs font-bold text-pink-500 hover:text-pink-600 transition-colors uppercase tracking-wider">
               Read Chronicle &gt;
             </Link>
           </div>
@@ -749,10 +767,10 @@ export default function HomePage() {
               </div>
             ) : (
               <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row w-full gap-3 max-w-md mt-2 relative z-10">
-                <input 
-                  type="email" 
-                  placeholder="you@company.com" 
-                  className="form-input flex-grow text-xs rounded-xl bg-gray-950 border-gray-800 text-white placeholder-gray-500 focus:border-gray-700 focus:ring-1 focus:ring-gray-700"
+                <input
+                  type="email"
+                  placeholder="you@company.com"
+                  className="flex-grow text-xs rounded-xl bg-gray-950 border border-gray-800 text-white placeholder-gray-500 outline-none px-4 py-3 focus:border-gray-700 focus:ring-1 focus:ring-gray-700"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   required

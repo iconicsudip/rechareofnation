@@ -494,7 +494,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                 <button
                   type="button"
                   onClick={handleContinue}
-                  className="bg-[#0c1222] hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   Continue <ArrowRight size={14} />
                 </button>

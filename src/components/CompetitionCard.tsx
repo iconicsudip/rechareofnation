@@ -19,10 +19,12 @@ export default function CompetitionCard(arena: CompetitionCardProps) {
       
       {/* Image Section */}
       <div className="h-56 relative overflow-hidden bg-slate-100 shrink-0">
-        <img 
-          src={arena.bannerUrl} 
-          alt={arena.name} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" 
+        <img
+          src={arena.bannerUrl}
+          alt={arena.name}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/40 to-transparent pointer-events-none"></div>
         

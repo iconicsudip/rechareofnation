@@ -32,9 +32,11 @@ export default function BlogCard({
     >
       {/* Image wrapper */}
       <div className={`relative ${aspectRatio} rounded-[24px] overflow-hidden shadow-sm border border-slate-200/80 bg-slate-50`}>
-        <img 
-          src={imageUrl} 
-          alt={title} 
+        <img
+          src={imageUrl}
+          alt={title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {/* Badge */}
@@ -57,7 +59,7 @@ export default function BlogCard({
         </p>
 
         <div className="flex items-center mt-2 pt-3 border-t border-slate-100/80">
-          <span className="text-slate-450 text-[10px] font-primary">
+          <span className="text-slate-400 text-[10px] font-primary">
             {publishedAt}
           </span>
         </div>

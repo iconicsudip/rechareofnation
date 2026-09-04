@@ -205,12 +205,12 @@ export default function Navbar() {
                 </Link>
 
                 <div className="flex items-center gap-2 pl-1.5 ml-1.5 border-l border-slate-200">
-                  <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-slate-750 text-xs font-bold font-primary">
+                  <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 text-xs font-bold font-primary">
                     {user.name ? user.name[0].toUpperCase() : "U"}
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="p-1.5 text-slate-450 hover:text-pink-500 transition-colors cursor-pointer shrink-0"
+                    className="p-1.5 text-slate-400 hover:text-pink-500 transition-colors cursor-pointer shrink-0"
                     title="Logout"
                   >
                     <LogOut size={14} />
@@ -240,14 +240,14 @@ export default function Navbar() {
           <div className="flex lg:hidden items-center gap-1.5 shrink-0">
             <button 
               onClick={() => setShowSearchModal(true)} 
-              className="p-2 text-slate-650 hover:text-pink-500 transition-colors cursor-pointer"
+              className="p-2 text-slate-600 hover:text-pink-500 transition-colors cursor-pointer"
               title="Search Events"
             >
               <Search size={16} />
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center justify-center p-2 text-slate-650 hover:text-slate-900 transition-colors cursor-pointer"
+              className="flex items-center justify-center p-2 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
             >
               {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -263,7 +263,7 @@ export default function Navbar() {
               href="/"
               onClick={() => setIsOpen(false)}
               className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${
-                pathname === "/" ? "text-pink-500" : "text-slate-650"
+                pathname === "/" ? "text-pink-500" : "text-slate-600"
               }`}
             >
               <Home size={16} />
@@ -277,7 +277,7 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${
-                    isActive ? "text-pink-500" : "text-slate-650"
+                    isActive ? "text-pink-500" : "text-slate-600"
                   }`}
                 >
                   <Calendar size={16} />

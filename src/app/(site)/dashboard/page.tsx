@@ -41,40 +41,40 @@ function QRImage({ value, size = 160 }: { value: string; size?: number }) {
 
 // ── Pass Modal ───────────────────────────────────────────────────────────────
 function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
+  const accent = pass.type === "ticket" ? "pink" : "indigo";
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(11,15,26,0.85)", backdropFilter: "blur(12px)" }}>
-      <div className="w-full max-w-sm rounded-3xl overflow-hidden relative"
-        style={{ background: "linear-gradient(180deg, #0F1729 0%, #0B0F1A 100%)", border: "1px solid rgba(99,102,241,0.25)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-[28px] overflow-hidden relative bg-white border border-slate-200/80 shadow-2xl">
 
         {/* Header stripe */}
-        <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, #4F46E5, #DB2777, #0891B2)" }} />
+        <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-pink-500 to-cyan-500" />
 
-        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg"
-          style={{ background: "rgba(255,255,255,0.06)", color: "#94A3B8" }}>
+        <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer">
           <X size={15} />
         </button>
 
         <div className="p-6 flex flex-col items-center gap-4 text-center">
-          <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full"
-            style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", color: "#22D3EE" }}>
+          <span className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full border ${
+            accent === "pink"
+              ? "bg-pink-50 border-pink-200 text-pink-600"
+              : "bg-indigo-50 border-indigo-200 text-indigo-600"
+          }`}>
             {pass.type === "ticket" ? "🎫 Event Entry Pass" : "🏆 Competitor ID Pass"}
           </span>
 
           <div>
-            <h4 className="text-lg font-extrabold text-white" style={{ fontFamily: "var(--font-primary)" }}>{pass.name}</h4>
-            <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
+            <h4 className="text-lg font-extrabold text-slate-900 font-primary">{pass.name}</h4>
+            <p className="text-xs mt-1 text-slate-400">
               {pass.type === "ticket" ? `Ref: ${pass.ref}` : `ID: ${pass.ref}`}
             </p>
           </div>
 
           {/* Real QR Code */}
-          <div className="p-3 bg-white rounded-2xl shadow-xl">
+          <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm">
             <QRImage value={pass.qrHash} size={160} />
           </div>
 
-          <div className="w-full text-xs flex flex-col gap-2.5 pt-2 border-t"
-            style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="w-full text-xs flex flex-col gap-2.5 pt-2 border-t border-slate-100">
             {[
               ["Pass Type", pass.ticketType || pass.category || "—"],
               ["Date", pass.eventDate || "—"],
@@ -82,8 +82,8 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
               ["Status", pass.status],
             ].map(([label, val]) => (
               <div key={label} className="flex justify-between">
-                <span style={{ color: "rgba(148,163,184,0.5)" }}>{label}</span>
-                <span className={`font-bold ${label === "Status" && (val === "confirmed" || val === "approved") ? "text-emerald-400" : "text-white"}`}>
+                <span className="text-slate-400">{label}</span>
+                <span className={`font-bold ${label === "Status" && (val === "confirmed" || val === "approved") ? "text-emerald-600" : "text-slate-900"}`}>
                   {val}
                 </span>
               </div>
@@ -91,9 +91,9 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
           </div>
 
           {pass.scanHistory && pass.scanHistory.length > 0 && (
-            <div className="w-full mt-2 bg-[rgba(16,185,129,0.1)] border border-[rgba(52,211,153,0.2)] rounded-xl p-3 flex flex-col gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 text-left">Completed Stages</span>
-              <div className="flex flex-col gap-1.5 text-xs text-emerald-300 text-left">
+            <div className="w-full mt-2 bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex flex-col gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 text-left">Completed Stages</span>
+              <div className="flex flex-col gap-1.5 text-xs text-emerald-700 text-left">
                 {pass.scanHistory.map((s, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <CheckCircle size={12} />
@@ -105,8 +105,7 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
           )}
 
           <button onClick={() => window.print()}
-            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff", border: "none", cursor: "pointer", fontFamily: "var(--font-primary)" }}>
+            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white font-primary cursor-pointer transition-all shadow-md">
             <Download size={14} /> Download / Print Pass
           </button>
         </div>
@@ -201,7 +200,7 @@ export default function DashboardPage() {
   const handleLogout = () => { ApiClient.logoutUser(); router.push("/"); };
 
   if (!currentUser) return (
-    <div className="container py-20 text-center text-sm" style={{ color: "rgba(148,163,184,0.5)" }}>
+    <div className="min-h-screen bg-[#f8fafc] container py-20 text-center text-sm text-slate-400">
       Authenticating...
     </div>
   );
@@ -213,77 +212,69 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="container py-20 md:py-24 flex flex-col lg:flex-row gap-8">
+    <div className="min-h-screen bg-[#f8fafc] font-secondary text-slate-800 container py-20 md:py-24 flex flex-col lg:flex-row gap-8">
       {selectedPass && <PassModal pass={selectedPass} onClose={() => setSelectedPass(null)} />}
 
       {/* Left: Profile + tabs */}
       <div className="lg:w-72 flex flex-col gap-4 flex-shrink-0">
         {/* Profile Card */}
-        <div className="glass-panel p-6 rounded-2xl flex flex-col gap-4 text-center">
-          <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center mx-auto font-black text-2xl text-white"
-            style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", fontFamily: "var(--font-primary)" }}>
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm p-6 flex flex-col gap-4 text-center">
+          <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center mx-auto font-black text-2xl text-white bg-gradient-to-br from-indigo-600 to-pink-600 font-primary">
             {currentUser.name.charAt(0).toUpperCase()}
             {currentUser.isVerified && (
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                style={{ background: "#10B981" }}>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center bg-emerald-500">
                 <CheckCircle size={11} className="text-white" />
               </div>
             )}
           </div>
           <div>
-            <h3 className="text-base font-bold text-white" style={{ fontFamily: "var(--font-primary)" }}>{currentUser.name}</h3>
-            <span className="text-xs block mt-0.5" style={{ color: "rgba(148,163,184,0.5)" }}>{currentUser.email}</span>
-            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-              style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#34D399" }}>
+            <h3 className="text-base font-bold text-slate-900 font-primary">{currentUser.name}</h3>
+            <span className="text-xs block mt-0.5 text-slate-400">{currentUser.email}</span>
+            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600">
               <Shield size={9} /> {currentUser.isVerified ? "Verified" : "Unverified"}
             </span>
           </div>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t" style={{ borderColor: "rgba(99,102,241,0.08)" }}>
-            <div className="rounded-xl p-2.5 text-center" style={{ background: "rgba(79,70,229,0.08)", border: "1px solid rgba(99,102,241,0.12)" }}>
-              <div className="text-lg font-black text-white" style={{ fontFamily: "var(--font-primary)" }}>{bookings.length}</div>
-              <div className="text-[10px]" style={{ color: "rgba(148,163,184,0.5)" }}>Tickets</div>
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+            <div className="rounded-xl p-2.5 text-center bg-pink-50 border border-pink-100">
+              <div className="text-lg font-black text-slate-900 font-primary">{bookings.length}</div>
+              <div className="text-[10px] text-slate-400">Tickets</div>
             </div>
-            <div className="rounded-xl p-2.5 text-center" style={{ background: "rgba(219,39,119,0.08)", border: "1px solid rgba(244,114,182,0.12)" }}>
-              <div className="text-lg font-black text-white" style={{ fontFamily: "var(--font-primary)" }}>{registrations.length}</div>
-              <div className="text-[10px]" style={{ color: "rgba(148,163,184,0.5)" }}>Registered</div>
+            <div className="rounded-xl p-2.5 text-center bg-indigo-50 border border-indigo-100">
+              <div className="text-lg font-black text-slate-900 font-primary">{registrations.length}</div>
+              <div className="text-[10px] text-slate-400">Registered</div>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <div className="glass-panel rounded-2xl p-2 flex flex-col gap-1">
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm p-2 flex flex-col gap-1">
           {TAB_ITEMS.map(t => (
             <button key={t.key} onClick={() => setActiveTab(t.key)}
-              className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all"
-              style={{
-                background: activeTab === t.key ? "linear-gradient(135deg, rgba(79,70,229,0.2), rgba(219,39,119,0.1))" : "transparent",
-                border: activeTab === t.key ? "1px solid rgba(99,102,241,0.2)" : "1px solid transparent",
-                color: activeTab === t.key ? "#fff" : "rgba(148,163,184,0.6)",
-                fontFamily: "var(--font-primary)",
-              }}>
-              <t.icon size={16} style={{ color: activeTab === t.key ? "#818CF8" : "rgba(148,163,184,0.4)" }} />
+              className={`flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all font-primary cursor-pointer border ${
+                activeTab === t.key
+                  ? "bg-indigo-50 border-indigo-200 text-slate-900"
+                  : "bg-transparent border-transparent text-slate-500 hover:bg-slate-50"
+              }`}>
+              <t.icon size={16} className={activeTab === t.key ? "text-indigo-600" : "text-slate-400"} />
               <span>{t.label}</span>
               {t.count > 0 && (
-                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8" }}>{t.count}</span>
+                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600">{t.count}</span>
               )}
             </button>
           ))}
 
-          <div className="border-t my-1" style={{ borderColor: "rgba(99,102,241,0.08)" }} />
+          <div className="border-t border-slate-100 my-1" />
 
           <button onClick={loadData.bind(null, currentUser)}
-            className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all"
-            style={{ color: "rgba(148,163,184,0.5)", fontFamily: "var(--font-primary)" }}>
-            <RefreshCw size={15} style={{ color: "rgba(148,163,184,0.3)" }} />
+            className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all font-primary cursor-pointer text-slate-500 hover:bg-slate-50">
+            <RefreshCw size={15} className="text-slate-400" />
             Refresh Data
           </button>
 
           <button onClick={handleLogout}
-            className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all"
-            style={{ color: "rgba(248,113,113,0.7)", fontFamily: "var(--font-primary)" }}>
+            className="flex items-center gap-3 p-3.5 text-sm font-semibold rounded-xl text-left transition-all font-primary cursor-pointer text-rose-500 hover:bg-rose-50">
             <LogOut size={15} />
             Sign Out
           </button>
@@ -297,59 +288,53 @@ export default function DashboardPage() {
         {activeTab === "tickets" && (
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: "var(--font-primary)" }}>
-                <Ticket size={20} style={{ color: "#22D3EE" }} /> My Booked Tickets
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 font-primary">
+                <Ticket size={20} className="text-pink-600" /> My Booked Tickets
               </h2>
-              <span className="text-xs px-2.5 py-1 rounded-full font-bold"
-                style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.15)", color: "#22D3EE" }}>
+              <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-pink-50 border border-pink-200 text-pink-600">
                 {bookings.length} passes
               </span>
             </div>
 
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(99,102,241,0.06)" }} />)}
+                {[...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl animate-pulse bg-slate-100" />)}
               </div>
             ) : bookings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {bookings.map((b) => (
-                  <div key={b.id || b.bookingRef} className="glass-panel overflow-hidden flex flex-col">
+                  <div key={b.id || b.bookingRef} className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden flex flex-col">
                     <div className="p-5 flex flex-col gap-3 flex-1">
                       <div className="flex justify-between items-start gap-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider"
-                          style={{ color: "rgba(148,163,184,0.4)" }}>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                           REF: {b.booking_ref || b.bookingRef}
                         </span>
-                        <span className="text-[9px] px-2 py-0.5 rounded uppercase font-bold"
-                          style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#34D399" }}>
+                        <span className="text-[9px] px-2 py-0.5 rounded uppercase font-bold bg-emerald-50 border border-emerald-200 text-emerald-600">
                           {b.status || "confirmed"}
                         </span>
                       </div>
-                      <h4 className="font-bold text-white text-sm" style={{ fontFamily: "var(--font-primary)" }}>
+                      <h4 className="font-bold text-slate-900 text-sm font-primary">
                         {b.event_name || b.eventName}
                       </h4>
-                      <div className="flex flex-col gap-1.5 text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
+                      <div className="flex flex-col gap-1.5 text-xs mt-1 text-slate-500">
                         <span className="flex items-center gap-1.5"><Calendar size={11} />{b.event_date || b.eventDate}</span>
                         <span className="flex items-center gap-1.5"><MapPin size={11} />{b.event_venue || b.eventVenue}</span>
-                        <span className="font-semibold mt-1" style={{ color: "#22D3EE" }}>
+                        <span className="font-semibold mt-1 text-pink-600">
                           {b.ticket_type || b.ticketType} × {b.quantity}
                         </span>
                       </div>
                     </div>
                     <button onClick={() => openPass(b, "ticket")}
-                      className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-all border-t"
-                      style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(6,182,212,0.05)", color: "#22D3EE", cursor: "pointer" }}
-                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(6,182,212,0.15)")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "rgba(6,182,212,0.05)")}>
+                      className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-colors border-t border-slate-100 bg-pink-50 hover:bg-pink-100 text-pink-600 cursor-pointer">
                       <QrCode size={13} /> View QR Pass
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="glass-panel py-16 text-center rounded-2xl">
-                <Ticket size={36} className="mx-auto mb-3" style={{ color: "rgba(148,163,184,0.2)" }} />
-                <p className="text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>No tickets booked yet.</p>
+              <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm py-16 text-center">
+                <Ticket size={36} className="mx-auto mb-3 text-slate-300" />
+                <p className="text-sm text-slate-400">No tickets booked yet.</p>
               </div>
             )}
           </div>
@@ -359,57 +344,54 @@ export default function DashboardPage() {
         {activeTab === "registrations" && (
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: "var(--font-primary)" }}>
-                <Trophy size={20} style={{ color: "#F472B6" }} /> Competition Registrations
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 font-primary">
+                <Trophy size={20} className="text-indigo-600" /> Competition Registrations
               </h2>
-              <span className="text-xs px-2.5 py-1 rounded-full font-bold"
-                style={{ background: "rgba(219,39,119,0.1)", border: "1px solid rgba(244,114,182,0.15)", color: "#F472B6" }}>
+              <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-indigo-50 border border-indigo-200 text-indigo-600">
                 {registrations.length} entries
               </span>
             </div>
 
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(219,39,119,0.06)" }} />)}
+                {[...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl animate-pulse bg-slate-100" />)}
               </div>
             ) : registrations.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {registrations.map((reg) => {
                   const approved = reg.status === "approved";
                   return (
-                    <div key={reg.id || reg.participantId} className="glass-panel overflow-hidden flex flex-col">
+                    <div key={reg.id || reg.participantId} className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden flex flex-col">
                       <div className="p-5 flex flex-col gap-3 flex-1">
                         <div className="flex justify-between items-start gap-3">
-                          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(148,163,184,0.4)" }}>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                             ID: {reg.participant_id || reg.participantId}
                           </span>
-                          <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-bold ${
+                          <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-bold border ${
                             approved
-                              ? "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20"
-                              : "text-yellow-400 bg-yellow-400/10 border border-yellow-400/20"
+                              ? "text-emerald-600 bg-emerald-50 border-emerald-200"
+                              : "text-amber-600 bg-amber-50 border-amber-200"
                           }`}>
                             {reg.status}
                           </span>
                         </div>
-                        <h4 className="font-bold text-white text-sm" style={{ fontFamily: "var(--font-primary)" }}>
+                        <h4 className="font-bold text-slate-900 text-sm font-primary">
                           {reg.competition_name || reg.competitionName}
                         </h4>
-                        <div className="flex flex-col gap-1.5 text-xs mt-1" style={{ color: "rgba(148,163,184,0.5)" }}>
+                        <div className="flex flex-col gap-1.5 text-xs mt-1 text-slate-500">
                           <span className="flex items-center gap-1.5"><Calendar size={11} />{reg.competition_date || reg.competitionDate}</span>
                           <span className="flex items-center gap-1.5"><MapPin size={11} />{reg.competition_venue || reg.competitionVenue}</span>
-                          <span className="font-semibold mt-1" style={{ color: "#F472B6" }}>Category: {reg.category}</span>
+                          <span className="font-semibold mt-1 text-indigo-600">Category: {reg.category}</span>
                         </div>
                       </div>
                       <button
                         onClick={() => approved && openPass(reg, "registration")}
                         disabled={!approved}
-                        className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-all border-t disabled:opacity-40"
-                        style={{
-                          borderColor: "rgba(255,255,255,0.06)",
-                          background: approved ? "rgba(219,39,119,0.05)" : "transparent",
-                          color: approved ? "#F472B6" : "rgba(148,163,184,0.3)",
-                          cursor: approved ? "pointer" : "not-allowed",
-                        }}>
+                        className={`w-full py-3 flex items-center justify-center gap-2 text-xs font-bold transition-colors border-t border-slate-100 disabled:opacity-40 ${
+                          approved
+                            ? "bg-indigo-50 hover:bg-indigo-100 text-indigo-600 cursor-pointer"
+                            : "bg-transparent text-slate-400 cursor-not-allowed"
+                        }`}>
                         <QrCode size={13} />
                         {approved ? "View Competitor Pass" : "Awaiting Approval"}
                       </button>
@@ -418,9 +400,9 @@ export default function DashboardPage() {
                 })}
               </div>
             ) : (
-              <div className="glass-panel py-16 text-center rounded-2xl">
-                <Trophy size={36} className="mx-auto mb-3" style={{ color: "rgba(148,163,184,0.2)" }} />
-                <p className="text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>No competition registrations yet.</p>
+              <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm py-16 text-center">
+                <Trophy size={36} className="mx-auto mb-3 text-slate-300" />
+                <p className="text-sm text-slate-400">No competition registrations yet.</p>
               </div>
             )}
           </div>
@@ -429,15 +411,13 @@ export default function DashboardPage() {
         {/* Settings */}
         {activeTab === "settings" && (
           <div className="flex flex-col gap-5">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2" style={{ fontFamily: "var(--font-primary)" }}>
-              <Settings size={20} style={{ color: "#818CF8" }} /> Account Settings
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 font-primary">
+              <Settings size={20} className="text-indigo-600" /> Account Settings
             </h2>
 
-            <form onSubmit={handleProfileUpdate} className="glass-panel p-6 md:p-8 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-5"
-              style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.85), rgba(248,250,252,0.9))" }}>
+            <form onSubmit={handleProfileUpdate} className="bg-white border border-slate-200/90 rounded-2xl shadow-sm p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-5">
               {settingsSuccess && (
-                <div className="md:col-span-2 p-3.5 rounded-xl flex items-center gap-2 text-sm"
-                  style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(52,211,153,0.2)", color: "#059669" }}>
+                <div className="md:col-span-2 p-3.5 rounded-xl flex items-center gap-2 text-sm bg-emerald-50 border border-emerald-200 text-emerald-600">
                   <CheckCircle size={15} /> Profile updated successfully!
                 </div>
               )}
@@ -449,26 +429,31 @@ export default function DashboardPage() {
                 { label: "City", value: city, set: setCity, type: "text" },
                 { label: "State", value: stateVal, set: setStateVal, type: "text" },
               ].map(f => (
-                <div key={f.label} className={f.span ? "md:col-span-2" : ""}>
-                  <label className="form-label">{f.label}</label>
-                  <input type={f.type} className="form-input" value={f.value} onChange={e => f.set(e.target.value)} />
+                <div key={f.label} className={`flex flex-col gap-1.5 ${f.span ? "md:col-span-2" : ""}`}>
+                  <label className="text-xs font-bold text-slate-600">{f.label}</label>
+                  <input
+                    type={f.type}
+                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    value={f.value}
+                    onChange={e => f.set(e.target.value)}
+                  />
                 </div>
               ))}
 
               <div className="md:col-span-2 pt-2">
-                <button type="submit" disabled={isSaving} className="btn btn-primary px-8 py-3.5 text-sm font-bold">
+                <button type="submit" disabled={isSaving}
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl px-8 py-3.5 text-sm font-bold font-primary cursor-pointer transition-colors">
                   {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
 
             {/* Admin quick-link if admin */}
-            <div className="glass-panel p-4 rounded-xl flex items-center gap-3"
-              style={{ background: "rgba(79,70,229,0.04)", border: "1px solid rgba(99,102,241,0.1)" }}>
-              <AlertCircle size={16} style={{ color: "#818CF8" }} />
-              <p className="text-xs" style={{ color: "rgba(100,116,139,0.8)" }}>
+            <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-4 flex items-center gap-3">
+              <AlertCircle size={16} className="text-indigo-600" />
+              <p className="text-xs text-slate-600">
                 If you have admin access, visit{" "}
-                <a href="/admin" className="font-bold underline" style={{ color: "#4F46E5" }}>/admin</a>{" "}
+                <a href="/admin" className="font-bold underline text-indigo-600 hover:text-indigo-700">/admin</a>{" "}
                 to manage the platform.
               </p>
             </div>

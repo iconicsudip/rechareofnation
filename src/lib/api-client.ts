@@ -375,6 +375,21 @@ export const ApiClient = {
     } catch { return null; }
   },
 
+  // Fetches every site_content row in a single request (the API already
+  // supports this when no `key` is given) — use this instead of several
+  // getSiteContent(key) calls when a page needs multiple keys at once, to
+  // collapse N round-trips into 1.
+  getAllSiteContent: async (): Promise<Record<string, unknown>> => {
+    try {
+      const res = await fetch('/api/site-content');
+      if (!res.ok) return {};
+      const data = await res.json();
+      const map: Record<string, unknown> = {};
+      for (const row of data.contents ?? []) map[row.key] = row.value;
+      return map;
+    } catch { return {}; }
+  },
+
   getTaxonomy: async (type: string): Promise<string[]> => {
     try {
       const res = await fetch(`/api/taxonomies?type=${encodeURIComponent(type)}`);

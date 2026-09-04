@@ -357,7 +357,7 @@ export default function CompetitionsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {competition.judges.map((j, idx) => (
                   <div key={idx} className="bg-slate-50 border border-slate-200/80 rounded-xl p-5 flex flex-col items-center text-center gap-3">
-                    <div className="w-12 h-12 bg-slate-250 rounded-full flex items-center justify-center text-slate-400">
+                    <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-400">
                       <User size={20} />
                     </div>
                     <div>
@@ -435,7 +435,7 @@ export default function CompetitionsPage() {
             </div>
 
             {/* 2. Contender Customizer Card */}
-            <div className="bg-[#0c1222] border border-gray-805 rounded-[20px] p-6 text-left shadow-[0_12px_30px_rgba(0,0,0,0.15)] flex flex-col gap-4 relative overflow-hidden">
+            <div className="bg-[#0c1222] border border-gray-800 rounded-[20px] p-6 text-left shadow-[0_12px_30px_rgba(0,0,0,0.15)] flex flex-col gap-4 relative overflow-hidden">
               <div>
                 <span className="text-amber-500 font-primary text-[8px] font-extrabold tracking-widest uppercase">CONTESTANT PROFILE CURATION</span>
                 <h3 className="font-extrabold text-white text-xs font-primary uppercase tracking-tight mt-0.5">
@@ -584,7 +584,7 @@ export default function CompetitionsPage() {
               <p className="text-slate-400 text-[10px] leading-relaxed font-secondary">
                 {competition.organizer.contact}
               </p>
-              <div className="border-t border-gray-850 pt-3 flex flex-col gap-1.5 text-[9px] font-primary font-bold text-slate-400 uppercase tracking-wider">
+              <div className="border-t border-gray-800 pt-3 flex flex-col gap-1.5 text-[9px] font-primary font-bold text-slate-400 uppercase tracking-wider">
                 <span>✉ {competition.organizer.email}</span>
                 <span>📞 {competition.organizer.phone}</span>
               </div>

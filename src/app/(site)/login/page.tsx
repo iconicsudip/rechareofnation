@@ -76,7 +76,7 @@ function LoginContent() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Email Address</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="email" 
@@ -95,12 +95,12 @@ function LoginContent() {
               <button 
                 type="button" 
                 onClick={() => setIsForgotModalOpen(true)}
-                className="text-[9.5px] font-primary font-bold text-indigo-600 hover:text-indigo-750 transition-colors uppercase tracking-wider cursor-pointer"
+                className="text-[9.5px] font-primary font-bold text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Forgot Password?
               </button>
             </div>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
               <Lock className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
               <input 
                 type="password" 
@@ -125,7 +125,7 @@ function LoginContent() {
 
         <div className="mt-8 text-center text-xs text-slate-500 font-secondary">
           Don't have an account?{" "}
-          <Link href={`/register?redirect=${encodeURIComponent(redirect)}`} className="text-indigo-600 hover:text-indigo-750 font-bold underline font-primary transition-colors">
+          <Link href={`/register?redirect=${encodeURIComponent(redirect)}`} className="text-indigo-600 hover:text-indigo-700 font-bold underline font-primary transition-colors">
             Register Here
           </Link>
         </div>
@@ -157,8 +157,8 @@ function LoginContent() {
             ) : (
               <form onSubmit={handleForgotSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col">
-                  <label className="text-[10px] font-primary tracking-wider font-bold text-slate-450 uppercase mb-1.5 block">Email Address</label>
-                  <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-350 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
+                  <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Email Address</label>
+                  <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
                     <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
                     <input 
                       type="email" 
@@ -173,7 +173,7 @@ function LoginContent() {
                 <div className="flex gap-3.5 mt-2">
                   <button 
                     type="submit" 
-                    className="py-3 bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-650 text-white font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex-grow cursor-pointer"
+                    className="py-3 bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-600 text-white font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex-grow cursor-pointer"
                   >
                     Send Reset Link
                   </button>

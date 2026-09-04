@@ -249,7 +249,7 @@ function EventsContent() {
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2 text-slate-850 font-bold uppercase text-[11px] tracking-wider">
+              <div className="flex items-center gap-2 text-slate-800 font-bold uppercase text-[11px] tracking-wider">
                 <Sliders size={13} className="text-slate-500" />
                 <span>Filter Matrix</span>
               </div>
@@ -271,7 +271,7 @@ function EventsContent() {
                 <input 
                   type="text" 
                   placeholder="Event name, city, tag..." 
-                  className="w-full text-xs rounded-xl bg-slate-50 border border-slate-200/80 pl-9 pr-4 py-2.5 text-slate-800 placeholder-slate-400 outline-none focus:border-slate-350 focus:ring-1 focus:ring-slate-300"
+                  className="w-full text-xs rounded-xl bg-slate-50 border border-slate-200/80 pl-9 pr-4 py-2.5 text-slate-800 placeholder-slate-400 outline-none focus:border-slate-300 focus:ring-1 focus:ring-slate-300"
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); updateUrlParam("search", e.target.value); }}
                 />
@@ -342,7 +342,7 @@ function EventsContent() {
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
                         isActive 
                           ? "text-pink-500 bg-pink-55 border-pink-200" 
-                          : "text-slate-600 bg-white border-slate-200 hover:border-slate-350"
+                          : "text-slate-600 bg-white border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       {timeOpt.label}
@@ -387,7 +387,7 @@ function EventsContent() {
               <select
                 value={sortBy}
                 onChange={(e) => { setSortBy(e.target.value); updateUrlParam("sort", e.target.value); }}
-                className="w-full text-xs rounded-xl bg-slate-50 border border-slate-200/85 px-3 py-2.5 text-slate-700 outline-none focus:border-slate-350 focus:ring-1 focus:ring-slate-300"
+                className="w-full text-xs rounded-xl bg-slate-50 border border-slate-200/85 px-3 py-2.5 text-slate-700 outline-none focus:border-slate-300 focus:ring-1 focus:ring-slate-300"
               >
                 <option value="rating-desc">Rating: Highest to Lowest</option>
                 <option value="price-asc">Price: Low to High</option>
