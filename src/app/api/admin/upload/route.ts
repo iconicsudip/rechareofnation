@@ -3,16 +3,19 @@
 //
 // Requires these env vars (in .env.local locally, and in your hosting platform's
 // environment variables in production): AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
-// AWS_REGION, AWS_S3_BUCKET_NAME. The bucket must allow public read access via its
-// bucket policy (Block Public Access must be off for this bucket, and the policy
-// must grant s3:GetObject to "*") — every uploaded image is used as a plain public
-// <img src> URL across the site, the same way Vercel Blob's public store worked.
+// AWS_REGION, and AWS_S3_BUCKET_NAME (or AWS_S3_BUCKET — both are accepted). The
+// bucket must allow public read access via its bucket policy (Block Public Access
+// must be off for this bucket, and the policy must grant s3:GetObject to "*") —
+// every uploaded image is used as a plain public <img src> URL across the site,
+// the same way Vercel Blob's public store worked.
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 function getS3Config() {
   const region = process.env.AWS_REGION;
-  const bucket = process.env.AWS_S3_BUCKET_NAME;
+  // Accept either name — AWS_S3_BUCKET_NAME is what this file originally
+  // documented, AWS_S3_BUCKET is what actually ended up in .env.local.
+  const bucket = process.env.AWS_S3_BUCKET_NAME || process.env.AWS_S3_BUCKET;
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
   if (!region || !bucket || !accessKeyId || !secretAccessKey) return null;
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest) {
   const config = getS3Config();
   if (!config) {
     return NextResponse.json(
-      { error: 'Image upload is not configured yet. Add AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, and AWS_S3_BUCKET_NAME to .env.local, or paste an image URL directly.' },
+      { error: 'Image upload is not configured yet. Add AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, and AWS_S3_BUCKET_NAME (or AWS_S3_BUCKET) to .env.local, or paste an image URL directly.' },
       { status: 503 }
     );
   }
