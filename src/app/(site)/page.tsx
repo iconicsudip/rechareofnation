@@ -6,7 +6,7 @@ import {
   Search, Calendar, MapPin, Trophy, ArrowRight, Star, Heart, 
   Flame, Compass, ChevronRight, Music, Sparkles, Paintbrush, 
   HelpCircle, Eye, Mail, Award, CheckCircle, Ticket, Layers, 
-  Laptop, Briefcase, GraduationCap, Globe, Shield, RefreshCw, ChevronLeft, BookOpen, Send
+  Laptop, Briefcase, GraduationCap, Globe, Shield, RefreshCw, ChevronLeft, BookOpen, Send, ImageIcon
 } from "lucide-react";
 import { ApiClient, GalleryItem, Event, CompetitionRecord, Blog } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
@@ -431,8 +431,12 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {carnivals.map((fest) => (
               <div key={fest.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
-                <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
-                  <img src={fest.bannerUrl} alt={fest.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0 bg-slate-100">
+                  {fest.bannerUrl ? (
+                    <img src={fest.bannerUrl} alt={fest.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><ImageIcon size={24} className="text-slate-300" /></div>
+                  )}
                   <span className="absolute top-3 left-3 bg-rose-500 text-white font-primary text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">MEGA FEST</span>
                 </div>
 
@@ -484,8 +488,12 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {expos.map((expo) => (
               <div key={expo.id} className="bg-white border border-slate-200 rounded-[20px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.012)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.035)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col sm:flex-row relative group min-h-[11.5rem]">
-                <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0">
-                  <img src={expo.bannerUrl} alt={expo.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                <div className="w-full h-44 sm:h-full sm:w-52 sm:absolute sm:left-0 sm:top-0 overflow-hidden shrink-0 bg-slate-100">
+                  {expo.bannerUrl ? (
+                    <img src={expo.bannerUrl} alt={expo.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><ImageIcon size={24} className="text-slate-300" /></div>
+                  )}
                   <span className="absolute top-3 left-3 bg-indigo-600 text-white font-primary text-[7px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10">TRADE EXPO</span>
                 </div>
 
@@ -553,8 +561,12 @@ export default function HomePage() {
                 key={evt.id}
                 className="bg-[#0f172a] dark-bg border border-gray-800 rounded-3xl overflow-hidden flex flex-col h-full hover:border-pink-500/40 transition-colors duration-300 group"
               >
-                <div className="h-44 relative overflow-hidden">
-                  <img src={evt.bannerUrl} alt={evt.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+                <div className="h-44 relative overflow-hidden bg-slate-800">
+                  {evt.bannerUrl ? (
+                    <img src={evt.bannerUrl} alt={evt.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><ImageIcon size={24} className="text-slate-500" /></div>
+                  )}
 
                   {/* Rating Badge Overlay */}
                   <div className="absolute top-3.5 left-3.5 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[10.5px] text-white font-bold font-primary shadow-lg shadow-black/20 border border-white/10">

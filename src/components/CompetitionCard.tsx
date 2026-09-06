@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Trophy } from "lucide-react";
+import { MapPin, Trophy, ImageIcon } from "lucide-react";
 
 export interface CompetitionCardProps {
   id: string;
@@ -19,13 +19,19 @@ export default function CompetitionCard(arena: CompetitionCardProps) {
       
       {/* Image Section */}
       <div className="h-56 relative overflow-hidden bg-slate-100 shrink-0">
-        <img
-          src={arena.bannerUrl}
-          alt={arena.name}
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
-        />
+        {arena.bannerUrl ? (
+          <img
+            src={arena.bannerUrl}
+            alt={arena.name}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageIcon size={28} className="text-slate-300" />
+          </div>
+        )}
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950/40 to-transparent pointer-events-none"></div>
         
         {/* Prize Pool Badge Overlay */}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ImageIcon } from "lucide-react";
 
 interface BlogCardProps {
   title: string;
@@ -32,13 +33,19 @@ export default function BlogCard({
     >
       {/* Image wrapper */}
       <div className={`relative ${aspectRatio} rounded-[24px] overflow-hidden shadow-sm border border-slate-200/80 bg-slate-50`}>
-        <img
-          src={imageUrl}
-          alt={title}
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={title}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageIcon size={28} className="text-slate-300" />
+          </div>
+        )}
         {/* Badge */}
         <span className="bg-white/95 text-slate-800 px-2.5 py-1 text-[8px] font-bold tracking-widest uppercase rounded-md absolute top-3 left-3 border border-slate-200/80 font-primary shadow-sm">
           {category}

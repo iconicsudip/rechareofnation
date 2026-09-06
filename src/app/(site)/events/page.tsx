@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { Search, Calendar, MapPin, Sliders, Star, X, Check } from "lucide-react";
+import { Search, Calendar, MapPin, Sliders, Star, X, Check, ImageIcon } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { ApiClient } from "@/lib/api-client";
 
@@ -417,11 +417,15 @@ function EventsContent() {
                     
                     {/* Header Image with Float Labels */}
                     <div className="h-44 relative overflow-hidden bg-slate-100">
-                      <img 
-                        src={evt.bannerUrl} 
-                        alt={evt.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
-                      />
+                      {evt.bannerUrl ? (
+                        <img
+                          src={evt.bannerUrl}
+                          alt={evt.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center"><ImageIcon size={24} className="text-slate-300" /></div>
+                      )}
                       
                       {/* Black bottom overlay for text contrast */}
                       <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none z-0"></div>

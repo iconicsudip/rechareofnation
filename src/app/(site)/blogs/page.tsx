@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, ImageIcon } from "lucide-react";
 import { ApiClient, Blog } from "@/lib/api-client";
 import BlogCard from "@/components/BlogCard";
 
@@ -65,11 +65,15 @@ export default function BlogsPage() {
               className="lg:col-span-2 group cursor-pointer relative rounded-[32px] overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 min-h-[350px] lg:min-h-[450px] flex flex-col justify-end"
             >
               {/* Background Image */}
-              <img 
-                src={blogs[0].imageUrl} 
-                alt={blogs[0].title} 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              {blogs[0].imageUrl ? (
+                <img
+                  src={blogs[0].imageUrl}
+                  alt={blogs[0].title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-slate-800 flex items-center justify-center"><ImageIcon size={32} className="text-slate-500" /></div>
+              )}
               {/* Dark Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-95" />
               
@@ -96,11 +100,15 @@ export default function BlogsPage() {
                   className="group cursor-pointer relative rounded-[32px] overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 flex-1 min-h-[180px] lg:min-h-[212px] flex flex-col justify-end"
                 >
                   {/* Background Image */}
-                  <img 
-                    src={blog.imageUrl} 
-                    alt={blog.title} 
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
+                  {blog.imageUrl ? (
+                    <img
+                      src={blog.imageUrl}
+                      alt={blog.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-slate-800 flex items-center justify-center"><ImageIcon size={24} className="text-slate-500" /></div>
+                  )}
                   {/* Dark Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent opacity-95" />
                   

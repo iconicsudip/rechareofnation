@@ -2,9 +2,10 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { Calendar, User, Clock, ArrowLeft, ArrowRight } from "lucide-react";
+import { Calendar, User, Clock, ArrowLeft, ArrowRight, ImageIcon } from "lucide-react";
 import { ApiClient, Blog } from "@/lib/api-client";
 import BlogCard from "@/components/BlogCard";
+import RichTextContent from "@/components/RichTextContent";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -69,11 +70,15 @@ export default function BlogDetailPage({ params }: PageProps) {
 
         {/* Large Rounded Cover Image Banner with Text Overlay */}
         <div className="relative rounded-[32px] overflow-hidden shadow-sm border border-slate-200/80 aspect-[16/9] md:aspect-[21/9] bg-[#070b19]">
-          <img 
-            src={blog.imageUrl} 
-            alt={blog.title} 
-            className="w-full h-full object-cover opacity-75"
-          />
+          {blog.imageUrl ? (
+            <img
+              src={blog.imageUrl}
+              alt={blog.title}
+              className="w-full h-full object-cover opacity-75"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center"><ImageIcon size={36} className="text-slate-600" /></div>
+          )}
           {/* Dark overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
           
@@ -137,41 +142,40 @@ export default function BlogDetailPage({ params }: PageProps) {
               <h2 className="text-xl md:text-2xl font-black font-primary text-slate-900 uppercase tracking-tight leading-snug">
                 {blog.subheading || "WHAT ARE THE KEY HIGHLIGHTS?"}
               </h2>
-              <p className="text-slate-600 text-sm md:text-base leading-relaxed whitespace-pre-line font-secondary">
-                {blog.content}
-              </p>
+              {/* blog.content is real HTML from the admin's rich text editor —
+                  render it as HTML, not as an escaped text node. */}
+              <RichTextContent html={blog.content} className="text-slate-600 text-sm md:text-base font-secondary" />
             </div>
 
-            {/* Bullets represented as subsections */}
+            {/* Key highlight bullets — plain highlight statements, not "title:
+                description" pairs, so they render as a straightforward list
+                rather than fabricated "Section N" subheadings. */}
             {blog.bullets && blog.bullets.length > 0 && (
-              <div className="flex flex-col gap-6 pt-2">
-                {blog.bullets.map((bullet, idx) => {
-                  const colonIndex = bullet.indexOf(":");
-                  const title = colonIndex !== -1 ? bullet.substring(0, colonIndex) : "";
-                  const desc = colonIndex !== -1 ? bullet.substring(colonIndex + 1) : bullet;
-                  return (
-                    <div key={idx} className="flex flex-col gap-2">
-                      <h3 className="text-base md:text-lg font-black font-primary text-slate-800 uppercase tracking-tight">
-                        {idx + 1}. {title || `Section ${idx + 1}`}
-                      </h3>
-                      <p className="text-slate-600 text-xs md:text-sm leading-relaxed font-secondary">
-                        {desc}
-                      </p>
-                    </div>
-                  );
-                })}
+              <div className="flex flex-col gap-3 pt-2">
+                {blog.bullets.map((bullet, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <span className="w-5 h-5 shrink-0 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-[10px] font-black font-primary mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <p className="text-slate-600 text-sm leading-relaxed font-secondary">{bullet}</p>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* Inline Article Secondary Image — reuses this article's real imageUrl
-                (previously a fixed stock photo identical on every article) */}
-            <div className="rounded-[24px] overflow-hidden border border-slate-200/80 aspect-[16/9] w-full bg-slate-50 mt-4 shadow-sm">
-              <img
-                src={blog.imageUrl}
-                alt={blog.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+                (previously a fixed stock photo identical on every article).
+                Hidden entirely (not a placeholder) when there's no real image,
+                since it would just duplicate an already-shown missing-image state. */}
+            {blog.imageUrl && (
+              <div className="rounded-[24px] overflow-hidden border border-slate-200/80 aspect-[16/9] w-full bg-slate-50 mt-4 shadow-sm">
+                <img
+                  src={blog.imageUrl}
+                  alt={blog.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
 
 
           </div>
@@ -190,12 +194,16 @@ export default function BlogDetailPage({ params }: PageProps) {
                   href={`/blogs/${popBlog.slug}`}
                   className="group flex gap-4 items-start cursor-pointer text-left"
                 >
-                  <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200/85 bg-slate-50 shadow-sm">
-                    <img 
-                      src={popBlog.imageUrl} 
-                      alt={popBlog.title} 
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                    />
+                  <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200/85 bg-slate-50 shadow-sm flex items-center justify-center">
+                    {popBlog.imageUrl ? (
+                      <img
+                        src={popBlog.imageUrl}
+                        alt={popBlog.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <ImageIcon size={18} className="text-slate-300" />
+                    )}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
                     <span className="text-[8px] font-bold text-pink-500 uppercase tracking-wider font-primary">
