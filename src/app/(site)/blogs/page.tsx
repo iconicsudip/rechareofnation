@@ -50,7 +50,7 @@ export default function BlogsPage() {
   });
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-16 text-slate-800">
+    <div className="w-full min-h-screen bg-[#F8FAFC] py-20 md:py-24 text-slate-800">
       
       {/* Main Page Layout */}
       <div className="container max-w-7xl mx-auto px-4 flex flex-col gap-12 font-secondary">

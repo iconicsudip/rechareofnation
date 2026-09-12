@@ -64,7 +64,7 @@ export default function AboutPage() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col mb-24">
       {/* Hero */}
       <section className="relative overflow-hidden py-20 md:py-28 border-b border-slate-100">
         <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/5 rounded-full blur-[100px] pointer-events-none" />

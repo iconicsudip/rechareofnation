@@ -446,7 +446,6 @@ export const ApiClient = {
       const data = await response.json();
       if (response.ok && data.success) {
         setStorageItem('rn_current_user', data.user);
-        if (data.verificationCode) setStorageItem(`rn_verification_code_${data.user.id}`, data.verificationCode);
         return { success: true, user: data.user };
       }
       return { success: false, error: data.error || 'Registration failed' };
@@ -457,12 +456,10 @@ export const ApiClient = {
     if (users.some((u: any) => u.email.toLowerCase() === email.toLowerCase())) {
       return { success: false, error: 'Email address already registered' };
     }
-    const newUser: User = { id: 'usr-' + Math.random().toString(36).substr(2, 9), name, email, isVerified: false, ...details };
+    // No email-verification step — accounts are usable immediately.
+    const newUser: User = { id: 'usr-' + Math.random().toString(36).substr(2, 9), name, email, isVerified: true, ...details };
     users.push({ ...newUser, passwordHash });
     setStorageItem('rn_registered_users', users);
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setStorageItem(`rn_verification_code_${newUser.id}`, verificationCode);
-    console.log(`[MOCK SMTP] OTP for ${email}: ${verificationCode}`);
     setStorageItem('rn_current_user', newUser);
     return { success: true, user: newUser };
   },
@@ -492,31 +489,6 @@ export const ApiClient = {
     };
     setStorageItem('rn_current_user', user);
     return { success: true, user };
-  },
-
-  verifyEmailCode: async (
-    userId: string, code: string
-  ): Promise<{ success: boolean; user?: User; error?: string }> => {
-    try {
-      const response = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, code })
-      });
-      const data = await response.json();
-      if (response.ok && data.success) { setStorageItem('rn_current_user', data.user); return { success: true, user: data.user }; }
-      return { success: false, error: data.error || 'Verification failed' };
-    } catch (err) {
-      console.warn('Backend verification failed, using localStorage fallback:', err);
-    }
-    const sentCode = getStorageItem<string | null>(`rn_verification_code_${userId}`, null);
-    if (!sentCode || sentCode !== code) return { success: false, error: 'Incorrect verification code.' };
-    const users = getStorageItem<any[]>('rn_registered_users', []);
-    const idx = users.findIndex((u: any) => u.id === userId);
-    if (idx !== -1) { users[idx].isVerified = true; setStorageItem('rn_registered_users', users); }
-    const currentUser = ApiClient.getCurrentUser();
-    if (currentUser && currentUser.id === userId) { currentUser.isVerified = true; setStorageItem('rn_current_user', currentUser); }
-    return { success: true, user: currentUser || undefined };
   },
 
   logoutUser: (): void => {

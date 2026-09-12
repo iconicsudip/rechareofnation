@@ -23,9 +23,9 @@ const KEY_META: Record<string, { label: string; description: string }> = {
   legal_privacy: { label: "Privacy Policy", description: "Full legal document body." },
   sponsorship_tiers: { label: "Sponsorship Tiers", description: "Pricing packages shown on the sponsors page." },
   homepage_hubs: { label: "Homepage National Hubs", description: "The curated category hub cards on the homepage — each links to a real event category." },
-  homepage_stats: { label: "Homepage Stats Bar", description: "The trust/stat tiles strip on the homepage." },
+  homepage_stats: { label: "About Recharge Nation", description: "The \"who we are\" intro section on the homepage, plus its trust/stat tiles." },
   homepage_newsletter: { label: "Homepage Newsletter Banner", description: "The VIP gateway email signup banner copy." },
-  sponsors_page: { label: "Sponsors Page", description: "Hero copy, stat tiles, and the Enlist Your Brand panel." },
+  sponsors_page: { label: "Sponsors Page", description: "Hero copy, stat tiles, the Enlist Your Brand panel, and the categorized partner logo wall." },
   gallery_page: { label: "Gallery Page", description: "Hero eyebrow, heading, and description." },
   blogs_page: { label: "Blogs Page", description: "Hero heading and description." },
 };
@@ -51,6 +51,7 @@ const EMPTY_TIER_KEYS = ["TITLE", "PLATINUM", "GOLD", "ASSOCIATE"];
 const EMPTY_TIER = { name: "", price: 0, baseImpressions: 0, space: "", allotments: "", entitlements: [] as string[], placements: "" };
 const EMPTY_HUB = { category: "", desc: "" };
 const EMPTY_STAT = { value: "", label: "" };
+const EMPTY_PARTNER = { category: "", name: "", logoUrl: "" };
 
 interface FooterColumn { title: string; links: { label: string; href: string }[] }
 
@@ -414,6 +415,19 @@ export default function AdminContentPage() {
                   value={(structured.enlistBullets as string[]) ?? []}
                   onChange={(v) => setStruct({ enlistBullets: v })}
                   placeholder="Add a bullet point..."
+                />
+                <RepeaterField
+                  label="Our Partners & Associates"
+                  hint="Categorize each logo (e.g. Universities, Brands, Institutions, Hospitality Partners) — rows sharing a category are grouped together on the Sponsors page."
+                  columns={[
+                    { key: "category", label: "Category (e.g. Universities)" },
+                    { key: "name", label: "Partner / Institution Name" },
+                    { key: "logoUrl", label: "Logo (optional)", type: "image", span: 2 },
+                  ]}
+                  value={(structured.partners as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ partners: v })}
+                  emptyRow={EMPTY_PARTNER}
+                  addLabel="Add partner"
                 />
               </>
             )}

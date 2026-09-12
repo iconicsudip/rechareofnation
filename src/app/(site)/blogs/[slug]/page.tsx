@@ -56,7 +56,7 @@ export default function BlogDetailPage({ params }: PageProps) {
   const popularBlogs = allBlogs.filter(b => b.id !== blog.id).slice(3, 5);
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-12 text-slate-800 font-secondary text-left">
+    <div className="w-full min-h-screen bg-[#F8FAFC] py-20 md:py-24 text-slate-800 font-secondary text-left">
       <div className="container max-w-7xl mx-auto px-4 flex flex-col">
         
         {/* Breadcrumb navigation */}
@@ -144,7 +144,7 @@ export default function BlogDetailPage({ params }: PageProps) {
               </h2>
               {/* blog.content is real HTML from the admin's rich text editor —
                   render it as HTML, not as an escaped text node. */}
-              <RichTextContent html={blog.content} className="text-slate-600 text-sm md:text-base font-secondary" />
+              <RichTextContent html={blog.content} className="text-slate-700 text-sm md:text-base font-secondary" />
             </div>
 
             {/* Key highlight bullets — plain highlight statements, not "title:

@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  Menu, X, User, LogOut, Trophy, Home, Info, Calendar, Image, 
-  FileText, Phone, Award, Sparkles, ChevronRight, Zap, Target, 
+import {
+  Menu, X, User, LogOut, Trophy, Home, Info, Calendar, Image,
+  FileText, Phone, Award, Sparkles, ChevronRight, Zap, Target,
   BookOpen, Layers, Laptop, Search, Ticket, Compass, ArrowRight
 } from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
@@ -58,7 +58,7 @@ export default function Navbar() {
     };
 
     checkUser();
-    
+
     // Set up a simple interval to poll user login state changes
     const interval = setInterval(checkUser, 1000);
     return () => clearInterval(interval);
@@ -93,7 +93,7 @@ export default function Navbar() {
       return;
     }
     const q = searchQuery.toLowerCase();
-    const matches = allEvents.filter(e => 
+    const matches = allEvents.filter(e =>
       e.name.toLowerCase().includes(q) ||
       e.category.toLowerCase().includes(q) ||
       e.city.toLowerCase().includes(q)
@@ -114,12 +114,10 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
-      {/* Top accent gradient stripe */}
-      <div className="h-1 w-full bg-gradient-to-r from-pink-500 via-indigo-500 to-cyan-400"></div>
 
       <div className="container max-w-[1550px] mx-auto px-4">
         <div className="flex h-16 items-center justify-between relative gap-4">
-          
+
           {/* Logo Section */}
           <div className="flex items-center gap-2 select-none shrink-0">
             <Link href="/" className="flex items-center gap-2.5">
@@ -142,11 +140,10 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-4 xl:gap-6 shrink-0">
             <Link
               href="/"
-              className={`text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${
-                pathname === "/" 
-                  ? "bg-pink-50 text-pink-600 shadow-[0_2px_8px_rgba(236,72,153,0.08)]" 
+              className={`text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${pathname === "/"
+                  ? "bg-pink-50 text-pink-600 shadow-[0_2px_8px_rgba(236,72,153,0.08)]"
                   : "text-slate-600 hover:text-pink-500"
-              }`}
+                }`}
             >
               Home
             </Link>
@@ -157,9 +154,8 @@ export default function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-[10px] font-black transition-all duration-300 hover:text-pink-500 font-secondary uppercase tracking-wider whitespace-nowrap shrink-0 ${
-                    isActive ? "text-pink-500" : "text-slate-600"
-                  }`}
+                  className={`text-[10px] font-black transition-all duration-300 hover:text-pink-500 font-secondary uppercase tracking-wider whitespace-nowrap shrink-0 ${isActive ? "text-pink-500" : "text-slate-600"
+                    }`}
                 >
                   {link.name}
                 </Link>
@@ -170,8 +166,8 @@ export default function Navbar() {
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
             {/* Search Icon Trigger */}
-            <button 
-              onClick={() => setShowSearchModal(true)} 
+            <button
+              onClick={() => setShowSearchModal(true)}
               className="p-2 text-slate-500 hover:text-pink-500 hover:bg-slate-100 rounded-full transition-colors cursor-pointer shrink-0 mr-1.5"
               title="Search Events"
             >
@@ -180,24 +176,24 @@ export default function Navbar() {
 
             {user ? (
               <>
-                <Link 
-                  href="/dashboard" 
+                <Link
+                  href="/dashboard"
                   className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
                 >
                   <Ticket size={11} className="text-red-500 shrink-0" />
                   <span>My Wallet</span>
                 </Link>
 
-                <Link 
-                  href="/dashboard" 
+                <Link
+                  href="/dashboard"
                   className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
                 >
                   <Layers size={11} className="text-slate-500 shrink-0" />
                   <span>Dashboard</span>
                 </Link>
 
-                <Link 
-                  href="/dashboard" 
+                <Link
+                  href="/dashboard"
                   className="bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[9.5px] font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_4px_12px_rgba(79,70,229,0.12)] whitespace-nowrap shrink-0"
                 >
                   <Compass size={11} className="text-white shrink-0" />
@@ -219,15 +215,15 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
                 >
                   <span>Login</span>
                 </Link>
 
-                <Link 
-                  href="/register" 
+                <Link
+                  href="/register"
                   className="bg-pink-500 hover:bg-pink-600 text-white text-[9.5px] font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_4px_12px_rgba(236,72,153,0.12)] whitespace-nowrap shrink-0"
                 >
                   <span>Register</span>
@@ -238,8 +234,8 @@ export default function Navbar() {
 
           {/* Mobile Menu Button & Search */}
           <div className="flex lg:hidden items-center gap-1.5 shrink-0">
-            <button 
-              onClick={() => setShowSearchModal(true)} 
+            <button
+              onClick={() => setShowSearchModal(true)}
               className="p-2 text-slate-600 hover:text-pink-500 transition-colors cursor-pointer"
               title="Search Events"
             >
@@ -262,9 +258,8 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${
-                pathname === "/" ? "text-pink-500" : "text-slate-600"
-              }`}
+              className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${pathname === "/" ? "text-pink-500" : "text-slate-600"
+                }`}
             >
               <Home size={16} />
               <span>Home</span>
@@ -276,9 +271,8 @@ export default function Navbar() {
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${
-                    isActive ? "text-pink-500" : "text-slate-600"
-                  }`}
+                  className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${isActive ? "text-pink-500" : "text-slate-600"
+                    }`}
                 >
                   <Calendar size={16} />
                   <span>{link.name}</span>
@@ -348,26 +342,26 @@ export default function Navbar() {
       )}
       {/* Search Modal Overlay */}
       {showSearchModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] flex items-start justify-center pt-24 md:pt-32 px-4 transition-all duration-300 h-[100vh]"
           onClick={() => setShowSearchModal(false)}
         >
-          <div 
+          <div
             className="w-full max-w-xl bg-white border border-slate-200/80 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col transition-all transform scale-100"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header / Input */}
             <div className="flex items-center px-4 py-3.5 border-b border-slate-100 gap-3">
               <Search className="text-slate-400 w-4 h-4 shrink-0" />
-              <input 
-                type="text" 
-                placeholder="Search events by name, city, category..." 
+              <input
+                type="text"
+                placeholder="Search events by name, city, category..."
                 className="w-full bg-transparent text-sm text-slate-800 outline-none border-none py-1 placeholder-slate-400 font-secondary"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
               />
-              <button 
+              <button
                 onClick={() => setShowSearchModal(false)}
                 className="text-[10px] font-primary font-bold text-slate-400 border border-slate-200 hover:border-slate-300 rounded px-1.5 py-0.5 bg-slate-50 transition-colors uppercase cursor-pointer"
               >
@@ -408,7 +402,7 @@ export default function Navbar() {
                       { name: "Abhyudaya Mega Cultural Fest", href: "/events/recharge-cultural-odyssey-2026" },
                       { name: "Nataraja Classical Dance Clash", href: "/events/national-vibe-rhythm-dance-cup" }
                     ].map((item, idx) => (
-                      <Link 
+                      <Link
                         key={idx}
                         href={item.href}
                         onClick={() => setShowSearchModal(false)}
@@ -425,8 +419,8 @@ export default function Navbar() {
             {/* Footer */}
             <div className="bg-slate-50/80 border-t border-slate-100 py-2.5 px-4 flex items-center justify-between text-[10px] font-primary text-slate-400 font-bold uppercase tracking-wider">
               <span>Type query to search</span>
-              <Link 
-                href={`/events?q=${searchQuery}`} 
+              <Link
+                href={`/events?q=${searchQuery}`}
                 onClick={() => setShowSearchModal(false)}
                 className="text-slate-505 hover:text-pink-500 transition-colors flex items-center gap-0.5"
               >

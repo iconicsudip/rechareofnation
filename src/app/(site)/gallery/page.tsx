@@ -57,7 +57,7 @@ export default function GalleryPage() {
   const visibleItems = showAll ? filteredItems : filteredItems.slice(0, 16);
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-16 relative overflow-hidden bg-[radial-gradient(#e2e8f0_1.2px,transparent_1.2px)] [background-size:24px_24px]">
+    <div className="w-full min-h-screen bg-[#F8FAFC] py-20 md:py-24 relative overflow-hidden bg-[radial-gradient(#e2e8f0_1.2px,transparent_1.2px)] [background-size:24px_24px]">
       
       {/* Lightbox Modal */}
       {selectedMedia && (

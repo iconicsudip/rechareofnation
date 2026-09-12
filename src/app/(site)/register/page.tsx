@@ -36,8 +36,7 @@ function RegisterContent() {
       });
 
       if (res.success && res.user) {
-        // Redirect to verification screen
-        router.push(`/login/verify?userId=${res.user.id}&redirect=${encodeURIComponent(redirect)}`);
+        router.push(redirect);
       } else {
         setError(res.error || "Registration failed. Email might already exist.");
       }

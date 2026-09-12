@@ -26,18 +26,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email address already registered' }, { status: 400 });
     }
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const passwordHash = hashPassword(password);
 
+    // No email-verification step — accounts are usable immediately after
+    // registration (there's no real SMTP sending configured, so gating
+    // login behind an emailed code would just lock users out).
     const users = await sql`
-      INSERT INTO users (name, email, password_hash, mobile, city, state, address, organization, is_verified, verification_code)
-      VALUES (${name}, ${email.toLowerCase()}, ${passwordHash}, ${mobile || null}, ${city || null}, ${state || null}, ${address || null}, ${organization || null}, false, ${verificationCode})
+      INSERT INTO users (name, email, password_hash, mobile, city, state, address, organization, is_verified)
+      VALUES (${name}, ${email.toLowerCase()}, ${passwordHash}, ${mobile || null}, ${city || null}, ${state || null}, ${address || null}, ${organization || null}, true)
       RETURNING id, name, email, mobile, city, state, organization, role, is_verified
     `;
 
-    console.log(`[EMAIL SMTP SIMULATOR] Verification code for ${email} is ${verificationCode}`);
-
-    return NextResponse.json({ success: true, user: users[0], verificationCode });
+    return NextResponse.json({ success: true, user: users[0] });
   } catch (err: unknown) {
     const error = err as Error;
     return NextResponse.json({ error: error.message }, { status: 500 });

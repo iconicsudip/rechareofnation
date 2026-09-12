@@ -68,7 +68,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="container py-16 md:py-20 flex flex-col gap-16">
+    <div className="container !py-20 !md:py-24 flex flex-col gap-16">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
         <span className="inline-flex items-center gap-2 bg-pink-50 border border-pink-100 text-pink-600 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary">

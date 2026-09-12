@@ -47,6 +47,8 @@ const FALLBACK_TIERS: Record<string, TierData> = {
   ASSOCIATE: FALLBACK_TIER
 };
 
+interface PartnerLogo { category: string; name: string; logoUrl?: string }
+
 interface SponsorsPageContent {
   heroBadge: string;
   heroTitle: string;
@@ -56,6 +58,7 @@ interface SponsorsPageContent {
   enlistHeading: string;
   enlistDescription: string;
   enlistBullets: string[];
+  partners: PartnerLogo[];
 }
 
 // Mirrors the copy currently seeded in `site_content` (key: sponsors_page) so
@@ -79,24 +82,46 @@ const FALLBACK_SPONSORS_CONTENT: SponsorsPageContent = {
     "Access over 2,00,000+ highly active demographics",
     "Custom physical experiential display zones",
     "Live app telemetry-integrated promotional badges"
-  ]
+  ],
+  partners: []
 };
 
 // Renders a stylized text lockup in place of a broken <img> when a sponsor
-// has no logoUrl (e.g. Paytm Checkout).
+// has no logoUrl (e.g. Paytm Checkout) or its logoUrl fails to load. Fully
+// self-contained (own background + centering) so it looks right regardless
+// of what the parent image-slot container is styled as.
 const renderLogoFallback = (name: string) => {
   const words = name.trim().split(/\s+/);
   const firstWord = words[0] || name;
   const restWords = words.slice(1).join(" ");
   return (
-    <div className="font-black text-slate-400 font-primary tracking-tighter text-md flex flex-col">
-      <span>{firstWord}</span>
+    <div className="w-full h-full bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4">
+      <span className="font-black text-slate-400 font-primary tracking-tighter text-md">{firstWord}</span>
       {restWords && (
         <span className="text-[10px] text-slate-300 tracking-wider font-secondary font-primary">
           {restWords}
         </span>
       )}
     </div>
+  );
+};
+
+// A sponsor.logoUrl being set doesn't guarantee the URL still resolves to an
+// image (dead/moved hosting, revoked hotlink, etc.) — a plain `logoUrl ? <img>
+// : fallback` ternary only catches an empty value, not a broken one, so a bad
+// URL rendered a broken-image icon with the alt text overlapping the tier
+// badge. This tracks the actual load result and swaps to the text fallback
+// on error.
+function SponsorLogo({ logoUrl, name }: { logoUrl?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!logoUrl || failed) return renderLogoFallback(name);
+  return (
+    <img
+      src={logoUrl}
+      alt={name}
+      className="w-full h-full object-cover"
+      onError={() => setFailed(true)}
+    />
   );
 };
 
@@ -177,8 +202,22 @@ export default function SponsorsPage() {
   const calculatedImpressions = Math.round(currentTierInfo.baseImpressions * footfallMultiplier);
   const calculatedCPM = calculatedImpressions > 0 ? (currentTierInfo.price / calculatedImpressions) * 1000 : 0;
 
+  // Group the "Our Partners & Associates" logo wall by category (Universities,
+  // Brands, Institutions, Hospitality Partners, ...) while preserving the
+  // order categories first appear in, so the admin controls section order
+  // just by row order.
+  const partnerCategories: { category: string; partners: PartnerLogo[] }[] = [];
+  for (const partner of pageContent.partners ?? []) {
+    let group = partnerCategories.find((g) => g.category === partner.category);
+    if (!group) {
+      group = { category: partner.category, partners: [] };
+      partnerCategories.push(group);
+    }
+    group.partners.push(partner);
+  }
+
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-12">
+    <div className="w-full min-h-screen bg-[#F8FAFC] py-20 md:py-24">
       <div className="container max-w-7xl mx-auto px-4 flex flex-col gap-12">
 
         {/* HERO SECTION */}
@@ -220,6 +259,46 @@ export default function SponsorsPage() {
             </div>
           </div>
         </div>
+
+        {/* OUR PARTNERS & ASSOCIATES (categorized logo wall) */}
+        {partnerCategories.length > 0 && (
+          <div className="w-full bg-white border border-slate-200/80 rounded-3xl shadow-sm p-6 md:p-10 flex flex-col gap-8">
+            <div className="text-left">
+              <span className="text-[10px] md:text-xs font-bold tracking-widest text-indigo-500 uppercase font-secondary">Trusted Collaborations</span>
+              <h2 className="text-xl md:text-2xl font-black font-primary text-slate-900 uppercase tracking-tight mt-1">
+                Our Partners &amp; Associates
+              </h2>
+              <p className="text-slate-500 text-xs md:text-sm mt-1">
+                Universities, brands, institutions, and hospitality partners who collaborate with us to deliver every event.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-7">
+              {partnerCategories.map((group) => (
+                <div key={group.category} className="flex flex-col gap-3">
+                  <span className="text-[10px] font-primary font-bold tracking-widest text-slate-400 uppercase">
+                    {group.category}
+                  </span>
+                  <div className="flex flex-wrap gap-3">
+                    {group.partners.map((partner, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
+                      >
+                        {partner.logoUrl ? (
+                          <img src={partner.logoUrl} alt={partner.name} className="h-6 w-auto object-contain" />
+                        ) : (
+                          <Building size={14} className="text-slate-400 shrink-0" />
+                        )}
+                        <span className="text-slate-700 font-bold text-xs font-primary">{partner.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ROI FORECASTER SECTION */}
         <div className="w-full bg-white border border-slate-200/80 rounded-3xl shadow-sm p-6 md:p-10 relative overflow-hidden bg-[radial-gradient(#e2e8f0_1.2px,transparent_1.2px)] [background-size:24px_24px]">
@@ -342,7 +421,7 @@ export default function SponsorsPage() {
             </div>
 
             {/* Right Card: Tier Summary */}
-            <div className="bg-slate-50 border border-slate-105 rounded-3xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden">
               <div className="flex flex-col gap-6">
                 <div>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-secondary">Tier Value Envelope</p>
@@ -492,16 +571,8 @@ export default function SponsorsPage() {
                   </div>
                   {titleSponsors.map((sponsor) => (
                     <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 max-w-7xl w-full">
-                      <div className={`relative w-full sm:w-48 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
-                        {sponsor.logoUrl ? (
-                          <img
-                            src={sponsor.logoUrl}
-                            alt={sponsor.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          renderLogoFallback(sponsor.name)
-                        )}
+                      <div className="relative w-full sm:w-48 h-40 sm:h-auto shrink-0 bg-slate-50">
+                        <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
                         {/* Badge overlay inside image */}
                         <span className="bg-indigo-600 text-white px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
                           TITLE SPONSOR
@@ -510,20 +581,28 @@ export default function SponsorsPage() {
                         <div className="absolute top-3 right-3 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-md" />
                       </div>
 
-                      <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                            <span>⌖</span> {sponsor.industry}
-                          </span>
+                      <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 flex-1 text-center sm:text-left">
+                        {/* Left: identity — capped width so it doesn't stretch
+                            thin across the full card on wide screens. */}
+                        <div className="flex flex-col gap-1 md:flex-1 md:max-w-xl min-w-0">
+                          {sponsor.industry && (
+                            <span className="text-pink-500 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                              <span>⌖</span> {sponsor.industry}
+                            </span>
+                          )}
                           <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-snug">
                             {sponsor.name}
                           </h4>
-                          <p className="text-slate-555 text-xs leading-relaxed font-secondary">
-                            {sponsor.description}
-                          </p>
+                          {sponsor.description && (
+                            <p className="text-slate-500 text-xs leading-relaxed font-secondary">
+                              {sponsor.description}
+                            </p>
+                          )}
                         </div>
 
-                        <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100/60">
+                        {/* Right: tier + CTA, kept together instead of
+                            spread to the far edge of a full-width card. */}
+                        <div className="flex items-center justify-between md:justify-end gap-6 pt-3 md:pt-0 mt-1 md:mt-0 border-t md:border-t-0 md:border-l border-slate-100/60 md:pl-6 shrink-0">
                           <div className="flex flex-col text-left">
                             <span className="text-[8px] font-primary font-bold tracking-widest text-slate-400 uppercase">Sponsor Tier</span>
                             <span className="text-xs font-black text-slate-900 font-primary mt-0.5">Grand Title</span>
@@ -555,16 +634,8 @@ export default function SponsorsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
                     {platinumSponsors.map((sponsor) => (
                       <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
-                        <div className={`relative w-full sm:w-40 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
-                          {sponsor.logoUrl ? (
-                            <img
-                              src={sponsor.logoUrl}
-                              alt={sponsor.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            renderLogoFallback(sponsor.name)
-                          )}
+                        <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
+                          <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
                           <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
                             PLATINUM
                           </span>
@@ -592,7 +663,7 @@ export default function SponsorsPage() {
                               href={sponsor.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                              className="bg-[#0c1222] hover:bg-slate-800 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
                             >
                               VISIT SITE
                             </a>
@@ -617,16 +688,8 @@ export default function SponsorsPage() {
 
                     {goldSponsors.map((sponsor) => (
                       <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full h-fit">
-                        <div className={`relative w-full sm:w-40 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
-                          {sponsor.logoUrl ? (
-                            <img
-                              src={sponsor.logoUrl}
-                              alt={sponsor.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            renderLogoFallback(sponsor.name)
-                          )}
+                        <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
+                          <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
                           <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
                             GOLD
                           </span>
@@ -654,7 +717,7 @@ export default function SponsorsPage() {
                               href={sponsor.websiteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                              className="bg-[#0c1222] hover:bg-slate-800 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
                             >
                               VISIT SITE
                             </a>
@@ -677,16 +740,8 @@ export default function SponsorsPage() {
                     <div className="flex flex-col gap-4 w-full">
                       {associateSponsors.map((sponsor) => (
                         <div key={sponsor.id} className="bg-white border border-slate-200/80 rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 w-full">
-                          <div className={`relative w-full sm:w-40 h-40 sm:h-auto shrink-0 ${sponsor.logoUrl ? "bg-slate-50" : "bg-[#F2F5FB] flex flex-col items-center justify-center text-center p-4"}`}>
-                            {sponsor.logoUrl ? (
-                              <img
-                                src={sponsor.logoUrl}
-                                alt={sponsor.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              renderLogoFallback(sponsor.name)
-                            )}
+                          <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-slate-50">
+                            <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
                             <span className="bg-indigo-600 text-white px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
                               ASSOCIATE
                             </span>
@@ -700,7 +755,7 @@ export default function SponsorsPage() {
                               <h4 className="text-base font-black text-slate-900 font-primary uppercase leading-tight">
                                 {sponsor.name}
                               </h4>
-                              <p className="text-slate-555 text-xs leading-normal line-clamp-1">
+                              <p className="text-slate-500 text-xs leading-normal line-clamp-1">
                                 {sponsor.description}
                               </p>
                             </div>
@@ -714,7 +769,7 @@ export default function SponsorsPage() {
                                 href={sponsor.websiteUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-[#0c1222] hover:bg-slate-855 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                                className="bg-[#0c1222] hover:bg-slate-800 text-white font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-lg transition-colors cursor-pointer"
                               >
                                 VISIT SITE
                               </a>

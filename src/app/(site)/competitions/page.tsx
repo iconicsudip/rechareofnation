@@ -118,7 +118,7 @@ export default function CompetitionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 py-8 font-secondary">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 py-20 md:py-24 font-secondary">
       <div className="container max-w-7xl mx-auto px-4 flex flex-col gap-8">
 
         {/* Back Link */}

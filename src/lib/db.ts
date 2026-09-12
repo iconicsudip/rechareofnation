@@ -476,15 +476,15 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
     key: 'about_page',
     value: {
       eyebrow: 'Recharge Nation', heading: 'About Our Platform',
-      subheading: 'Providing a premium digital gateway for discovering high-energy cultural, business, and entertainment events across metropolitan India.',
+      subheading: 'An experiential event management platform creating meaningful experiences across education, culture, fashion, food, music, awards, and entertainment.',
       introParagraphs: [
-        "Founded in 2024, Recharge Nation has grown to become India's leading event integration platform. We connect student bodies, professional artists, corporate sponsors, and local communities through customized, premium-tier event management interfaces.",
-        'Whether you are a college student looking to battle in nationwide dance cups, a startup founder pitching to venture capitalists at trade expos, or a family seeking weekends at street food festivals, Recharge Nation delivers a premium, secure user experience.',
+        'Recharge Nation is an experiential event management platform creating meaningful experiences across education, culture, fashion, food, music, awards, and entertainment.',
+        "Through every event we host, we build trust with our audiences — delivering the kind of consistent, well-run experiences that keep people coming back and keep our partners satisfied.",
       ],
       milestones: [
-        { title: '50+', desc: 'Premium Events Hosted' },
-        { title: '250K+', desc: 'Tickets Booked Successfully' },
-        { title: '10K+', desc: 'Registered Competitors' },
+        { title: '20+', desc: 'Years of Experience' },
+        { title: '75+', desc: 'Events & Programs' },
+        { title: '18+', desc: 'Publications' },
       ],
       coreValuesHeading: 'Our Core Values',
       coreValues: [
@@ -565,9 +565,11 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
       items: [
         { name: 'Explore Events', href: '/events' },
         { name: 'Mr/Miss Traditional', href: '/competitions' },
-        { name: 'Sponsors', href: '/sponsors' },
+        { name: 'Partner With Us', href: '/sponsors' },
         { name: 'Gallery', href: '/gallery' },
         { name: 'Blogs', href: '/blogs' },
+        { name: 'About Us', href: '/about' },
+        { name: 'Contact Us', href: '/contact' },
       ],
     },
   },
@@ -597,11 +599,13 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
   {
     key: 'homepage_stats',
     value: {
+      eyebrow: 'Who We Are',
+      heading: 'About Recharge Nation',
+      description: 'Recharge Nation is an experiential event management platform creating meaningful experiences across education, culture, fashion, food, music, awards, and entertainment.',
       stats: [
-        { value: '50+', label: 'Premium Events Hosted' },
-        { value: '250K+', label: 'Tickets Booked Successfully' },
-        { value: '7+', label: 'Cities Live Nationwide' },
-        { value: '12+', label: 'Event Categories' },
+        { value: '20+', label: 'Years of Experience' },
+        { value: '75+', label: 'Events & Programs' },
+        { value: '18+', label: 'Publications' },
       ],
     },
   },
@@ -624,8 +628,8 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
       stats: [
         { label: 'Total Audience Reach', value: '15 Lakhs+' },
         { label: 'Allied Brands', value: '50+ Active' },
-        { label: 'Weaver Payouts', value: '₹85,00,000+' },
-        { label: 'Gate Transits', value: '99.98% Smooth' },
+        { label: 'Events & Programs', value: '75+' },
+        { label: 'Years of Experience', value: '20+' },
       ],
       enlistEyebrow: 'B2B Co-Creation & Media',
       enlistHeading: 'ENLIST YOUR BRAND',
@@ -635,6 +639,11 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
         'Custom physical experiential display zones',
         'Live app telemetry-integrated promotional badges',
       ],
+      // Categorized "Our Partners & Associates" logo wall (Universities,
+      // Brands, Institutions, Hospitality Partners, etc.) — left empty by
+      // default; real partner names/logos get added via the admin so the
+      // site never claims a partnership that doesn't exist.
+      partners: [] as { category: string; name: string; logoUrl?: string }[],
     },
   },
   {

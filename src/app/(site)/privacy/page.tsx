@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
   const sections = content?.sections ?? [];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] container py-20 md:py-24 flex flex-col gap-12 max-w-6xl text-left">
+    <div className="min-h-screen container !py-20 !md:py-24 flex flex-col gap-12 max-w-6xl text-left">
       {/* Header */}
       <div className="flex flex-col gap-3 max-w-2xl">
         <span className="inline-flex items-center gap-2 bg-pink-50 border border-pink-100 text-pink-600 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary w-fit">

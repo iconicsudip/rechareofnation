@@ -228,7 +228,7 @@ function EventsContent() {
 
   return (
     <div 
-      className="min-h-screen bg-[#fbfcfd] text-slate-800 py-16 font-secondary"
+      className="min-h-screen bg-[#fbfcfd] text-slate-800 py-20 md:py-24 font-secondary"
     >
       <div className="container max-w-7xl mx-auto px-4">
         {/* 1. Header Section */}

@@ -29,11 +29,7 @@ function LoginContent() {
     try {
       const res = await ApiClient.loginUser(email, password);
       if (res.success && res.user) {
-        if (!res.user.isVerified) {
-          router.push(`/login/verify?userId=${res.user.id}&redirect=${encodeURIComponent(redirect)}`);
-        } else {
-          router.push(redirect);
-        }
+        router.push(redirect);
       } else {
         setError(res.error || "Something went wrong. Please check your credentials.");
       }

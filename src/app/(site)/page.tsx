@@ -76,6 +76,9 @@ export default function HomePage() {
   const [eventCategories, setEventCategories] = useState<string[]>([]);
   const [hubs, setHubs] = useState<HubItem[]>([]);
   const [stats, setStats] = useState<StatItem[]>([]);
+  const [aboutContent, setAboutContent] = useState<{ eyebrow: string; heading: string; description: string }>({
+    eyebrow: "Who We Are", heading: "About Recharge Nation", description: "",
+  });
   const [newsletterContent, setNewsletterContent] = useState<NewsletterContent>(DEFAULT_NEWSLETTER);
 
   // Next slide automation
@@ -95,7 +98,15 @@ export default function HomePage() {
     // separate round-trips to the same table.
     ApiClient.getAllSiteContent().then((all) => {
       setHeroSlides((all.homepage_hero as { slides: HeroSlide[] } | undefined)?.slides ?? []);
-      setStats((all.homepage_stats as { stats: StatItem[] } | undefined)?.stats ?? []);
+      const statsContent = all.homepage_stats as { eyebrow?: string; heading?: string; description?: string; stats: StatItem[] } | undefined;
+      setStats(statsContent?.stats ?? []);
+      if (statsContent) {
+        setAboutContent({
+          eyebrow: statsContent.eyebrow || "Who We Are",
+          heading: statsContent.heading || "About Recharge Nation",
+          description: statsContent.description || "",
+        });
+      }
       setHubs((all.homepage_hubs as { hubs: HubItem[] } | undefined)?.hubs ?? []);
       setPartnerLogos((all.homepage_partner_logos as { logos: string[] } | undefined)?.logos ?? []);
       setTestimonials((all.homepage_testimonials as { testimonials: Testimonial[] } | undefined)?.testimonials ?? []);
@@ -163,6 +174,13 @@ export default function HomePage() {
   const expos = allEvents.filter(e => EXPO_CATEGORIES.has(e.category)).slice(0, 4);
   const trendingEventsForCity = allEvents.filter(e => e.city === trendingCity).slice(0, 3);
   const citiesWithEvents = cities.filter(city => allEvents.some(e => e.city === city));
+
+  // Soonest-first, real upcoming events for the zigzag showcase below.
+  const today = new Date().toISOString().slice(0, 10);
+  const upcomingEvents = allEvents
+    .filter(e => e.isUpcoming && e.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 4);
 
   return (
     <div className="flex flex-col text-left">
@@ -272,44 +290,85 @@ export default function HomePage() {
         </form>
       </div>
 
-      {/* 2B. TRUST / STATS BAR */}
-      {stats.length > 0 && (
-        <section className="pt-10 pb-2 bg-[#fbfcfd]">
+      {/* 2B. ABOUT RECHARGE NATION (COVER SECTION) + TRUST STATS */}
+      {(aboutContent.description || stats.length > 0) && (
+        <section className="pt-14 pb-2 bg-[#fbfcfd]">
           <div className="container">
-            <div className="bg-white border border-slate-200/80 shadow-[0_15px_50px_rgba(0,0,0,0.04)] rounded-[22px] px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4">
-              {stats.map((stat, idx) => (
-                <div key={idx} className="text-center px-2">
-                  <p className="text-2xl sm:text-3xl font-black font-primary text-slate-900 tracking-tight">{stat.value}</p>
-                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 font-primary mt-2">{stat.label}</p>
+            <div className="bg-white border border-slate-200/80 shadow-[0_15px_50px_rgba(0,0,0,0.04)] rounded-[28px] px-6 py-10 md:px-12 md:py-12">
+              {aboutContent.description && (
+                <div className="max-w-2xl mx-auto text-center flex flex-col items-center gap-3 mb-10">
+                  <span className="text-[10px] font-primary font-bold tracking-widest text-pink-500 uppercase">{aboutContent.eyebrow}</span>
+                  <h2 className="text-2xl md:text-3xl font-black font-primary text-slate-900 tracking-tight">{aboutContent.heading}</h2>
+                  <p className="text-slate-600 text-sm md:text-base leading-relaxed">{aboutContent.description}</p>
                 </div>
-              ))}
+              )}
+              {stats.length > 0 && (
+                // Flex + justify-center instead of a fixed-column grid, so this
+                // stays centered and evenly spaced no matter how many stat
+                // tiles are configured (a 4-column grid with 3 items left an
+                // empty trailing column and pushed everything to the left).
+                <div className="flex flex-wrap justify-center gap-x-12 gap-y-8">
+                  {stats.map((stat, idx) => (
+                    <div key={idx} className="text-center px-2 w-24 sm:w-32">
+                      <p className="text-2xl sm:text-3xl font-black font-primary text-slate-900 tracking-tight">{stat.value}</p>
+                      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 font-primary mt-2">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
       )}
 
-      {/* 3. BROWSE SEGMENT FAST-TRACKS */}
-      <section className="py-12 bg-[#fbfcfd]">
-        <div className="container">
-          <span className="text-[9px] font-primary tracking-widest text-slate-400 font-bold uppercase">Browse Segment Fast-Tracks</span>
-          <div className="flex flex-wrap gap-2.5 mt-3">
-            {eventCategories.map((cat, idx) => {
-              const style = CATEGORY_STYLE_PALETTE[idx % CATEGORY_STYLE_PALETTE.length];
-              const Icon = style.icon;
-              return (
-                <Link
-                  key={cat}
-                  href={`/events?category=${cat}`}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full border ${style.chipBg} ${style.chipBorder} ${style.chipText} text-xs font-bold hover:scale-102 transition-transform duration-200`}
-                >
-                  <Icon size={12} />
-                  <span>{cat}</span>
-                </Link>
-              );
-            })}
+      {/* 2C. UPCOMING EVENTS (ZIGZAG SHOWCASE) */}
+      {upcomingEvents.length > 0 && (
+        <section className="py-16 bg-[#fbfcfd] border-t border-slate-100">
+          <div className="container">
+            <div className="text-center max-w-xl mx-auto flex flex-col gap-2 mb-12">
+              <span className="text-[10px] font-primary tracking-widest text-pink-500 font-bold uppercase">Mark Your Calendar</span>
+              <h2 className="text-2xl md:text-3xl font-black text-slate-900 font-primary uppercase tracking-tight">Upcoming Events</h2>
+              <p className="text-slate-500 text-sm font-secondary">The soonest events on our calendar, closest date first.</p>
+            </div>
+
+            <div className="flex flex-col gap-14 md:gap-20">
+              {upcomingEvents.map((evt, idx) => {
+                const [y, m, d] = evt.date.split("-");
+                const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const prettyDate = m ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : evt.date;
+                return (
+                  <div key={evt.id} className={`flex flex-col ${idx % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-8 md:gap-14`}>
+                    <div className="w-full lg:w-1/2 aspect-[4/3] rounded-[28px] overflow-hidden shadow-sm border border-slate-200 bg-slate-100 shrink-0">
+                      {evt.bannerUrl ? (
+                        <img src={evt.bannerUrl} alt={evt.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center"><ImageIcon size={32} className="text-slate-300" /></div>
+                      )}
+                    </div>
+                    <div className="w-full lg:w-1/2 flex flex-col gap-4 text-left">
+                      <span className="text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider w-fit bg-indigo-50 text-indigo-600 border border-indigo-100 font-primary">
+                        {evt.category}
+                      </span>
+                      <h3 className="text-2xl md:text-3xl font-black text-slate-900 font-primary uppercase tracking-tight leading-tight">{evt.name}</h3>
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-primary font-bold text-slate-500 uppercase tracking-wide">
+                        <span className="flex items-center gap-1.5"><Calendar size={13} className="text-pink-500" /> {prettyDate}</span>
+                        <span className="flex items-center gap-1.5"><MapPin size={13} className="text-pink-500" /> {evt.venue}, {evt.city}</span>
+                      </div>
+                      <p className="text-slate-600 text-sm leading-relaxed font-secondary line-clamp-3">{evt.summary || evt.description?.replace(/<[^>]+>/g, " ")}</p>
+                      <Link
+                        href={`/events/${evt.slug}`}
+                        className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 transition-colors text-white text-xs font-primary font-bold uppercase tracking-wider rounded-xl px-6 py-3.5 w-fit mt-1"
+                      >
+                        View Details <ChevronRight size={14} />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 4. DISCOVER NATIONAL HUBS */}
       {hubs.length > 0 && (
@@ -395,18 +454,22 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* flex-wrap (not a fixed 3-col grid) so a partial row of cards
+              stays card-width instead of stretching to fill empty columns —
+              a single result no longer leaves two-thirds of the row blank. */}
+          <div className="flex flex-wrap gap-6">
             {arenas.map((arena) => (
-              <CompetitionCard
-                key={arena.id}
-                id={arena.id}
-                name={arena.name}
-                city={arena.city}
-                prizePool={arena.prizePool.replace(/^₹/, "")}
-                registrationFee={arena.registrationFee}
-                bannerUrl={arena.bannerUrl}
-                desc={arena.summary || arena.description}
-              />
+              <div key={arena.id} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <CompetitionCard
+                  id={arena.id}
+                  name={arena.name}
+                  city={arena.city}
+                  prizePool={arena.prizePool.replace(/^₹/, "")}
+                  registrationFee={arena.registrationFee}
+                  bannerUrl={arena.bannerUrl}
+                  desc={arena.summary || arena.description}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -622,9 +685,13 @@ export default function HomePage() {
             {gallery.slice(0, 6).map((item) => (
               <div
                 key={item.id}
-                className="relative h-44 rounded-xl overflow-hidden group border border-slate-100 shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:-translate-y-0.5 transition-transform duration-350"
+                className="relative h-44 rounded-xl overflow-hidden group border border-slate-100 shadow-[0_4px_15px_rgba(0,0,0,0.01)] hover:-translate-y-0.5 transition-transform duration-350 bg-slate-100"
               >
-                <img src={item.thumbnailUrl || item.url} alt={item.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                {(item.thumbnailUrl || item.url) ? (
+                  <img src={item.thumbnailUrl || item.url} alt={item.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center"><ImageIcon size={24} className="text-slate-300" /></div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-transparent"></div>
 
                 <div className="absolute bottom-3 left-3 flex flex-col gap-0.5 text-left z-10">

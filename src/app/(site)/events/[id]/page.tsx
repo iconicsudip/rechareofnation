@@ -7,7 +7,7 @@ import {
   Calendar, MapPin, Phone, Mail, User, Shield, Share2, 
   ArrowLeft, Check, Ticket, Trophy, Upload, ShieldCheck, 
   AlertCircle, DollarSign, ExternalLink, Printer, X,
-  Info, Volume2, VolumeX, Clock, ArrowRight, ChevronDown, ChevronUp, Music, Sliders, Star, HelpCircle
+  Info, Clock, ArrowRight, ChevronDown, ChevronUp, Sliders, Star, HelpCircle
 } from "lucide-react";
 import { ApiClient, Event, TicketType, TicketPriceInfo, TicketBooking, CompetitionRegistration } from "@/lib/api-client";
 import RichTextContent from "@/components/RichTextContent";
@@ -33,7 +33,6 @@ export default function EventDetailPage({ params }: PageProps) {
   const [passholderName, setPassholderName] = useState("");
   const [badgeGlow, setBadgeGlow] = useState<"purple" | "pink" | "orange" | "green">("purple");
   const [scheduleTab, setScheduleTab] = useState<number>(0);
-  const [playingTrack, setPlayingTrack] = useState<string | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
 
   // Curator bot states
@@ -63,52 +62,6 @@ export default function EventDetailPage({ params }: PageProps) {
       navigator.clipboard.writeText(window.location.href);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    }
-  };
-
-  // Synthesize Web Audio API sound sweeps for live acoustic preview
-  const playMockAcoustic = (trackName: string) => {
-    if (typeof window === "undefined") return;
-    if (playingTrack === trackName) {
-      setPlayingTrack(null);
-      return;
-    }
-    setPlayingTrack(trackName);
-
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      
-      // Pitch arrays mapping to track themes
-      const notes = trackName.toLowerCase().includes("jugalbandi")
-        ? [293.66, 329.63, 440.0, 523.25] // Acoustic Sitar sequence (D4, E4, A4, C5)
-        : trackName.toLowerCase().includes("bass")
-        ? [82.41, 110.0, 73.42, 55.0]     // EDM Heavy Bass drops (E2, A2, D2, G1)
-        : [329.63, 392.0, 440.0, 587.33]; // Runway Theme (E4, G4, A4, D5)
-
-      let time = ctx.currentTime;
-      notes.forEach((freq) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        
-        osc.frequency.setValueAtTime(freq, time);
-        gain.gain.setValueAtTime(0.12, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
-        
-        osc.start(time);
-        osc.stop(time + 0.5);
-        time += 0.15;
-      });
-
-      setTimeout(() => {
-        setPlayingTrack(null);
-      }, 800);
-    } catch (err) {
-      console.log("AudioContext blocked:", err);
     }
   };
 
@@ -196,7 +149,7 @@ export default function EventDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] py-8 pb-20 font-secondary text-slate-800">
+    <div className="min-h-screen bg-[#f8fafc] py-20 md:py-24 font-secondary text-slate-800">
       
       {/* Dynamic Wizard Overlays */}
       {activeWizard === "booking" && (
@@ -287,80 +240,8 @@ export default function EventDetailPage({ params }: PageProps) {
               </div>
               <RichTextContent
                 html={event.description}
-                className="text-slate-500 text-xs sm:text-sm leading-relaxed font-secondary"
+                className="text-slate-700 text-xs sm:text-sm leading-relaxed font-secondary"
               />
-            </div>
-
-            {/* Card 2: ACOUSTICS PREVIEW */}
-            <div className="bg-white border border-slate-200/90 rounded-[28px] p-6 md:p-8 shadow-sm flex flex-col gap-4 text-left">
-              <div className="flex flex-col gap-1 border-b border-slate-100 pb-3">
-                <span className="text-[8px] font-primary tracking-widest text-indigo-600 font-bold uppercase">
-                  Interactive Soundscape Preview
-                </span>
-                <div className="flex items-center gap-2.5">
-                  <Volume2 size={16} className="text-indigo-600 animate-pulse" />
-                  <h3 className="text-sm font-bold font-primary text-slate-900 uppercase tracking-wider">
-                    Simulate Stage Acoustics
-                  </h3>
-                </div>
-              </div>
-              
-              <p className="text-slate-500 text-xs leading-relaxed font-secondary">
-                Click any live track preview button below to test stage equalizers, 3D spatial mixing, and audio sync configurations.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                {(event.headliners.length > 0
-                  ? event.headliners.slice(0, 3).map((h, i) => ({
-                      title: `${h.name} — Live Preview`,
-                      desc: h.role || "Live Performance",
-                      duration: ["2:15m Preview", "1:50m Preview", "3:05m Preview"][i] || "Preview"
-                    }))
-                  : [
-                      { title: "Live Performance Preview", desc: "Main Stage", duration: "2:15m Preview" },
-                      { title: "Featured Set", desc: "Live Mix", duration: "1:50m Preview" },
-                      { title: "Opening Act Preview", desc: "Live Performance", duration: "3:05m Preview" }
-                    ]
-                ).map((track) => {
-                  const isCurrent = playingTrack === track.title;
-                  return (
-                    <button
-                      key={track.title}
-                      onClick={() => playMockAcoustic(track.title)}
-                      className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all duration-300 relative overflow-hidden group cursor-pointer ${
-                        isCurrent 
-                          ? "border-pink-500 bg-pink-500/5 shadow-sm" 
-                          : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100/50"
-                      }`}
-                    >
-                      <div className="flex flex-col gap-1 z-10">
-                        <span className="text-[8px] font-primary tracking-wider text-slate-400 font-bold uppercase group-hover:text-pink-500 transition-colors">
-                          Soundboard Preview
-                        </span>
-                        <h4 className="text-[11px] font-black text-slate-800 uppercase font-primary mt-1 line-clamp-1">
-                          {track.title}
-                        </h4>
-                        <p className="text-slate-400 text-[9px] font-secondary mt-0.5 line-clamp-1">
-                          {track.desc}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-200/60 z-10 w-full">
-                        <span className="text-[8px] font-primary text-slate-400">{track.duration}</span>
-                        {isCurrent ? (
-                          <div className="flex gap-0.5 items-end h-3">
-                            <span className="w-0.5 bg-pink-500 animate-[bounce_0.8s_infinite_100ms]" style={{ height: '100%' }}></span>
-                            <span className="w-0.5 bg-pink-500 animate-[bounce_0.8s_infinite_300ms]" style={{ height: '60%' }}></span>
-                            <span className="w-0.5 bg-pink-500 animate-[bounce_0.8s_infinite_200ms]" style={{ height: '80%' }}></span>
-                          </div>
-                        ) : (
-                          <Music size={10} className="text-slate-400 group-hover:text-pink-500 transition-colors" />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Card 3: PROGRAM SCHEDULE (only if the event has schedule days configured) */}
