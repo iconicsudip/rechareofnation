@@ -324,11 +324,10 @@ export default function SponsorsPage() {
                 <button
                   key={tierKey}
                   onClick={() => setSelectedTier(tierKey)}
-                  className={`px-4 py-2 rounded-lg text-xs font-black tracking-wider uppercase transition-all cursor-pointer ${
-                    selectedTier === tierKey
-                      ? "bg-amber-500 text-[#170D08] shadow-md"
-                      : "bg-white/5 border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-white/10"
-                  }`}
+                  className={`px-4 py-2 rounded-lg text-xs font-black tracking-wider uppercase transition-all cursor-pointer ${selectedTier === tierKey
+                    ? "bg-amber-500 text-[#170D08] shadow-md"
+                    : "bg-white/5 border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-white/10"
+                    }`}
                 >
                   {tierKey}
                 </button>
@@ -547,101 +546,50 @@ export default function SponsorsPage() {
             <>
               {/* Title Sponsor Showcase */}
               {titleSponsors.length > 0 && (
-                <div className="flex flex-col items-start gap-4">
-                  <div className="text-left w-full max-w-7xl">
-                    <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                      Grand Title Sponsor
-                    </h3>
-                  </div>
-                  {titleSponsors.map((sponsor) => (
-                    <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 max-w-7xl w-full">
-                      <div className="relative w-full sm:w-48 h-40 sm:h-auto shrink-0 bg-black/20">
-                        <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
-                        {/* Badge overlay inside image */}
-                        <span className="bg-amber-500 text-[#170D08] px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                          TITLE SPONSOR
-                        </span>
-                        {/* Active Indicator dot */}
-                        <div className="absolute top-3 right-3 w-3 h-3 bg-emerald-500 border-2 border-[#170D08] rounded-full shadow-md" />
-                      </div>
-
-                      <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 flex-1 text-center sm:text-left">
-                        {/* Left: identity — capped width so it doesn't stretch
-                            thin across the full card on wide screens. */}
-                        <div className="flex flex-col gap-1 md:flex-1 md:max-w-xl min-w-0">
-                          {sponsor.industry && (
-                            <span className="text-amber-400 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                              <Building size={10} /> {sponsor.industry}
-                            </span>
-                          )}
-                          <h4 className="text-base font-black text-[var(--text-primary)] font-primary uppercase leading-snug">
-                            {sponsor.name}
-                          </h4>
-                          {sponsor.description && (
-                            <p className="text-[var(--text-secondary)] text-xs leading-relaxed font-secondary">
-                              {sponsor.description}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Right: tier + CTA, kept together instead of
-                            spread to the far edge of a full-width card. */}
-                        <div className="flex items-center justify-between md:justify-end gap-6 pt-3 md:pt-0 mt-1 md:mt-0 border-t md:border-t-0 md:border-l border-[var(--border-color)] md:pl-6 shrink-0">
-                          <div className="flex flex-col text-left">
-                            <span className="text-[8px] font-primary font-bold tracking-widest text-[var(--text-muted)] uppercase">Sponsor Tier</span>
-                            <span className="text-xs font-black text-[var(--text-primary)] font-primary mt-0.5">Grand Title</span>
-                          </div>
-                          <a
-                            href={sponsor.websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-[var(--bg-panel)] hover:bg-amber-500 hover:text-[#170D08] text-[var(--text-primary)] font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
-                          >
-                            VISIT SITE
-                          </a>
-                        </div>
-                      </div>
+                <div className={`grid grid-cols-1  gap-8 w-full max-w-8xl mx-auto`}>
+                  <div className="flex flex-col items-start gap-4">
+                    <div className="text-left w-full max-w-7xl">
+                      <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                        Grand Title Sponsor
+                      </h3>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Platinum Showcase */}
-              {platinumSponsors.length > 0 && (
-                <div className="flex flex-col items-start gap-4 w-full">
-                  <div className="text-left w-full max-w-7xl mx-auto">
-                    <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                      Platinum Alliance Patrons
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
-                    {platinumSponsors.map((sponsor) => (
-                      <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 w-full">
-                        <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-black/20">
+                    {titleSponsors.map((sponsor) => (
+                      <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 max-w-7xl w-full">
+                        <div className="relative w-full sm:w-48 h-40 sm:h-auto shrink-0 bg-black/20">
                           <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
-                          <span className="bg-amber-500 text-[#170D08] px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
-                            PLATINUM
+                          {/* Badge overlay inside image */}
+                          <span className="bg-amber-500 text-[#170D08] px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
+                            TITLE SPONSOR
                           </span>
+                          {/* Active Indicator dot */}
+                          <div className="absolute top-3 right-3 w-3 h-3 bg-emerald-500 border-2 border-[#170D08] rounded-full shadow-md" />
                         </div>
 
-                        <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-amber-400 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
-                              <Building size={10} /> {sponsor.industry}
-                            </span>
+                        <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 flex-1 text-center sm:text-left">
+                          {/* Left: identity — capped width so it doesn't stretch
+                            thin across the full card on wide screens. */}
+                          <div className="flex flex-col gap-1 md:flex-1 md:max-w-xl min-w-0">
+                            {sponsor.industry && (
+                              <span className="text-amber-400 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                                <Building size={10} /> {sponsor.industry}
+                              </span>
+                            )}
                             <h4 className="text-base font-black text-[var(--text-primary)] font-primary uppercase leading-snug">
                               {sponsor.name}
                             </h4>
-                            <p className="text-[var(--text-secondary)] text-xs leading-relaxed font-secondary line-clamp-2">
-                              {sponsor.description}
-                            </p>
+                            {sponsor.description && (
+                              <p className="text-[var(--text-secondary)] text-xs leading-relaxed font-secondary">
+                                {sponsor.description}
+                              </p>
+                            )}
                           </div>
 
-                          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-[var(--border-color)]">
+                          {/* Right: tier + CTA, kept together instead of
+                            spread to the far edge of a full-width card. */}
+                          <div className="flex items-center justify-between md:justify-end gap-6 pt-3 md:pt-0 mt-1 md:mt-0 border-t md:border-t-0 md:border-l border-[var(--border-color)] md:pl-6 shrink-0">
                             <div className="flex flex-col text-left">
                               <span className="text-[8px] font-primary font-bold tracking-widest text-[var(--text-muted)] uppercase">Sponsor Tier</span>
-                              <span className="text-xs font-black text-[var(--text-primary)] font-primary mt-0.5">Platinum</span>
+                              <span className="text-xs font-black text-[var(--text-primary)] font-primary mt-0.5">Grand Title</span>
                             </div>
                             <a
                               href={sponsor.websiteUrl}
@@ -659,13 +607,68 @@ export default function SponsorsPage() {
                 </div>
               )}
 
+              {/* Platinum Showcase */}
+              {platinumSponsors.length > 0 && (
+                <div className={`grid grid-cols-1  gap-8 w-full max-w-8xl mx-auto`}>
+                  <div className="flex flex-col items-start gap-4 w-full">
+                    <div className="text-left w-full max-w-7xl mx-auto">
+                      <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                        Platinum Alliance Patrons
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
+                      {platinumSponsors.map((sponsor) => (
+                        <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 w-full">
+                          <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-black/20">
+                            <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
+                            <span className="bg-amber-500 text-[#170D08] px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase rounded-md absolute top-3 left-3">
+                              PLATINUM
+                            </span>
+                          </div>
+
+                          <div className="p-5 flex flex-col justify-between flex-1 text-center sm:text-left gap-2.5">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-amber-400 font-primary text-[9px] tracking-wider uppercase font-bold flex items-center justify-center sm:justify-start gap-1">
+                                <Building size={10} /> {sponsor.industry}
+                              </span>
+                              <h4 className="text-base font-black text-[var(--text-primary)] font-primary uppercase leading-snug">
+                                {sponsor.name}
+                              </h4>
+                              <p className="text-[var(--text-secondary)] text-xs leading-relaxed font-secondary line-clamp-2">
+                                {sponsor.description}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-[var(--border-color)]">
+                              <div className="flex flex-col text-left">
+                                <span className="text-[8px] font-primary font-bold tracking-widest text-[var(--text-muted)] uppercase">Sponsor Tier</span>
+                                <span className="text-xs font-black text-[var(--text-primary)] font-primary mt-0.5">Platinum</span>
+                              </div>
+                              <a
+                                href={sponsor.websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-[var(--bg-panel)] hover:bg-amber-500 hover:text-[#170D08] text-[var(--text-primary)] font-primary font-bold text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-colors cursor-pointer"
+                              >
+                                VISIT SITE
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Gold and Associate Side-by-Side Grid — only split into two
                   columns when both tiers actually have sponsors, otherwise
                   the empty tier still reserves its column and leaves a
                   blank half. */}
-              <div className={`grid grid-cols-1 ${goldSponsors.length > 0 && associateSponsors.length > 0 ? "lg:grid-cols-2" : ""} gap-8 w-full max-w-8xl mx-auto`}>
-                {/* Gold Sponsor Block */}
-                {goldSponsors.length > 0 && (
+              {/* Gold Sponsor Block */}
+              {goldSponsors.length > 0 && (
+                <div className={`grid grid-cols-1  gap-8 w-full max-w-8xl mx-auto`}>
                   <div className="flex flex-col items-start gap-4 w-full">
                     <div className="text-left w-full">
                       <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -713,10 +716,11 @@ export default function SponsorsPage() {
                       </div>
                     ))}
                   </div>
-                )}
-
-                {/* Associate Sponsor Block */}
-                {associateSponsors.length > 0 && (
+                </div>
+              )}
+              {/* Associate Sponsor Block */}
+              {associateSponsors.length > 0 && (
+                <div className={`grid grid-cols-1  gap-8 w-full max-w-8xl mx-auto`}>
                   <div className="flex flex-col items-start gap-4 w-full">
                     <div className="text-left w-full">
                       <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -768,8 +772,8 @@ export default function SponsorsPage() {
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </>
           )}
         </div>
