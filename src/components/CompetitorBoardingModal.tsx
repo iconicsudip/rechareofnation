@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Form, Input, Upload, message } from "antd";
 import { X, Upload as UploadIcon, Video, FileText, CreditCard, Check, User, ArrowRight, AlertCircle } from "lucide-react";
 import { ApiClient, CompetitionRecord } from "@/lib/api-client";
+import { isFieldEnabled, DEFAULT_REGISTRATION_FORM_FIELDS } from "@/lib/bookingFormFields";
 
 const STEPS = ["Track", "Profile", "Uploads", "Fee", "ID Card"];
 
@@ -48,6 +49,11 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
   const [profileForm] = Form.useForm<ProfileFormValues>();
   const [uploadsForm] = Form.useForm<UploadsFormValues>();
   const [step, setStep] = useState(0);
+  const showPhone = isFieldEnabled(competition.registrationFormFields, DEFAULT_REGISTRATION_FORM_FIELDS, "phone");
+  const showIdProof = isFieldEnabled(competition.registrationFormFields, DEFAULT_REGISTRATION_FORM_FIELDS, "idProof");
+  const showVideoLink = isFieldEnabled(competition.registrationFormFields, DEFAULT_REGISTRATION_FORM_FIELDS, "videoLink");
+  const showPortfolioLink = isFieldEnabled(competition.registrationFormFields, DEFAULT_REGISTRATION_FORM_FIELDS, "portfolioLink");
+  const showHeadshot = isFieldEnabled(competition.registrationFormFields, DEFAULT_REGISTRATION_FORM_FIELDS, "headshot");
   const [selectedCategory, setSelectedCategory] = useState<string>(() => resolveInitialCategory(competition, initialTrack));
   const [fullName, setFullName] = useState(initialName);
   const [email, setEmail] = useState("");
@@ -156,7 +162,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
         {/* Header */}
         <div className="flex items-start justify-between px-6 sm:px-8 pt-7 pb-5 border-b border-slate-100 shrink-0">
           <div>
-            <span className="text-indigo-600 font-primary text-[11px] font-bold tracking-widest uppercase">Competitor Boarding</span>
+            <span className="text-amber-600 font-primary text-[11px] font-bold tracking-widest uppercase">Competitor Boarding</span>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-primary mt-1">{competition.name}</h2>
           </div>
           <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors cursor-pointer shrink-0">
@@ -170,7 +176,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
             <div
               key={label}
               className={`px-3 sm:px-4 py-3.5 text-xs sm:text-sm font-primary font-bold whitespace-nowrap border-b-2 -mb-px transition-colors ${
-                idx === step ? "text-indigo-600 border-indigo-600" : idx < step ? "text-slate-500 border-transparent" : "text-slate-300 border-transparent"
+                idx === step ? "text-amber-600 border-amber-600" : idx < step ? "text-slate-500 border-transparent" : "text-slate-300 border-transparent"
               }`}
             >
               {idx + 1}. {label}
@@ -181,7 +187,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-7">
           {error && (
-            <div className="mb-5 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs flex items-start gap-2.5">
+            <div className="mb-5 p-4 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl text-xs flex items-start gap-2.5">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <div className="flex flex-col gap-2.5 items-start">
                 <span>{error}</span>
@@ -189,7 +195,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                   <button
                     type="button"
                     onClick={() => router.push("/login?redirect=/competitions")}
-                    className="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-primary font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                    className="bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-primary font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors cursor-pointer"
                   >
                     Log In to Continue
                   </button>
@@ -206,12 +212,12 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                   <label
                     key={opt.name}
                     className={`flex items-center justify-between gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-colors ${
-                      selectedCategory === opt.name ? "border-indigo-600 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300"
+                      selectedCategory === opt.name ? "border-amber-600 bg-amber-50/50" : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedCategory === opt.name ? "border-indigo-600" : "border-slate-300"}`}>
-                        {selectedCategory === opt.name && <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                      <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedCategory === opt.name ? "border-amber-600" : "border-slate-300"}`}>
+                        {selectedCategory === opt.name && <span className="w-2.5 h-2.5 rounded-full bg-amber-600" />}
                       </span>
                       <span className="font-bold text-slate-800 text-[15px]">{opt.name}</span>
                     </span>
@@ -222,7 +228,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col gap-1.5">
-                <span className="text-indigo-600 font-primary text-[11px] font-bold tracking-widest uppercase">Prize Pool Valuation</span>
+                <span className="text-amber-600 font-primary text-[11px] font-bold tracking-widest uppercase">Prize Pool Valuation</span>
                 <span className="text-xl font-black text-slate-900">{competition.prizePool}</span>
                 <p className="text-slate-500 text-xs">Includes modeling contracts, live stage exposure, performance certificates, and mentorship fellowships.</p>
               </div>
@@ -245,7 +251,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                 <Input className="antd-cyber-input" placeholder="Enter full name for participant ID badge" />
               </Form.Item>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5">
+              <div className={showPhone ? "grid grid-cols-1 sm:grid-cols-2 gap-x-5" : ""}>
                 <Form.Item
                   name="email"
                   label={<span className={labelClass}>Email Address</span>}
@@ -256,37 +262,41 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                 >
                   <Input className="antd-cyber-input" placeholder="e.g. name@domain.com" />
                 </Form.Item>
-                <Form.Item
-                  name="phone"
-                  label={<span className={labelClass}>Phone Number</span>}
-                  rules={[
-                    { required: true, message: "Phone number is required." },
-                    {
-                      validator: (_, value) => {
-                        if (!value) return Promise.resolve();
-                        const digits = String(value).replace(/[\s-]/g, "");
-                        return /^(\+91)?[6-9]\d{9}$/.test(digits)
-                          ? Promise.resolve()
-                          : Promise.reject(new Error("Enter a valid 10-digit Indian mobile number."));
+                {showPhone && (
+                  <Form.Item
+                    name="phone"
+                    label={<span className={labelClass}>Phone Number</span>}
+                    rules={[
+                      { required: true, message: "Phone number is required." },
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve();
+                          const digits = String(value).replace(/[\s-]/g, "");
+                          return /^(\+91)?[6-9]\d{9}$/.test(digits)
+                            ? Promise.resolve()
+                            : Promise.reject(new Error("Enter a valid 10-digit Indian mobile number."));
+                        },
                       },
-                    },
-                  ]}
-                >
-                  <Input className="antd-cyber-input" placeholder="e.g. +91 99887 XXXXX" />
-                </Form.Item>
+                    ]}
+                  >
+                    <Input className="antd-cyber-input" placeholder="e.g. +91 99887 XXXXX" />
+                  </Form.Item>
+                )}
               </div>
 
-              <Form.Item
-                name="idProof"
-                label={<span className={labelClass}>Verification ID Proof (College ID / Aadhaar / Passport)</span>}
-                extra={<span className="text-slate-400 text-[11px]">Your ID number is strictly encrypted and used solely for gate identity verification matching.</span>}
-                rules={[
-                  { required: true, message: "ID proof number is required." },
-                  { min: 4, message: "ID number looks too short." },
-                ]}
-              >
-                <Input className="antd-cyber-input" placeholder="Enter ID Number for entry gate identity checks" />
-              </Form.Item>
+              {showIdProof && (
+                <Form.Item
+                  name="idProof"
+                  label={<span className={labelClass}>Verification ID Proof (College ID / Aadhaar / Passport)</span>}
+                  extra={<span className="text-slate-400 text-[11px]">Your ID number is strictly encrypted and used solely for gate identity verification matching.</span>}
+                  rules={[
+                    { required: true, message: "ID proof number is required." },
+                    { min: 4, message: "ID number looks too short." },
+                  ]}
+                >
+                  <Input className="antd-cyber-input" placeholder="Enter ID Number for entry gate identity checks" />
+                </Form.Item>
+              )}
             </Form>
           )}
 
@@ -294,63 +304,69 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
             <Form form={uploadsForm} layout="vertical" requiredMark={false} initialValues={{ videoLink, portfolioLink }} className="flex flex-col gap-5">
               <h3 className="font-bold text-slate-900 text-base">Upload Portfolios & Audition Audios:</h3>
 
-              <Upload.Dragger
-                accept="image/jpeg,image/png"
-                maxCount={1}
-                showUploadList={false}
-                className="!bg-transparent !border-2 !border-dashed !border-slate-200 hover:!border-indigo-300 !rounded-2xl transition-colors"
-                beforeUpload={(file) => {
-                  const isValidType = file.type === "image/jpeg" || file.type === "image/png";
-                  const isValidSize = file.size / 1024 / 1024 < 5;
-                  if (!isValidType) {
-                    message.error("Only JPG or PNG files are supported.");
-                    return Upload.LIST_IGNORE;
-                  }
-                  if (!isValidSize) {
-                    message.error("Headshot must be smaller than 5MB.");
-                    return Upload.LIST_IGNORE;
-                  }
-                  setHeadshotFile(file);
-                  setHeadshotPreview(URL.createObjectURL(file));
-                  return false;
-                }}
-              >
-                <div className="flex flex-col items-center gap-3 py-6">
-                  <span className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 mx-auto">
-                    <UploadIcon size={20} />
-                  </span>
-                  <span className="font-bold text-slate-800 text-sm block">
-                    {headshotFile ? headshotFile.name : "Drag & Drop Portrait Headshot or Click to Browse"}
-                  </span>
-                  <span className="text-slate-400 text-xs block">JPG, PNG up to 5MB. Must clearly show face for ID Badge integration.</span>
-                </div>
-              </Upload.Dragger>
+              {showHeadshot && (
+                <Upload.Dragger
+                  accept="image/jpeg,image/png"
+                  maxCount={1}
+                  showUploadList={false}
+                  className="!bg-transparent !border-2 !border-dashed !border-slate-200 hover:!border-amber-300 !rounded-2xl transition-colors"
+                  beforeUpload={(file) => {
+                    const isValidType = file.type === "image/jpeg" || file.type === "image/png";
+                    const isValidSize = file.size / 1024 / 1024 < 5;
+                    if (!isValidType) {
+                      message.error("Only JPG or PNG files are supported.");
+                      return Upload.LIST_IGNORE;
+                    }
+                    if (!isValidSize) {
+                      message.error("Headshot must be smaller than 5MB.");
+                      return Upload.LIST_IGNORE;
+                    }
+                    setHeadshotFile(file);
+                    setHeadshotPreview(URL.createObjectURL(file));
+                    return false;
+                  }}
+                >
+                  <div className="flex flex-col items-center gap-3 py-6">
+                    <span className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 mx-auto">
+                      <UploadIcon size={20} />
+                    </span>
+                    <span className="font-bold text-slate-800 text-sm block">
+                      {headshotFile ? headshotFile.name : "Drag & Drop Portrait Headshot or Click to Browse"}
+                    </span>
+                    <span className="text-slate-400 text-xs block">JPG, PNG up to 5MB. Must clearly show face for ID Badge integration.</span>
+                  </div>
+                </Upload.Dragger>
+              )}
 
-              <Form.Item
-                name="videoLink"
-                label={
-                  <span className={`${labelClass} flex items-center gap-1.5`}>
-                    <Video size={12} /> Audition Performance Video Link (YouTube / Drive)
-                  </span>
-                }
-                rules={[{ type: "url", message: "Enter a valid URL." }]}
-                className="!mb-0"
-              >
-                <Input className="antd-cyber-input" placeholder="https://youtube.com/watch?v=..." />
-              </Form.Item>
+              {showVideoLink && (
+                <Form.Item
+                  name="videoLink"
+                  label={
+                    <span className={`${labelClass} flex items-center gap-1.5`}>
+                      <Video size={12} /> Audition Performance Video Link (YouTube / Drive)
+                    </span>
+                  }
+                  rules={[{ type: "url", message: "Enter a valid URL." }]}
+                  className="!mb-0"
+                >
+                  <Input className="antd-cyber-input" placeholder="https://youtube.com/watch?v=..." />
+                </Form.Item>
+              )}
 
-              <Form.Item
-                name="portfolioLink"
-                label={
-                  <span className={`${labelClass} flex items-center gap-1.5`}>
-                    <FileText size={12} /> Digital Portfolio / Certificates Folder Link (Optional)
-                  </span>
-                }
-                rules={[{ type: "url", message: "Enter a valid URL." }]}
-                className="!mb-0"
-              >
-                <Input className="antd-cyber-input" placeholder="https://drive.google.com/drive/..." />
-              </Form.Item>
+              {showPortfolioLink && (
+                <Form.Item
+                  name="portfolioLink"
+                  label={
+                    <span className={`${labelClass} flex items-center gap-1.5`}>
+                      <FileText size={12} /> Digital Portfolio / Certificates Folder Link (Optional)
+                    </span>
+                  }
+                  rules={[{ type: "url", message: "Enter a valid URL." }]}
+                  className="!mb-0"
+                >
+                  <Input className="antd-cyber-input" placeholder="https://drive.google.com/drive/..." />
+                </Form.Item>
+              )}
             </Form>
           )}
 
@@ -368,20 +384,20 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                 </div>
                 <div className="border-t border-slate-200 pt-4 flex justify-between text-base font-black text-slate-900">
                   <span>Payable Amount</span>
-                  <span className="text-indigo-600">₹{registrationFee}</span>
+                  <span className="text-amber-600">₹{registrationFee}</span>
                 </div>
               </div>
 
               <div className="border border-slate-200 rounded-2xl p-6 flex flex-col gap-4">
                 <span className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                  <CreditCard size={16} className="text-indigo-600" /> Secure Gateway Payment Integration
+                  <CreditCard size={16} className="text-amber-600" /> Secure Gateway Payment Integration
                 </span>
                 <div className="border-t border-slate-100" />
                 <button
                   type="button"
                   onClick={handleSettlePayment}
                   disabled={isSubmitting}
-                  className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full py-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "Processing..." : `✨ Settle Registration of ₹${registrationFee}`}
                 </button>
@@ -392,7 +408,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
 
           {step === 4 && (
             <div className="flex flex-col items-center gap-5 text-center">
-              <span className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <span className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
                 <Check size={26} />
               </span>
               <div>
@@ -401,27 +417,27 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
               </div>
 
               {/* ID Card */}
-              <div className="w-full max-w-xs bg-[#0c1222] border border-indigo-500/30 rounded-3xl overflow-hidden shadow-xl">
+              <div className="w-full max-w-xs bg-[#0c1222] border border-amber-500/30 rounded-3xl overflow-hidden shadow-xl">
                 <div className="flex justify-center pt-3">
                   <span className="w-12 h-1.5 rounded-full bg-slate-700" />
                 </div>
                 <div className="px-6 pb-6 pt-2 flex flex-col items-center gap-3">
-                  <span className="bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
+                  <span className="bg-amber-600 text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
                     ★ Competitor Badge ★
                   </span>
                   <span className="text-white font-bold text-xs uppercase tracking-wide text-center">{competition.name}</span>
 
-                  <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-indigo-500/50 bg-slate-800 flex items-center justify-center relative mt-2">
+                  <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-amber-500/50 bg-slate-800 flex items-center justify-center relative mt-2">
                     {headshotPreview ? (
                       <img src={headshotPreview} alt="Contestant headshot" className="w-full h-full object-cover" />
                     ) : (
                       <User size={32} className="text-slate-500" />
                     )}
-                    <span className="absolute bottom-0 inset-x-0 bg-indigo-600/90 text-white text-[7px] font-bold uppercase text-center py-0.5">Verified ID</span>
+                    <span className="absolute bottom-0 inset-x-0 bg-amber-600/90 text-white text-[7px] font-bold uppercase text-center py-0.5">Verified ID</span>
                   </div>
 
                   <span className="text-white font-black text-lg uppercase tracking-tight mt-1 break-words max-w-full">{fullName}</span>
-                  <span className="text-indigo-400 font-bold text-[11px] uppercase tracking-wide -mt-2">{selectedCategory}</span>
+                  <span className="text-amber-400 font-bold text-[11px] uppercase tracking-wide -mt-2">{selectedCategory}</span>
                   <span className="text-slate-500 text-[10px] font-primary">REG ID: {participantId}</span>
 
                   {/* QR Code (mock visual, encodes the real registration qrCodeValue) */}
@@ -451,7 +467,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                   </div>
                 </div>
                 <div className="bg-slate-950/60 border-t border-slate-800 py-2.5 text-center">
-                  <span className="text-indigo-400 text-[9px] font-primary font-bold uppercase tracking-widest">Recharge Nation Official Talent Register</span>
+                  <span className="text-amber-400 text-[9px] font-primary font-bold uppercase tracking-widest">Recharge Nation Official Talent Register</span>
                 </div>
               </div>
             </div>
@@ -474,7 +490,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                 <button
                   type="button"
                   onClick={onClose}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-colors cursor-pointer"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-colors cursor-pointer"
                 >
                   Done
                 </button>
@@ -494,7 +510,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                 <button
                   type="button"
                   onClick={handleContinue}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   Continue <ArrowRight size={14} />
                 </button>

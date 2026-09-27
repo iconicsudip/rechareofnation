@@ -10,7 +10,7 @@ const EMPTY_ITEM: ScheduleItem = { time: "", title: "", desc: "" };
 
 const S = {
   input: {
-    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)",
+    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)",
     borderRadius: "8px", color: "#E2E8F0", outline: "none", padding: "9px 12px", fontSize: "13px", width: "100%",
   },
   btn: {
@@ -64,7 +64,7 @@ export default function ScheduleDaysEditor({ label, value, onChange }: ScheduleD
         ))}
       </div>
       <button type="button" onClick={addDay} className="flex items-center gap-1.5 mt-2.5"
-        style={{ ...S.btn, background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
+        style={{ ...S.btn, background: "rgba(217, 119, 6,0.12)", color: "#fbbf24" }}>
         <Plus size={12} /> Add day
       </button>
     </div>

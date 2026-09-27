@@ -4,45 +4,76 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Menu, X, User, LogOut, Trophy, Home, Info, Calendar, Image,
-  FileText, Phone, Award, Sparkles, ChevronRight, Zap, Target,
-  BookOpen, Layers, Laptop, Search, Ticket, Compass, ArrowRight
+  Menu, X, LogOut, Calendar,
+  ChevronRight, Layers, Ticket,
+  Compass, ChevronDown
 } from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
+
+interface NavItem {
+  name: string;
+  href: string;
+}
 
 interface NavContent {
   brandName: string;
   brandTagline: string;
-  items: { name: string; href: string }[];
+  items: NavItem[];
 }
 
-// Literal defaults mirror the current hardcoded links/tagline so there's no
-// visible flash on load; the fetch overwrites this if it returns data.
-const defaultNavContent: NavContent = {
-  brandName: "RECHARGENATION",
-  brandTagline: "Experience India",
-  items: [
-    { name: "Explore Events", href: "/events" },
-    { name: "Mr/Miss Traditional", href: "/competitions" },
-    { name: "Sponsors", href: "/sponsors" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Blogs", href: "/blogs" },
-  ],
-};
+const DEFAULT_PRIMARY_LINKS: NavItem[] = [
+  { name: "Events", href: "/events" },
+  { name: "Competitions", href: "/competitions" },
+  { name: "Gallery", href: "/gallery" },
+  { name: "Blogs", href: "/blogs" },
+  { name: "Partners", href: "/sponsors" },
+];
+
+function normalizeLinkName(raw: string): string {
+  const lower = raw.toLowerCase().trim();
+  if (lower.includes("event")) return "Events";
+  if (lower.includes("traditional") || lower.includes("competi")) return "Competitions";
+  if (lower.includes("partner") || lower.includes("sponsor")) return "Partners";
+  if (lower.includes("gallery")) return "Gallery";
+  if (lower.includes("blog")) return "Blogs";
+  return raw;
+}
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [navContent, setNavContent] = useState<NavContent>(defaultNavContent);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [primaryLinks, setPrimaryLinks] = useState<NavItem[]>(DEFAULT_PRIMARY_LINKS);
+  const [brandTagline, setBrandTagline] = useState("Experience India");
 
-  // Fetch CMS-editable nav links / brand tagline (lightweight, fallback-seeded to avoid flash)
+
+
+  // Fetch CMS-editable nav links / brand tagline
   useEffect(() => {
     let cancelled = false;
     const fetchNavContent = async () => {
       const data = await ApiClient.getSiteContent<NavContent>("nav_links");
-      if (!cancelled && data) setNavContent(data);
+      if (!cancelled && data) {
+        if (data.brandTagline) setBrandTagline(data.brandTagline);
+        if (Array.isArray(data.items) && data.items.length > 0) {
+          // Filter out home and secondary items to keep the primary bar minimal
+          const curated: NavItem[] = [];
+          for (const item of data.items) {
+            const lower = item.name.toLowerCase();
+            if (item.href === "/" || lower.includes("home")) continue;
+            if (lower.includes("about") || lower.includes("contact")) continue;
+            curated.push({
+              name: normalizeLinkName(item.name),
+              href: item.href,
+            });
+          }
+          if (curated.length > 0) {
+            setPrimaryLinks(curated.slice(0, 5));
+          }
+        }
+      }
     };
     fetchNavContent();
     return () => {
@@ -56,11 +87,8 @@ export default function Navbar() {
       const currentUser = ApiClient.getCurrentUser();
       setUser(currentUser);
     };
-
     checkUser();
-
-    // Set up a simple interval to poll user login state changes
-    const interval = setInterval(checkUser, 1000);
+    const interval = setInterval(checkUser, 1500);
     return () => clearInterval(interval);
   }, []);
 
@@ -68,44 +96,15 @@ export default function Navbar() {
     ApiClient.logoutUser();
     setUser(null);
     setIsOpen(false);
+    setUserMenuOpen(false);
     router.push("/");
   };
 
-  // Search Modal States
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [allEvents, setAllEvents] = useState<any[]>([]);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-
-  // Fetch all events on load
-  useEffect(() => {
-    const fetchEvents = async () => {
-      const events = await ApiClient.getEvents();
-      setAllEvents(events);
-    };
-    fetchEvents();
-  }, []);
-
-  // Filter events in real-time
-  useEffect(() => {
-    if (!searchQuery) {
-      setSearchResults([]);
-      return;
-    }
-    const q = searchQuery.toLowerCase();
-    const matches = allEvents.filter(e =>
-      e.name.toLowerCase().includes(q) ||
-      e.category.toLowerCase().includes(q) ||
-      e.city.toLowerCase().includes(q)
-    );
-    setSearchResults(matches.slice(0, 5));
-  }, [searchQuery, allEvents]);
-
-  // Escape key close handler
+  // Close menus on Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setShowSearchModal(false);
+        setUserMenuOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -113,323 +112,242 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full bg-[#120B07]/85 backdrop-blur-xl border-b border-amber-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all">
+      {/* Top subtle golden ambient beam */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent pointer-events-none" />
 
-      <div className="container max-w-[1550px] mx-auto px-4">
+      <div className="container max-w-[1440px] mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between relative gap-4">
 
-          {/* Logo Section */}
-          <div className="flex items-center gap-2 select-none shrink-0">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-pink-500 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm shadow-pink-500/10">
-                <Ticket size={18} className="shrink-0" />
-              </div>
-              <div className="flex flex-col text-left leading-none">
-                <span className="text-[14px] font-black tracking-tight text-slate-800 font-primary uppercase leading-tight">
-                  RECHARGE<span className="text-pink-500">NATION</span>
-                </span>
-                <span className="text-[7.5px] font-primary font-bold tracking-widest text-slate-400 uppercase mt-0.5 leading-none">
-                  {navContent.brandTagline}
-                </span>
-              </div>
-            </Link>
+          {/* Brand Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group select-none shrink-0 outline-none focus:outline-none"
+          >
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[#170D08] shadow-[0_0_15px_rgba(245,158,11,0.25)] group-hover:shadow-[0_0_22px_rgba(245,158,11,0.4)] transition-all shrink-0">
+              <Ticket size={16} className="shrink-0 group-hover:scale-105 transition-transform" />
+            </div>
+            <div className="flex flex-col text-left leading-none">
+              <span className="text-[13.5px] font-black tracking-tight text-white font-primary uppercase leading-tight">
+                RECHARGE<span className="text-amber-400">NATION</span>
+              </span>
+              <span className="text-[7.5px] font-primary font-bold tracking-[0.25em] text-stone-400 uppercase mt-0.5 leading-none">
+                {brandTagline}
+              </span>
+            </div>
+          </Link>
 
-          </div>
-
-          {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-4 xl:gap-6 shrink-0">
-            <Link
-              href="/"
-              className={`text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap shrink-0 ${pathname === "/"
-                  ? "bg-pink-50 text-pink-600 shadow-[0_2px_8px_rgba(236,72,153,0.08)]"
-                  : "text-slate-600 hover:text-pink-500"
-                }`}
-            >
-              Home
-            </Link>
-
-            {navContent.items.map((link) => {
-              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+          {/* Desktop Minimal Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+            {primaryLinks.map((link) => {
+              const isActive =
+                pathname === link.href ||
+                (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-[10px] font-black transition-all duration-300 hover:text-pink-500 font-secondary uppercase tracking-wider whitespace-nowrap shrink-0 ${isActive ? "text-pink-500" : "text-slate-600"
-                    }`}
+                  className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 outline-none focus:outline-none ${
+                    isActive
+                      ? "text-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
+                      : "text-stone-300 hover:text-amber-300 hover:bg-white/[0.04]"
+                  }`}
                 >
                   {link.name}
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400 animate-pulse" />
+                  )}
                 </Link>
               );
             })}
-          </div>
+          </nav>
 
-          {/* Desktop Action Buttons */}
-          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
-            {/* Search Icon Trigger */}
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className="p-2 text-slate-500 hover:text-pink-500 hover:bg-slate-100 rounded-full transition-colors cursor-pointer shrink-0 mr-1.5"
-              title="Search Events"
-            >
-              <Search size={14} className="shrink-0" />
-            </button>
+          {/* Desktop Right Actions */}
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
 
+
+
+            {/* Auth States */}
             {user ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
+              <div
+                className="relative"
+                onMouseLeave={() => setUserMenuOpen(false)}
+              >
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  onMouseEnter={() => setUserMenuOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-amber-500/20 text-stone-200 transition-all cursor-pointer text-xs font-bold outline-none focus:outline-none"
                 >
-                  <Ticket size={11} className="text-red-500 shrink-0" />
-                  <span>My Wallet</span>
-                </Link>
-
-                <Link
-                  href="/dashboard"
-                  className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
-                >
-                  <Layers size={11} className="text-slate-500 shrink-0" />
-                  <span>Dashboard</span>
-                </Link>
-
-                <Link
-                  href="/dashboard"
-                  className="bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[9.5px] font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_4px_12px_rgba(79,70,229,0.12)] whitespace-nowrap shrink-0"
-                >
-                  <Compass size={11} className="text-white shrink-0" />
-                  <span>Scanner</span>
-                </Link>
-
-                <div className="flex items-center gap-2 pl-1.5 ml-1.5 border-l border-slate-200">
-                  <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 text-xs font-bold font-primary">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-[#170D08] flex items-center justify-center text-[9px] font-black shrink-0">
                     {user.name ? user.name[0].toUpperCase() : "U"}
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="p-1.5 text-slate-400 hover:text-pink-500 transition-colors cursor-pointer shrink-0"
-                    title="Logout"
+                  <span className="max-w-[90px] truncate text-[11px]">{user.name || "Account"}</span>
+                  <ChevronDown
+                    size={11}
+                    className={`transition-transform text-stone-400 ${
+                      userMenuOpen ? "rotate-180 text-amber-400" : ""
+                    }`}
+                  />
+                </button>
+
+                {userMenuOpen && (
+                  <div
+                    className="absolute top-full right-0 mt-2 w-52 bg-[#180E09]/95 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-1.5 shadow-2xl flex flex-col gap-1 z-50 animate-fade-in text-left"
+                    onMouseEnter={() => setUserMenuOpen(true)}
                   >
-                    <LogOut size={14} />
-                  </button>
-                </div>
-              </>
+                    <div className="px-3 py-2 border-b border-white/[0.06] mb-1">
+                      <p className="text-[11px] font-bold text-white truncate">{user.name}</p>
+                      <p className="text-[10px] text-stone-400 truncate">{user.email}</p>
+                    </div>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Ticket size={13} className="text-amber-400 shrink-0" />
+                      <span>My Passes &amp; Wallet</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Layers size={13} className="text-stone-400 shrink-0" />
+                      <span>Dashboard</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
+                    >
+                      <Compass size={13} className="text-amber-400 shrink-0" />
+                      <span>Gate Scanner</span>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 px-3 py-2 mt-1 border-t border-white/[0.06] rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition-colors w-full text-left cursor-pointer"
+                    >
+                      <LogOut size={13} className="shrink-0" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-[9.5px] font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_2px_8px_rgba(0,0,0,0.015)] whitespace-nowrap shrink-0"
+                  className="text-xs font-bold uppercase tracking-wider text-stone-300 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/[0.04] transition-all outline-none focus:outline-none"
                 >
-                  <span>Login</span>
+                  Login
                 </Link>
 
                 <Link
                   href="/register"
-                  className="bg-pink-500 hover:bg-pink-600 text-white text-[9.5px] font-extrabold px-4.5 py-2 rounded-xl flex items-center gap-1.5 uppercase transition-all shadow-[0_4px_12px_rgba(236,72,153,0.12)] whitespace-nowrap shrink-0"
+                  className="bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-[#170D08] text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.35)] transition-all transform hover:-translate-y-0.5 outline-none focus:outline-none"
                 >
-                  <span>Register</span>
+                  Register
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
-          {/* Mobile Menu Button & Search */}
-          <div className="flex lg:hidden items-center gap-1.5 shrink-0">
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className="p-2 text-slate-600 hover:text-pink-500 transition-colors cursor-pointer"
-              title="Search Events"
-            >
-              <Search size={16} />
-            </button>
+          {/* Mobile Right Bar */}
+          <div className="flex lg:hidden items-center gap-2 shrink-0">
+
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center justify-center p-2 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+              className="p-2 text-stone-300 hover:text-white transition-colors cursor-pointer outline-none focus:outline-none"
             >
               {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
+
         </div>
       </div>
 
       {/* Mobile Drawer Overlay */}
       {isOpen && (
-        <div className="lg:hidden absolute top-[68px] left-0 w-full bg-white border-b border-slate-200 py-6 px-5 flex flex-col gap-5 shadow-2xl animate-fade-in z-50">
-          <div className="flex flex-col gap-4">
+        <div className="lg:hidden absolute top-[64px] left-0 w-full bg-[#120B07]/98 border-b border-amber-500/10 p-5 flex flex-col gap-4 shadow-2xl animate-fade-in z-50">
+          <div className="flex flex-col gap-2">
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${pathname === "/" ? "text-pink-500" : "text-slate-600"
-                }`}
+              className={`flex items-center justify-between text-xs font-bold py-2.5 px-3 rounded-xl uppercase tracking-wider transition-colors ${
+                pathname === "/" ? "bg-amber-500/10 text-amber-400" : "text-stone-300 hover:bg-white/5 hover:text-white"
+              }`}
             >
-              <Home size={16} />
               <span>Home</span>
+              <ChevronRight size={14} className="text-stone-500" />
             </Link>
-            {navContent.items.map((link) => {
-              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+
+            {primaryLinks.map((link) => {
+              const isActive =
+                pathname === link.href ||
+                (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 text-[14px] font-extrabold py-2 border-b border-slate-100 hover:text-pink-500 uppercase tracking-wider ${isActive ? "text-pink-500" : "text-slate-600"
-                    }`}
+                  className={`flex items-center justify-between text-xs font-bold py-2.5 px-3 rounded-xl uppercase tracking-wider transition-colors ${
+                    isActive ? "bg-amber-500/10 text-amber-400" : "text-stone-300 hover:bg-white/5 hover:text-white"
+                  }`}
                 >
-                  <Calendar size={16} />
                   <span>{link.name}</span>
+                  <ChevronRight size={14} className="text-stone-500" />
                 </Link>
               );
             })}
           </div>
 
-          <div className="pt-2 flex flex-wrap gap-2">
+          <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
             {user ? (
               <>
                 <Link
                   href="/dashboard"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 flex-grow py-3 border border-slate-200 rounded-xl text-slate-700 text-center text-xs font-extrabold uppercase"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 rounded-xl text-stone-200 text-xs font-bold uppercase"
                 >
-                  <Ticket size={14} className="text-red-500" />
-                  <span>My Wallet</span>
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 flex-grow py-3 border border-slate-200 rounded-xl text-slate-700 text-center text-xs font-extrabold uppercase"
-                >
-                  <Layers size={14} className="text-slate-500" />
-                  <span>Dashboard</span>
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#4f46e5] rounded-xl text-white text-center text-xs font-extrabold uppercase shadow-lg shadow-indigo-500/10"
-                >
-                  <Compass size={14} className="text-white" />
-                  <span>Scanner</span>
+                  <Ticket size={13} className="text-amber-400" />
+                  <span>My Passes &amp; Wallet</span>
                 </Link>
                 <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsOpen(false);
-                  }}
-                  className="w-full mt-2 py-3 bg-slate-900 rounded-xl text-white text-center text-xs font-extrabold uppercase flex items-center justify-center gap-2 cursor-pointer"
+                  type="button"
+                  onClick={handleLogout}
+                  className="py-2.5 text-rose-400 text-xs font-bold uppercase text-center cursor-pointer"
                 >
-                  <LogOut size={14} />
-                  <span>Logout</span>
+                  Sign Out
                 </button>
               </>
             ) : (
-              <>
+              <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 flex-grow py-3 border border-slate-200 rounded-xl text-slate-700 text-center text-xs font-extrabold uppercase"
+                  className="py-2.5 text-center border border-white/10 rounded-xl text-stone-300 text-xs font-bold uppercase hover:bg-white/5"
                 >
-                  <span>Login</span>
+                  Login
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 flex-grow py-3 bg-pink-500 rounded-xl text-white text-center text-xs font-extrabold uppercase"
+                  className="py-2.5 text-center bg-gradient-to-r from-amber-500 to-amber-400 text-[#170D08] rounded-xl text-xs font-black uppercase shadow-lg shadow-amber-500/20"
                 >
-                  <span>Register</span>
+                  Register
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
       )}
-      {/* Search Modal Overlay */}
-      {showSearchModal && (
-        <div
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] flex items-start justify-center pt-24 md:pt-32 px-4 transition-all duration-300 h-[100vh]"
-          onClick={() => setShowSearchModal(false)}
-        >
-          <div
-            className="w-full max-w-xl bg-white border border-slate-200/80 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col transition-all transform scale-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header / Input */}
-            <div className="flex items-center px-4 py-3.5 border-b border-slate-100 gap-3">
-              <Search className="text-slate-400 w-4 h-4 shrink-0" />
-              <input
-                type="text"
-                placeholder="Search events by name, city, category..."
-                className="w-full bg-transparent text-sm text-slate-800 outline-none border-none py-1 placeholder-slate-400 font-secondary"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-              <button
-                onClick={() => setShowSearchModal(false)}
-                className="text-[10px] font-primary font-bold text-slate-400 border border-slate-200 hover:border-slate-300 rounded px-1.5 py-0.5 bg-slate-50 transition-colors uppercase cursor-pointer"
-              >
-                Esc
-              </button>
-            </div>
 
-            {/* Results body */}
-            <div className="max-h-80 overflow-y-auto p-2 flex flex-col gap-1">
-              {searchQuery ? (
-                searchResults.length > 0 ? (
-                  searchResults.map((evt) => (
-                    <Link
-                      key={evt.id}
-                      href={`/events/${evt.slug}`}
-                      onClick={() => setShowSearchModal(false)}
-                      className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group text-left"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs font-primary font-bold text-pink-500 uppercase tracking-wide">{evt.category}</span>
-                        <h4 className="text-[13px] font-extrabold text-slate-800 group-hover:text-pink-500 transition-colors font-primary line-clamp-1">{evt.name}</h4>
-                        <span className="text-[10px] text-slate-400 font-primary uppercase">{evt.city}</span>
-                      </div>
-                      <ChevronRight size={14} className="text-slate-300 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-slate-400 text-xs font-secondary">
-                    No matching events found for "{searchQuery}"
-                  </div>
-                )
-              ) : (
-                <div className="p-3 flex flex-col gap-2.5">
-                  <span className="text-[9px] font-primary font-bold text-slate-400 uppercase tracking-widest block">Trending Searches</span>
-                  <div className="flex flex-col gap-1.5">
-                    {[
-                      { name: "Miss & Mr Traditional India 2026", href: "/competitions" },
-                      { name: "Abhyudaya Mega Cultural Fest", href: "/events/recharge-cultural-odyssey-2026" },
-                      { name: "Nataraja Classical Dance Clash", href: "/events/national-vibe-rhythm-dance-cup" }
-                    ].map((item, idx) => (
-                      <Link
-                        key={idx}
-                        href={item.href}
-                        onClick={() => setShowSearchModal(false)}
-                        className="text-xs text-indigo-600 hover:text-pink-500 font-semibold flex items-center gap-1.5 transition-colors"
-                      >
-                        <Zap size={11} className="text-amber-500 font-bold" /> {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="bg-slate-50/80 border-t border-slate-100 py-2.5 px-4 flex items-center justify-between text-[10px] font-primary text-slate-400 font-bold uppercase tracking-wider">
-              <span>Type query to search</span>
-              <Link
-                href={`/events?q=${searchQuery}`}
-                onClick={() => setShowSearchModal(false)}
-                className="text-slate-505 hover:text-pink-500 transition-colors flex items-center gap-0.5"
-              >
-                View Directory <ArrowRight size={10} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
+    </header>
   );
 }

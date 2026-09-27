@@ -2,8 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { FileText, Check, RefreshCw, Plus, Trash2 } from "lucide-react";
+import FieldToggleListEditor from "@/components/admin/FieldToggleListEditor";
 import RepeaterField from "@/components/admin/RepeaterField";
 import SimpleListEditor from "@/components/admin/SimpleListEditor";
+import ImageUploadField from "@/components/admin/ImageUploadField";
+import { DEFAULT_EVENT_FORM_FIELDS } from "@/lib/eventFormFields";
 
 interface SiteContentRow {
   key: string;
@@ -28,13 +31,14 @@ const KEY_META: Record<string, { label: string; description: string }> = {
   sponsors_page: { label: "Sponsors Page", description: "Hero copy, stat tiles, the Enlist Your Brand panel, and the categorized partner logo wall." },
   gallery_page: { label: "Gallery Page", description: "Hero eyebrow, heading, and description." },
   blogs_page: { label: "Blogs Page", description: "Hero heading and description." },
+  event_form_fields: { label: "Event Form Fields", description: "Which fields appear in the admin Add/Edit Event form, and in what order." },
 };
 
 const KEY_ORDER = Object.keys(KEY_META);
 
 const S = {
-  card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
-  input: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "9px 12px", fontSize: "13px", width: "100%" },
+  card: { background: "rgba(23,13,8,0.6)", border: "1px solid rgba(217, 119, 6,0.12)", borderRadius: "16px" },
+  input: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)", borderRadius: "10px", color: "#F5EEE2", outline: "none", padding: "9px 12px", fontSize: "13px", width: "100%" },
   btn: { display: "inline-flex", alignItems: "center", gap: "6px", padding: "9px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer", border: "none" },
 };
 
@@ -64,7 +68,7 @@ function FooterColumnsEditor({ value, onChange }: { value: FooterColumn[]; onCha
 
   return (
     <div>
-      <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>
+      <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(203,185,160,0.5)" }}>
         Footer Columns
       </label>
       <div className="flex flex-col gap-4">
@@ -88,12 +92,13 @@ function FooterColumnsEditor({ value, onChange }: { value: FooterColumn[]; onCha
         ))}
       </div>
       <button type="button" onClick={addColumn} className="flex items-center gap-1.5 mt-2.5"
-        style={{ ...S.btn, background: "rgba(99,102,241,0.12)", color: "#818CF8" }}>
+        style={{ ...S.btn, background: "rgba(217, 119, 6,0.12)", color: "#fbbf24" }}>
         <Plus size={12} /> Add column
       </button>
     </div>
   );
 }
+
 
 function SponsorshipTiersEditor({ value, onChange }: { value: Record<string, typeof EMPTY_TIER>; onChange: (v: Record<string, typeof EMPTY_TIER>) => void }) {
   const tiers = value ?? {};
@@ -106,7 +111,7 @@ function SponsorshipTiersEditor({ value, onChange }: { value: Record<string, typ
         const tier = tiers[tierKey] ?? EMPTY_TIER;
         return (
           <div key={tierKey} className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "#818CF8" }}>{tierKey}</label>
+            <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "#fbbf24" }}>{tierKey}</label>
             <div className="grid grid-cols-2 gap-2 mb-2">
               <input style={S.input} placeholder="Tier display name" value={tier.name}
                 onChange={(e) => updateTier(tierKey, { name: e.target.value })} />
@@ -185,20 +190,20 @@ export default function AdminContentPage() {
   const meta = KEY_META[activeKey];
 
   return (
-    <div className="p-6 md:p-8 flex flex-col lg:flex-row gap-6" style={{ color: "#E2E8F0" }}>
+    <div className="p-6 md:p-8 flex flex-col lg:flex-row gap-6" style={{ color: "#F5EEE2" }}>
       {/* Sidebar */}
       <div className="lg:w-64 flex-shrink-0 flex flex-col gap-1">
-        <h1 className="text-xl font-extrabold text-white tracking-tight mb-1">Site Content</h1>
-        <p className="text-xs mb-4" style={{ color: "rgba(148,163,184,0.6)" }}>Edit copy shown across the public site.</p>
+        <h1 className="text-xl font-extrabold text-[#F5EEE2] tracking-tight mb-1">Site Content</h1>
+        <p className="text-xs mb-4" style={{ color: "rgba(203,185,160,0.6)" }}>Edit copy shown across the public site.</p>
         {KEY_ORDER.map((key) => (
           <button
             key={key}
             onClick={() => setActiveKey(key)}
             className="text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors"
             style={{
-              background: activeKey === key ? "linear-gradient(135deg, rgba(79,70,229,0.25), rgba(219,39,119,0.12))" : "transparent",
-              color: activeKey === key ? "#fff" : "rgba(148,163,184,0.7)",
-              border: activeKey === key ? "1px solid rgba(99,102,241,0.25)" : "1px solid transparent",
+              background: activeKey === key ? "linear-gradient(135deg, rgba(180, 83, 9,0.25), rgba(217, 119, 6,0.12))" : "transparent",
+              color: activeKey === key ? "#F5EEE2" : "rgba(203,185,160,0.7)",
+              border: activeKey === key ? "1px solid rgba(217, 119, 6,0.25)" : "1px solid transparent",
             }}
           >
             {KEY_META[key].label}
@@ -209,35 +214,38 @@ export default function AdminContentPage() {
       {/* Editor */}
       <div className="flex-1 min-w-0">
         {loading ? (
-          <div className="h-64 rounded-2xl animate-pulse" style={{ background: "rgba(99,102,241,0.06)" }} />
+          <div className="h-64 rounded-2xl animate-pulse" style={{ background: "rgba(217, 119, 6,0.06)" }} />
         ) : (
           <div style={S.card} className="p-6 flex flex-col gap-5">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
-                <h2 className="font-extrabold text-white text-lg">{meta.label}</h2>
-                <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.6)" }}>{meta.description}</p>
+                <h2 className="font-extrabold text-[#F5EEE2] text-lg">{meta.label}</h2>
+                <p className="text-xs mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>{meta.description}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={load} style={{ ...S.btn, background: "rgba(99,102,241,0.1)", color: "#818CF8" }}>
+                <button onClick={load} style={{ ...S.btn, background: "rgba(217, 119, 6,0.1)", color: "#fbbf24" }}>
                   <RefreshCw size={13} /> Refresh
                 </button>
                 <button onClick={handleSave} disabled={saving}
-                  style={{ ...S.btn, background: saving ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg,#4F46E5,#DB2777)", color: "#fff" }}>
+                  style={{ ...S.btn, background: saving ? "rgba(217, 119, 6,0.3)" : "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff" }}>
                   {saving ? "Saving..." : saved ? <><Check size={14} /> Saved</> : "Save Changes"}
                 </button>
               </div>
             </div>
 
             {Object.keys(scalarFields).length === 0 && Object.keys(structured).length === 0 && (
-              <div className="flex items-center gap-2 text-sm py-8 justify-center" style={{ color: "rgba(148,163,184,0.5)" }}>
+              <div className="flex items-center gap-2 text-sm py-8 justify-center" style={{ color: "rgba(203,185,160,0.5)" }}>
                 <FileText size={16} /> No content seeded for this key yet.
               </div>
             )}
 
             {/* Flat scalar fields (headings, subheadings, single strings) */}
             {Object.entries(scalarFields).map(([field, val]) => (
+              (activeKey === "homepage_hero" && field === "bgImage") ||
+              (activeKey === "homepage_stats" && field === "image")
+                ? null :
               <div key={field}>
-                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>
+                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(203,185,160,0.5)" }}>
                   {field}
                 </label>
                 {isLongText(val) ? (
@@ -252,29 +260,51 @@ export default function AdminContentPage() {
 
             {/* Structured, type-specific editors — no raw JSON anywhere */}
             {activeKey === "homepage_hero" && (
-              <RepeaterField
-                label="Hero Slides"
-                columns={[
-                  { key: "badge", label: "Badge text", span: 2 },
-                  { key: "titleLine1", label: "Title line 1" },
-                  { key: "titleLine2", label: "Title line 2" },
-                  { key: "accent", label: "Accent label", span: 2 },
-                  { key: "desc", label: "Description", type: "textarea", span: 2 },
-                  { key: "image", label: "Slide Image", type: "image", span: 2 },
-                  { key: "tier", label: "Tier label" },
-                  { key: "multipass", label: "Multipass label" },
-                  { key: "eventDate", label: "Event date text" },
-                  { key: "venue", label: "Venue" },
-                  { key: "gate", label: "Gate label" },
-                  { key: "price", label: "Price text" },
-                  { key: "code", label: "Pass code" },
-                  { key: "slug", label: "Linked event slug" },
-                ]}
-                value={(structured.slides as Record<string, unknown>[]) ?? []}
-                onChange={(v) => setStruct({ slides: v })}
-                emptyRow={EMPTY_SLIDE}
-                addLabel="Add slide"
-              />
+              <>
+                <ImageUploadField
+                  label="Background (Image or Video)"
+                  value={scalarFields.bgImage ?? ""}
+                  onChange={(url) => setScalarFields((p) => ({ ...p, bgImage: url }))}
+                  allowVideo
+                />
+                <RepeaterField
+                  label="Hero Slides (Rotating Banner Mode)"
+                  columns={[
+                    { key: "badge", label: "Badge text", span: 2 },
+                    { key: "titleLine1", label: "Title line 1" },
+                    { key: "titleLine2", label: "Title line 2" },
+                    { key: "accent", label: "Accent label", span: 2 },
+                    { key: "desc", label: "Description", type: "textarea", span: 2 },
+                    { key: "image", label: "Slide Background (Image or Video)", type: "media", span: 2 },
+                    { key: "tier", label: "Tier label" },
+                    { key: "multipass", label: "Multipass label" },
+                    { key: "eventDate", label: "Event date text" },
+                    { key: "venue", label: "Venue" },
+                    { key: "gate", label: "Gate label" },
+                    { key: "price", label: "Price text" },
+                    { key: "code", label: "Pass code" },
+                    { key: "slug", label: "Linked event slug" },
+                  ]}
+                  value={(structured.slides as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ slides: v })}
+                  emptyRow={EMPTY_SLIDE}
+                  addLabel="Add slide"
+                />
+
+                <div style={{ marginTop: 24 }}>
+                  <RepeaterField
+                    label="Upcoming Events Quick Links (Hero Bottom Navigation)"
+                    columns={[
+                      { key: "label", label: "Link Title / Label" },
+                      { key: "href", label: "Target URL (e.g. /events/...)" },
+                    ]}
+                    value={(structured.upcomingLinks as Record<string, unknown>[]) ?? []}
+                    onChange={(v) => setStruct({ upcomingLinks: v })}
+                    emptyRow={{ label: "", href: "/events" }}
+                    addLabel="Add Quick Link"
+                  />
+                </div>
+              </>
             )}
 
             {activeKey === "homepage_testimonials" && (
@@ -384,17 +414,24 @@ export default function AdminContentPage() {
             )}
 
             {activeKey === "homepage_stats" && (
-              <RepeaterField
-                label="Stat Tiles"
-                columns={[
-                  { key: "value", label: "Value (e.g. 250K+)" },
-                  { key: "label", label: "Label (e.g. Tickets Booked Successfully)" },
-                ]}
-                value={(structured.stats as Record<string, unknown>[]) ?? []}
-                onChange={(v) => setStruct({ stats: v })}
-                emptyRow={EMPTY_STAT}
-                addLabel="Add stat tile"
-              />
+              <>
+                <ImageUploadField
+                  label="About Section Image (shown on the right, next to the About text)"
+                  value={scalarFields.image ?? ""}
+                  onChange={(url) => setScalarFields((p) => ({ ...p, image: url }))}
+                />
+                <RepeaterField
+                  label="Stat Tiles"
+                  columns={[
+                    { key: "value", label: "Value (e.g. 250K+)" },
+                    { key: "label", label: "Label (e.g. Tickets Booked Successfully)" },
+                  ]}
+                  value={(structured.stats as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ stats: v })}
+                  emptyRow={EMPTY_STAT}
+                  addLabel="Add stat tile"
+                />
+              </>
             )}
 
             {activeKey === "sponsors_page" && (
@@ -430,6 +467,17 @@ export default function AdminContentPage() {
                   addLabel="Add partner"
                 />
               </>
+            )}
+
+            {activeKey === "event_form_fields" && (
+              <FieldToggleListEditor
+                label="Optional Field Blocks (Basic Info, Category/City, and Save/Cancel always show)"
+                value={
+                  (structured.fields as { key: string; label: string; enabled: boolean }[] | undefined) ??
+                  DEFAULT_EVENT_FORM_FIELDS
+                }
+                onChange={(v) => setStruct({ fields: v })}
+              />
             )}
           </div>
         )}

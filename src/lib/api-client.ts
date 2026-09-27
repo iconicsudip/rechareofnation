@@ -1,6 +1,9 @@
 // API Client for Recharge Nation
 // All content is fetched from the Neon PostgreSQL database via Next.js API routes.
 
+import { BookingFormFieldConfig } from "@/lib/bookingFormFields";
+export type { BookingFormFieldConfig };
+
 export interface User {
   id: string;
   name: string;
@@ -39,6 +42,7 @@ export interface Event {
   description: string;
   summary: string;
   bannerUrl: string;
+  videoUrl?: string;
   date: string;
   time: string;
   venue: string;
@@ -66,6 +70,21 @@ export interface Event {
   scheduleDays: { dayLabel: string; items: { time: string; title: string; desc: string }[] }[];
   sponsors: { name: string; logoUrl: string }[];
   galleryUrls: string[];
+  brochurePdfUrl?: string;
+  exhibitInfo?: string;
+  visitInfo?: string;
+  eventSections?: EventSectionItem[];
+  bookingFormFields?: BookingFormFieldConfig[];
+  inquiryFormFields?: BookingFormFieldConfig[];
+}
+
+export interface EventSectionItem {
+  id: string;
+  label: string;
+  enabled: boolean;
+  type: 'exhibit' | 'visit' | 'gallery' | 'pdf' | 'book_space' | 'sponsorship' | 'custom';
+  content?: string;
+  url?: string;
 }
 
 export interface CompetitionCategory {
@@ -110,6 +129,7 @@ export interface CompetitionRecord {
   faqs: CompetitionFaq[];
   regionalHubs: CompetitionRegionalHub[];
   organizer: { name: string; contact: string; email: string; phone: string };
+  registrationFormFields?: BookingFormFieldConfig[];
 }
 
 export interface TicketBooking {
@@ -292,7 +312,22 @@ const mapDbEvent = (e: any): Event => ({
     ? e.schedule_days
     : (() => { try { return JSON.parse(e.schedule_days || '[]'); } catch { return []; } })(),
   sponsors: [],
-  galleryUrls: [],
+  videoUrl: e.video_url || '',
+  galleryUrls: Array.isArray(e.gallery_urls)
+    ? e.gallery_urls
+    : (() => { try { return JSON.parse(e.gallery_urls || '[]'); } catch { return []; } })(),
+  brochurePdfUrl: e.brochure_pdf_url || '',
+  exhibitInfo: e.exhibit_info || '',
+  visitInfo: e.visit_info || '',
+  eventSections: Array.isArray(e.event_sections)
+    ? e.event_sections
+    : (() => { try { return JSON.parse(e.event_sections || '[]'); } catch { return []; } })(),
+  bookingFormFields: Array.isArray(e.booking_form_fields)
+    ? e.booking_form_fields
+    : (() => { try { return JSON.parse(e.booking_form_fields || '[]'); } catch { return []; } })(),
+  inquiryFormFields: Array.isArray(e.inquiry_form_fields)
+    ? e.inquiry_form_fields
+    : (() => { try { return JSON.parse(e.inquiry_form_fields || '[]'); } catch { return []; } })(),
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -317,6 +352,9 @@ const mapDbCompetition = (c: any): CompetitionRecord => ({
   organizer: (typeof c.organizer === 'object' && c.organizer !== null)
     ? c.organizer
     : (() => { try { return JSON.parse(c.organizer || '{}'); } catch { return { name: '', contact: '', email: '', phone: '' }; } })(),
+  registrationFormFields: Array.isArray(c.registration_form_fields)
+    ? c.registration_form_fields
+    : (() => { try { return JSON.parse(c.registration_form_fields || '[]'); } catch { return []; } })(),
 });
 
 // ─── API Client ───────────────────────────────────────────────────────────────
@@ -428,6 +466,36 @@ export const ApiClient = {
         id: g.id, type: g.type, url: g.url, thumbnailUrl: g.thumbnail_url, title: g.title, event: g.event,
       }));
     } catch { return []; }
+  },
+
+  getPaginatedGalleryItems: async (
+    page = 1,
+    limit = 12,
+    category?: string,
+    type?: "all" | "photo" | "video"
+  ): Promise<{ items: GalleryItem[]; total: number; totalPages: number }> => {
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+      });
+      if (category && category !== 'All') params.set('category', category);
+      if (type && type !== 'all') params.set('type', type);
+
+      const res = await fetch(`/api/gallery?${params.toString()}`);
+      if (!res.ok) return { items: [], total: 0, totalPages: 1 };
+      const data = await res.json();
+      const items = (data.items ?? []).map((g: any): GalleryItem => ({
+        id: g.id, type: g.type, url: g.url, thumbnailUrl: g.thumbnail_url, title: g.title, event: g.event,
+      }));
+      return {
+        items,
+        total: data.pagination?.total ?? items.length,
+        totalPages: data.pagination?.totalPages ?? 1,
+      };
+    } catch {
+      return { items: [], total: 0, totalPages: 1 };
+    }
   },
 
   getCurrentUser: (): User | null => {

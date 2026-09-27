@@ -18,8 +18,11 @@ types.setTypeParser(types.builtins.DATE, (value: string) => value);
 
 export const sql = neon(process.env.DATABASE_URL);
 
-// Run migrations once on first request
-let migrated = false;
+// Global singleton to guarantee ensureSchema executes strictly ONCE in the application lifecycle
+const globalForSchema = globalThis as unknown as {
+  _schemaDone?: boolean;
+  _schemaPromise?: Promise<void> | null;
+};
 
 // Static Seed Data
 const MOCK_EVENTS = [
@@ -412,13 +415,6 @@ const MOCK_BLOGS = [
   }
 ];
 
-const MOCK_GALLERY = [
-  { id: 'g-1', type: 'photo', url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=800&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=300&q=80', title: 'Odyssey Grand Stage', event: 'Cultural Odyssey 2025' },
-  { id: 'g-2', type: 'photo', url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=800&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=300&q=80', title: 'Sufi Rock Performance', event: 'Fusion Carnival 2025' },
-  { id: 'g-3', type: 'photo', url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=300&q=80', title: 'Choreography Contest Soloist', event: 'Dance Cup 2025' },
-  { id: 'g-4', type: 'photo', url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80', thumbnailUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=300&q=80', title: 'Startup Pitch Arena', event: 'Tech Trade Expo 2025' }
-];
-
 // Site content seed (generic key/value JSONB blocks for admin-editable page copy)
 const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
   {
@@ -555,6 +551,12 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
           { label: 'Download Participant ID', href: '/dashboard' },
           { label: 'Admin Portal Access', href: '/admin/login' },
         ] },
+        { title: 'Company', links: [
+          { label: 'About Us', href: '/about' },
+          { label: 'Contact Us', href: '/contact' },
+          { label: 'Privacy Policy', href: '/privacy' },
+          { label: 'Terms & Conditions', href: '/terms' },
+        ] },
       ],
     },
   },
@@ -563,13 +565,11 @@ const MOCK_SITE_CONTENT: { key: string; value: unknown }[] = [
     value: {
       brandName: 'RECHARGENATION', brandTagline: 'Experience India',
       items: [
-        { name: 'Explore Events', href: '/events' },
-        { name: 'Mr/Miss Traditional', href: '/competitions' },
-        { name: 'Partner With Us', href: '/sponsors' },
+        { name: 'Events', href: '/events' },
+        { name: 'Competitions', href: '/competitions' },
         { name: 'Gallery', href: '/gallery' },
         { name: 'Blogs', href: '/blogs' },
-        { name: 'About Us', href: '/about' },
-        { name: 'Contact Us', href: '/contact' },
+        { name: 'Partners', href: '/sponsors' },
       ],
     },
   },
@@ -760,9 +760,7 @@ const EXTRA_SPONSORS = [
   { id: 'sp-assoc-2', name: 'BookMyShow', logoUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=300&q=80', tier: 'Partner', websiteUrl: 'https://bookmyshow.com', description: 'Online movie and event tickets.', industry: 'Entertainment' },
 ];
 
-export async function ensureSchema() {
-  if (migrated) return;
-
+async function runSchemaInitialization() {
   await sql`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
@@ -986,6 +984,13 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS _bootstrap_state (
+      key TEXT PRIMARY KEY,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
   // Schema migrations for existing tables
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1) DEFAULT 4.6`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS qr_stages JSONB DEFAULT '[{"id":"entry","name":"Entry Gate","order":1}]'`;
@@ -1001,109 +1006,121 @@ export async function ensureSchema() {
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS headliners JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS faqs JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS schedule_days JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS gallery_urls JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS video_url TEXT DEFAULT ''`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS rules JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS brochure_pdf_url TEXT DEFAULT ''`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS exhibit_info TEXT DEFAULT ''`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS visit_info TEXT DEFAULT ''`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS event_sections JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS booking_form_fields JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS inquiry_form_fields JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS registration_form_fields JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS description TEXT`;
   await sql`ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS industry TEXT`;
 
-  // Auto-seed events
-  const eventCount = await sql`SELECT COUNT(*) as count FROM events`;
-  if (Number(eventCount[0].count) === 0) {
-    for (const ev of MOCK_EVENTS) {
-      await sql`
+  // One-time bootstrap guard: if 'schema_ready' is recorded, NEVER run seed queries on refresh.
+  let isBootstrapped = false;
+  try {
+    const ready = await sql`SELECT 1 FROM _bootstrap_state WHERE key = 'schema_ready'`;
+    if (ready.length > 0) {
+      isBootstrapped = true;
+    }
+  } catch {
+    // _bootstrap_state was just created
+  }
+
+  if (isBootstrapped) {
+    return;
+  }
+
+  {
+    // Auto-seed events
+    const eventCount = await sql`SELECT COUNT(*) as count FROM events`;
+    if (Number(eventCount[0].count) === 0) {
+      await Promise.all(MOCK_EVENTS.map((ev) => sql`
         INSERT INTO events (id, name, slug, category, description, summary, banner_url, event_date, event_time, venue, city, google_map_url, is_featured, is_upcoming, ticket_prices, organizer)
         VALUES (${ev.id}, ${ev.name}, ${ev.slug}, ${ev.category}, ${ev.description}, ${ev.summary}, ${ev.bannerUrl}, ${ev.date}, ${ev.time}, ${ev.venue}, ${ev.city}, ${ev.googleMapEmbedUrl}, ${ev.isFeatured}, ${ev.isUpcoming}, ${JSON.stringify(ev.ticketPrices)}, ${JSON.stringify(ev.organizer)})
-      `;
+        ON CONFLICT (id) DO NOTHING
+      `));
+      console.log("[DB INIT] Seeded events table.");
     }
-    console.log("[DB INIT] Seeded events table.");
-  }
 
-  // Auto-seed sponsors
-  const sponsorCount = await sql`SELECT COUNT(*) as count FROM sponsors`;
-  if (Number(sponsorCount[0].count) === 0) {
-    for (const sp of MOCK_SPONSORS) {
-      await sql`
+    // Auto-seed sponsors
+    const sponsorCount = await sql`SELECT COUNT(*) as count FROM sponsors`;
+    if (Number(sponsorCount[0].count) === 0) {
+      await Promise.all(MOCK_SPONSORS.map((sp) => sql`
         INSERT INTO sponsors (id, name, logo_url, tier, website_url)
         VALUES (${sp.id}, ${sp.name}, ${sp.logoUrl}, ${sp.tier}, ${sp.websiteUrl})
-      `;
+        ON CONFLICT (id) DO NOTHING
+      `));
+      console.log("[DB INIT] Seeded sponsors table.");
     }
-    console.log("[DB INIT] Seeded sponsors table.");
-  }
 
-  // Auto-seed blogs
-  const blogCount = await sql`SELECT COUNT(*) as count FROM blogs`;
-  if (Number(blogCount[0].count) === 0) {
-    for (const bl of MOCK_BLOGS) {
-      await sql`
+    // Auto-seed blogs
+    const blogCount = await sql`SELECT COUNT(*) as count FROM blogs`;
+    if (Number(blogCount[0].count) === 0) {
+      await Promise.all(MOCK_BLOGS.map((bl) => sql`
         INSERT INTO blogs (id, title, slug, summary, content, image_url, category, author, published_at, read_time, subheading, bullets)
         VALUES (${bl.id}, ${bl.title}, ${bl.slug}, ${bl.summary}, ${bl.content}, ${bl.imageUrl}, ${bl.category}, ${bl.author}, ${bl.publishedAt}, ${bl.readTime}, ${bl.subheading || null}, ${JSON.stringify(bl.bullets || [])})
-      `;
+        ON CONFLICT (id) DO NOTHING
+      `));
+      console.log("[DB INIT] Seeded blogs table.");
     }
-    console.log("[DB INIT] Seeded blogs table.");
-  }
 
-  // Auto-seed gallery
-  const galleryCount = await sql`SELECT COUNT(*) as count FROM gallery_items`;
-  if (Number(galleryCount[0].count) === 0) {
-    for (const g of MOCK_GALLERY) {
-      await sql`
-        INSERT INTO gallery_items (id, type, url, thumbnail_url, title, event)
-        VALUES (${g.id}, ${g.type}, ${g.url}, ${g.thumbnailUrl}, ${g.title}, ${g.event})
-      `;
+    // Note: the old MOCK_GALLERY placeholder seed (4 stock photos, ids g-1..g-4)
+    // has been removed — it overlapped with EXTRA_GALLERY_ITEMS below (same
+    // Unsplash photos under different captions) and kept reappearing any time
+    // the gallery was cleared out, since it re-ran whenever gallery_items was
+    // empty. EXTRA_GALLERY_ITEMS is the real seed content for this table now.
+
+    // Auto-seed competitions
+    const competitionCount = await sql`SELECT COUNT(*) as count FROM competitions`;
+    if (Number(competitionCount[0].count) === 0) {
+      await Promise.all(MOCK_COMPETITIONS.map((c) => sql`
+        INSERT INTO competitions (id, name, slug, description, summary, banner_url, event_date, deadline, venue, city, prize_pool, registration_fee, categories, rules, judges, faqs, regional_hubs, organizer)
+        VALUES (${c.id}, ${c.name}, ${c.slug}, ${c.description}, ${c.summary}, ${c.bannerUrl}, ${c.eventDate}, ${c.deadline}, ${c.venue}, ${c.city}, ${c.prizePool}, ${c.registrationFee}, ${JSON.stringify(c.categories)}, ${JSON.stringify(c.rules)}, ${JSON.stringify(c.judges)}, ${JSON.stringify(c.faqs)}, ${JSON.stringify(c.regionalHubs)}, ${JSON.stringify(c.organizer)})
+        ON CONFLICT (id) DO NOTHING
+      `));
+      console.log("[DB INIT] Seeded competitions table.");
     }
-    console.log("[DB INIT] Seeded gallery_items table.");
-  }
 
-  // Merge in extra real gallery items (idempotent, doesn't disturb existing rows)
-  for (const g of EXTRA_GALLERY_ITEMS) {
-    await sql`
+    // Auto-seed taxonomies
+    const taxonomyCount = await sql`SELECT COUNT(*) as count FROM taxonomies`;
+    if (Number(taxonomyCount[0].count) === 0) {
+      await Promise.all(MOCK_TAXONOMIES.map((t) => {
+        const id = `tax-${t.type}-${t.value}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return sql`
+          INSERT INTO taxonomies (id, type, value)
+          VALUES (${id}, ${t.type}, ${t.value})
+          ON CONFLICT (type, value) DO NOTHING
+        `;
+      }));
+      console.log("[DB INIT] Seeded taxonomies table.");
+    }
+
+    // Merge in initial real gallery items
+    await Promise.all(EXTRA_GALLERY_ITEMS.map((g) => sql`
       INSERT INTO gallery_items (id, type, url, thumbnail_url, title, event)
       VALUES (${g.id}, ${g.type}, ${g.url}, ${g.url}, ${g.title}, ${g.event})
       ON CONFLICT (id) DO NOTHING
-    `;
-  }
+    `));
 
-  // Merge in extra real sponsor showcase cards (idempotent, doesn't disturb existing rows)
-  for (const sp of EXTRA_SPONSORS) {
-    await sql`
+    // Merge in initial real sponsor showcase cards
+    await Promise.all(EXTRA_SPONSORS.map((sp) => sql`
       INSERT INTO sponsors (id, name, logo_url, tier, website_url, description, industry)
       VALUES (${sp.id}, ${sp.name}, ${sp.logoUrl}, ${sp.tier}, ${sp.websiteUrl}, ${sp.description}, ${sp.industry})
       ON CONFLICT (id) DO NOTHING
-    `;
-  }
+    `));
 
-  // Auto-seed site_content — per-key upsert so newly introduced keys get seeded
-  // on future deploys without ever overwriting a key an admin has already edited.
-  for (const sc of MOCK_SITE_CONTENT) {
-    await sql`
+    // Auto-seed site_content
+    await Promise.all(MOCK_SITE_CONTENT.map((sc) => sql`
       INSERT INTO site_content (key, value)
       VALUES (${sc.key}, ${JSON.stringify(sc.value)})
       ON CONFLICT (key) DO NOTHING
-    `;
-  }
+    `));
 
-  // Auto-seed competitions
-  const competitionCount = await sql`SELECT COUNT(*) as count FROM competitions`;
-  if (Number(competitionCount[0].count) === 0) {
-    for (const c of MOCK_COMPETITIONS) {
-      await sql`
-        INSERT INTO competitions (id, name, slug, description, summary, banner_url, event_date, deadline, venue, city, prize_pool, registration_fee, categories, rules, judges, faqs, regional_hubs, organizer)
-        VALUES (${c.id}, ${c.name}, ${c.slug}, ${c.description}, ${c.summary}, ${c.bannerUrl}, ${c.eventDate}, ${c.deadline}, ${c.venue}, ${c.city}, ${c.prizePool}, ${c.registrationFee}, ${JSON.stringify(c.categories)}, ${JSON.stringify(c.rules)}, ${JSON.stringify(c.judges)}, ${JSON.stringify(c.faqs)}, ${JSON.stringify(c.regionalHubs)}, ${JSON.stringify(c.organizer)})
-      `;
-    }
-    console.log("[DB INIT] Seeded competitions table.");
-  }
-
-  // Auto-seed taxonomies
-  const taxonomyCount = await sql`SELECT COUNT(*) as count FROM taxonomies`;
-  if (Number(taxonomyCount[0].count) === 0) {
-    for (const t of MOCK_TAXONOMIES) {
-      const id = `tax-${t.type}-${t.value}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      await sql`
-        INSERT INTO taxonomies (id, type, value)
-        VALUES (${id}, ${t.type}, ${t.value})
-        ON CONFLICT (type, value) DO NOTHING
-      `;
-    }
-    console.log("[DB INIT] Seeded taxonomies table.");
+    await sql`INSERT INTO _bootstrap_state (key) VALUES ('schema_ready') ON CONFLICT (key) DO NOTHING`;
   }
 
   // Auto-create default admin account if environment variables are set
@@ -1123,5 +1140,34 @@ export async function ensureSchema() {
     }
   }
 
-  migrated = true;
+}
+
+/**
+ * Ensures schema creation, migrations, and one-time bootstrap execute strictly
+ * ONCE in the application lifecycle. Concurrent and subsequent calls return
+ * immediately without redundant database round-trips.
+ */
+export async function ensureSchema(): Promise<void> {
+  // If already executed once in this application runtime, return immediately
+  if (globalForSchema._schemaDone) {
+    return;
+  }
+
+  // If already in-flight, return the active promise so concurrent calls wait for the same execution
+  if (globalForSchema._schemaPromise) {
+    return globalForSchema._schemaPromise;
+  }
+
+  globalForSchema._schemaPromise = (async () => {
+    try {
+      await runSchemaInitialization();
+      globalForSchema._schemaDone = true;
+    } catch (err) {
+      console.error("[DB INIT] ensureSchema error:", err);
+      globalForSchema._schemaPromise = null;
+      throw err;
+    }
+  })();
+
+  return globalForSchema._schemaPromise;
 }

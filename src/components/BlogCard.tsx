@@ -26,13 +26,13 @@ export default function BlogCard({
     <Link
       href={`/blogs/${slug}`}
       className={`group cursor-pointer flex flex-col gap-4 text-left ${
-        bordered 
-          ? "bg-white border border-slate-200/80 rounded-[32px] p-5 shadow-sm hover:shadow-md transition-all duration-350"
+        bordered
+          ? "bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[32px] p-5 shadow-sm hover:border-[var(--border-hover)] transition-all duration-350"
           : ""
       }`}
     >
       {/* Image wrapper */}
-      <div className={`relative ${aspectRatio} rounded-[24px] overflow-hidden shadow-sm border border-slate-200/80 bg-slate-50`}>
+      <div className={`relative ${aspectRatio} rounded-[24px] overflow-hidden shadow-sm border border-[var(--border-color)] bg-black/20`}>
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -43,30 +43,30 @@ export default function BlogCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon size={28} className="text-slate-300" />
+            <ImageIcon size={28} className="text-[var(--text-muted)]" />
           </div>
         )}
         {/* Badge */}
-        <span className="bg-white/95 text-slate-800 px-2.5 py-1 text-[8px] font-bold tracking-widest uppercase rounded-md absolute top-3 left-3 border border-slate-200/80 font-primary shadow-sm">
+        <span className="bg-[#170D08]/90 text-[var(--text-primary)] px-2.5 py-1 text-[8px] font-bold tracking-widest uppercase rounded-md absolute top-3 left-3 border border-[var(--border-color)] font-primary shadow-sm">
           {category}
         </span>
       </div>
 
       {/* Content */}
       <div className="flex flex-col gap-2 px-1">
-        <h4 className="text-xs md:text-sm font-black text-slate-900 font-primary uppercase leading-snug tracking-tight group-hover:text-pink-500 transition-colors flex items-start gap-2 justify-between">
+        <h4 className="text-xs md:text-sm font-black text-[var(--text-primary)] font-primary uppercase leading-snug tracking-tight group-hover:text-amber-400 transition-colors flex items-start gap-2 justify-between">
           <span className="flex-1 line-clamp-2">{title}</span>
-          <span className="inline-block shrink-0 text-slate-400 group-hover:text-pink-500 transition-colors font-primary text-sm leading-none mt-0.5">
+          <span className="inline-block shrink-0 text-[var(--text-muted)] group-hover:text-amber-400 transition-colors font-primary text-sm leading-none mt-0.5">
             ↗
           </span>
         </h4>
-        
-        <p className="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-2 font-secondary">
+
+        <p className="text-[var(--text-secondary)] text-xs md:text-sm leading-relaxed line-clamp-2 font-secondary">
           {summary}
         </p>
 
-        <div className="flex items-center mt-2 pt-3 border-t border-slate-100/80">
-          <span className="text-slate-400 text-[10px] font-primary">
+        <div className="flex items-center mt-2 pt-3 border-t border-[var(--border-color)]">
+          <span className="text-[var(--text-muted)] text-[10px] font-primary">
             {publishedAt}
           </span>
         </div>

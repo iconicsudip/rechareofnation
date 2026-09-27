@@ -1,34 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  /* Color Palette - Premium Light Theme */
-  --bg-main: #F8FAFC;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: rgba(255, 255, 255, 0.98);
-  --text-primary: #0F172A;
-  --text-secondary: #334155;
-  --text-muted: #64748B;
-  
-  /* Primary Gradients */
-  --primary-color: #4F46E5; /* Indigo */
-  --secondary-color: #DB2777; /* Pink */
-  --accent-color: #0891B2; /* Cyan */
-  
-  --grad-primary: linear-gradient(135deg, #4F46E5 0%, #DB2777 50%, #0891B2 100%);
-  --grad-text: linear-gradient(to right, #4F46E5, #DB2777, #0891B2);
-  --grad-dark: linear-gradient(180deg, #F8FAFC 0%, #E2E8F0 100%);
-  
+  /* Color Palette - Premium Heritage Theme (espresso + gold + oxblood) */
+  --bg-main: #170D08;
+  --bg-card: rgba(255, 247, 235, 0.04);
+  --bg-card-hover: rgba(255, 247, 235, 0.07);
+  --bg-panel: #2A1510; /* oxblood/maroon panel — price tags, primary CTAs */
+  --bg-panel-hover: #3A1C14;
+  --text-primary: #F5EEE2;
+  --text-secondary: #CBB9A0;
+  --text-muted: #8F7A66;
+
+  /* Primary Palette */
+  --primary-color: #C9A227; /* Antique Gold */
+  --primary-color-light: #E4C465;
+  --secondary-color: #2A1510; /* Oxblood/Maroon */
+  --accent-color: #C9A227;
+
+  --grad-primary: linear-gradient(135deg, #9C7A1D 0%, #C9A227 50%, #E4C465 100%);
+  --grad-text: linear-gradient(to right, #9C7A1D, #E4C465);
+  --grad-dark: linear-gradient(180deg, #170D08 0%, #0D0603 100%);
+
   /* Border & Shadows */
-  --border-color: rgba(15, 23, 42, 0.08);
-  --border-hover: rgba(15, 23, 42, 0.16);
-  --shadow-neon-violet: 0 4px 20px rgba(99, 102, 241, 0.08);
-  --shadow-neon-pink: 0 4px 20px rgba(236, 72, 153, 0.08);
-  --shadow-neon-cyan: 0 4px 20px rgba(6, 182, 212, 0.08);
-  
+  --border-color: rgba(201, 162, 39, 0.25);
+  --border-hover: rgba(201, 162, 39, 0.5);
+  --shadow-neon-violet: 0 4px 20px rgba(201, 162, 39, 0.12);
+  --shadow-neon-pink: 0 4px 20px rgba(201, 162, 39, 0.12);
+  --shadow-neon-cyan: 0 4px 20px rgba(0, 0, 0, 0.3);
+
   /* Fonts */
-  --font-primary: 'Outfit', sans-serif;
-  --font-secondary: 'Inter', sans-serif;
+  --font-primary: var(--font-display), serif;
+  --font-secondary: var(--font-body), sans-serif;
 }
 
 @utility font-primary {
@@ -41,10 +43,10 @@
 
 html, body {
   background-color: var(--bg-main);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.04) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.03) 0px, transparent 50%);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(201, 162, 39, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(201, 162, 39, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(0, 0, 0, 0.4) 0px, transparent 60%);
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-secondary);
@@ -117,7 +119,7 @@ h1, h2, h3, h4, h5, h6 {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2), rgba(6, 182, 212, 0.2));
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(180, 83, 9, 0.2), rgba(20, 32, 46, 0.2));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -145,12 +147,12 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 200% auto;
   color: #fff !important;
   border: none;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.15);
 }
 
 .btn-primary:hover {
   background-position: right center;
-  box-shadow: 0 4px 30px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 30px rgba(180, 83, 9, 0.3);
   transform: translateY(-2px);
 }
 
@@ -171,7 +173,7 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent;
   color: var(--text-primary);
   border: 1px solid var(--primary-color);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.05);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.05);
 }
 
 .btn-outline-neon:hover {
@@ -240,7 +242,7 @@ h1, h2, h3, h4, h5, h6 {
 .form-input:focus {
   border-color: var(--primary-color);
   background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.1);
 }
 
 .form-select {
@@ -291,30 +293,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 .section-dark-1 {
   background-color: #FFFFFF !important;
-  background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.02) 0%, transparent 60%) !important;
+  background-image: radial-gradient(circle at 10% 20%, rgba(217, 119, 6, 0.02) 0%, transparent 60%) !important;
 }
 .section-dark-2 {
   background-color: #F8FAFC !important;
-  background-image: radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.02) 0%, transparent 50%) !important;
+  background-image: radial-gradient(circle at 90% 80%, rgba(20, 32, 46, 0.02) 0%, transparent 50%) !important;
 }
 
 /* Premium Card hover neon glow */
 .hover-neon-pink:hover {
-  border-color: rgba(236, 72, 153, 0.4) !important;
-  box-shadow: 0 10px 30px -10px rgba(236, 72, 153, 0.1);
+  border-color: rgba(180, 83, 9, 0.4) !important;
+  box-shadow: 0 10px 30px -10px rgba(180, 83, 9, 0.1);
 }
 .hover-neon-cyan:hover {
-  border-color: rgba(6, 182, 212, 0.4) !important;
-  box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.1);
+  border-color: rgba(20, 32, 46, 0.4) !important;
+  box-shadow: 0 10px 30px -10px rgba(20, 32, 46, 0.1);
 }
 .hover-neon-violet:hover {
-  border-color: rgba(99, 102, 241, 0.4) !important;
-  box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.1);
+  border-color: rgba(217, 119, 6, 0.4) !important;
+  box-shadow: 0 10px 30px -10px rgba(217, 119, 6, 0.1);
 }
 
 /* Text glow accent shadow */
 .shadow-text-glow {
-  text-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+  text-shadow: 0 2px 8px rgba(217, 119, 6, 0.08);
 }
 
 /* Slide entry animations */
@@ -354,7 +356,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .antd-cyber-input.ant-input-affix-wrapper:hover,
 .antd-cyber-input.ant-input-affix-wrapper-focused {
-  border-color: #4F46E5 !important;
+  border-color: #D97706 !important;
   box-shadow: 0 0 8px rgba(79, 70, 229, 0.15) !important;
 }
 
@@ -377,7 +379,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .antd-cyber-input.ant-input:hover,
 .antd-cyber-input.ant-input:focus {
-  border-color: #4F46E5 !important;
+  border-color: #D97706 !important;
   box-shadow: 0 0 8px rgba(79, 70, 229, 0.15) !important;
 }
 
@@ -400,7 +402,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .antd-cyber-select:hover .ant-select-selector,
 .antd-cyber-select.ant-select-focused .ant-select-selector {
-  border-color: #4F46E5 !important;
+  border-color: #D97706 !important;
   box-shadow: 0 0 8px rgba(79, 70, 229, 0.15) !important;
 }
 
@@ -553,7 +555,7 @@ body .text-gray-500:not(:hover):not(.group:hover *):not(.peer:hover *):not(foote
   font-weight: 800;
   margin: 1.4em 0 0.6em;
   padding-bottom: 0.45em;
-  border-bottom: 2px solid rgba(99, 102, 241, 0.15);
+  border-bottom: 2px solid rgba(217, 119, 6, 0.15);
 }
 .rn-rich-text-editor h2:first-child,
 .rn-rich-text-content h2:first-child {
@@ -567,7 +569,7 @@ body .text-gray-500:not(:hover):not(.group:hover *):not(.peer:hover *):not(foote
 .rn-rich-text-content h3 {
   font-size: 1.08em;
   font-weight: 800;
-  color: #DB2777;
+  color: #D97706;
   margin: 1.3em 0 0.4em;
   display: flex;
   align-items: center;
@@ -590,8 +592,8 @@ body .text-gray-500:not(:hover):not(.group:hover *):not(.peer:hover *):not(foote
 }
 .rn-rich-text-editor blockquote,
 .rn-rich-text-content blockquote {
-  border-left: 3px solid #EC4899;
-  background: rgba(236, 72, 153, 0.06);
+  border-left: 3px solid #D97706;
+  background: rgba(180, 83, 9, 0.06);
   padding: 0.75em 1.15em;
   margin: 1em 0;
   border-radius: 0 12px 12px 0;
@@ -615,7 +617,7 @@ body .text-gray-500:not(:hover):not(.group:hover *):not(.peer:hover *):not(foote
 }
 .rn-rich-text-editor a,
 .rn-rich-text-content a {
-  color: #818CF8;
+  color: #F59E0B;
   text-decoration: underline;
 }
 .rn-rich-text-editor:focus,

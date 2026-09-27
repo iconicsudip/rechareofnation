@@ -68,7 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // requests before this component ever renders) — no client-side gate needed here.
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#0B0F1A", fontFamily: "var(--font-primary)" }}>
+    <div className="min-h-screen flex" style={{ background: "#170D08", fontFamily: "var(--font-primary)" }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -83,27 +83,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
-          background: "linear-gradient(180deg, #0F1729 0%, #0B0F1A 100%)",
-          borderRight: "1px solid rgba(99, 102, 241, 0.12)",
+          background: "linear-gradient(180deg, #2A1510 0%, #170D08 100%)",
+          borderRight: "1px solid rgba(201, 162, 39, 0.15)",
         }}
       >
         {/* Logo */}
-        <div className="p-6 border-b" style={{ borderColor: "rgba(99, 102, 241, 0.1)" }}>
+        <div className="p-6 border-b" style={{ borderColor: "rgba(201, 162, 39, 0.12)" }}>
           <Link href="/admin" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)" }}>
-              <Zap size={16} className="text-white" />
+              style={{ background: "linear-gradient(135deg, #E4C465, #9C7A1D)" }}>
+              <Zap size={16} className="text-[#170D08]" />
             </div>
             <div>
-              <div className="text-white font-extrabold text-sm tracking-tight leading-none">Admin</div>
-              <div className="text-[10px]" style={{ color: "rgba(148,163,184,0.6)" }}>Recharge Nation</div>
+              <div className="text-[#F5EEE2] font-extrabold text-sm tracking-tight leading-none">Admin</div>
+              <div className="text-[10px]" style={{ color: "rgba(203,185,160,0.6)" }}>Recharge Nation</div>
             </div>
           </Link>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-4 flex flex-col gap-1 overflow-y-auto">
-          <div className="text-[10px] uppercase tracking-widest font-bold mb-2 px-1" style={{ color: "rgba(148,163,184,0.35)" }}>
+          <div className="text-[10px] uppercase tracking-widest font-bold mb-2 px-1" style={{ color: "rgba(143,122,102,0.7)" }}>
             Operations
           </div>
           {NAV_ITEMS.map((item) => {
@@ -115,26 +115,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group relative"
                 style={{
-                  color: active ? "#fff" : "rgba(148,163,184,0.7)",
+                  color: active ? "#F5EEE2" : "rgba(203,185,160,0.7)",
                   background: active
-                    ? "linear-gradient(135deg, rgba(79,70,229,0.25), rgba(219,39,119,0.12))"
+                    ? "linear-gradient(135deg, rgba(156,122,29,0.25), rgba(201,162,39,0.12))"
                     : "transparent",
-                  border: active ? "1px solid rgba(99,102,241,0.25)" : "1px solid transparent",
+                  border: active ? "1px solid rgba(201,162,39,0.25)" : "1px solid transparent",
                 }}
               >
                 {active && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
-                    style={{ background: "linear-gradient(to bottom, #4F46E5, #DB2777)" }} />
+                    style={{ background: "linear-gradient(to bottom, #E4C465, #9C7A1D)" }} />
                 )}
-                <item.icon size={16} style={{ color: active ? "#818CF8" : "rgba(148,163,184,0.5)" }} />
+                <item.icon size={16} style={{ color: active ? "#E4C465" : "rgba(203,185,160,0.5)" }} />
                 <span>{item.label}</span>
-                {active && <ChevronRight size={12} className="ml-auto" style={{ color: "#818CF8" }} />}
+                {active && <ChevronRight size={12} className="ml-auto" style={{ color: "#E4C465" }} />}
               </Link>
             );
           })}
 
           {/* Content Management */}
-          <div className="text-[10px] uppercase tracking-widest font-bold mt-4 mb-2 px-1" style={{ color: "rgba(148,163,184,0.35)" }}>
+          <div className="text-[10px] uppercase tracking-widest font-bold mt-4 mb-2 px-1" style={{ color: "rgba(143,122,102,0.7)" }}>
             Content
           </div>
           {CONTENT_NAV_ITEMS.map((item) => {
@@ -146,20 +146,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group relative"
                 style={{
-                  color: active ? "#fff" : "rgba(148,163,184,0.7)",
+                  color: active ? "#F5EEE2" : "rgba(203,185,160,0.7)",
                   background: active
-                    ? "linear-gradient(135deg, rgba(79,70,229,0.25), rgba(219,39,119,0.12))"
+                    ? "linear-gradient(135deg, rgba(156,122,29,0.25), rgba(201,162,39,0.12))"
                     : "transparent",
-                  border: active ? "1px solid rgba(99,102,241,0.25)" : "1px solid transparent",
+                  border: active ? "1px solid rgba(201,162,39,0.25)" : "1px solid transparent",
                 }}
               >
                 {active && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full"
-                    style={{ background: "linear-gradient(to bottom, #4F46E5, #DB2777)" }} />
+                    style={{ background: "linear-gradient(to bottom, #E4C465, #9C7A1D)" }} />
                 )}
-                <item.icon size={16} style={{ color: active ? "#818CF8" : "rgba(148,163,184,0.5)" }} />
+                <item.icon size={16} style={{ color: active ? "#E4C465" : "rgba(203,185,160,0.5)" }} />
                 <span>{item.label}</span>
-                {active && <ChevronRight size={12} className="ml-auto" style={{ color: "#818CF8" }} />}
+                {active && <ChevronRight size={12} className="ml-auto" style={{ color: "#E4C465" }} />}
               </Link>
             );
           })}
@@ -167,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
 
         {/* Bottom */}
-        <div className="p-4 border-t" style={{ borderColor: "rgba(99,102,241,0.1)" }}>
+        <div className="p-4 border-t" style={{ borderColor: "rgba(201,162,39,0.12)" }}>
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left bg-transparent border-0 cursor-pointer"
@@ -185,21 +185,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header
           className="sticky top-0 z-30 flex items-center gap-4 px-6 py-3"
           style={{
-            background: "rgba(11,15,26,0.85)",
+            background: "rgba(23,13,8,0.85)",
             backdropFilter: "blur(16px)",
-            borderBottom: "1px solid rgba(99,102,241,0.1)",
+            borderBottom: "1px solid rgba(201,162,39,0.12)",
           }}
         >
           <button
             className="lg:hidden p-2 rounded-lg"
-            style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8" }}
+            style={{ background: "rgba(201,162,39,0.1)", color: "#E4C465" }}
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
           <div className="flex-1" />
           <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full"
-            style={{ background: "rgba(79,70,229,0.12)", border: "1px solid rgba(99,102,241,0.2)", color: "#818CF8" }}>
+            style={{ background: "rgba(156,122,29,0.15)", border: "1px solid rgba(201,162,39,0.25)", color: "#E4C465" }}>
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span>Admin Panel</span>
           </div>

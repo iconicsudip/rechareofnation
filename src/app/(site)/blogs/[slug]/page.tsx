@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { Calendar, User, Clock, ArrowLeft, ArrowRight, ImageIcon } from "lucide-react";
+import { Clock, ImageIcon, AlertCircle, Share2 } from "lucide-react";
 import { ApiClient, Blog } from "@/lib/api-client";
 import BlogCard from "@/components/BlogCard";
 import RichTextContent from "@/components/RichTextContent";
@@ -32,7 +32,7 @@ export default function BlogDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="w-full min-h-screen bg-[#F8FAFC] py-20 text-center text-slate-500 text-sm font-secondary">
+      <div className="w-full min-h-screen py-20 text-center text-[var(--text-secondary)] text-sm font-secondary">
         Loading Article Details...
       </div>
     );
@@ -40,11 +40,11 @@ export default function BlogDetailPage({ params }: PageProps) {
 
   if (!blog) {
     return (
-      <div className="w-full min-h-screen bg-[#F8FAFC] py-20 text-center flex flex-col items-center gap-4 font-secondary">
-        <span className="text-4xl">⚠️</span>
-        <h3 className="text-xl font-bold text-slate-900 font-primary">Article Not Found</h3>
-        <p className="text-slate-500 text-sm">The blog post you are looking for does not exist or has been removed.</p>
-        <Link href="/blogs" className="bg-slate-900 hover:bg-slate-800 text-white font-primary font-bold text-xs uppercase px-6 py-3 rounded-full transition-colors">
+      <div className="w-full min-h-screen py-20 text-center flex flex-col items-center gap-4 font-secondary">
+        <AlertCircle size={36} className="text-amber-500/70" />
+        <h3 className="text-xl font-bold text-[var(--text-primary)] font-primary">Article Not Found</h3>
+        <p className="text-[var(--text-secondary)] text-sm">The blog post you are looking for does not exist or has been removed.</p>
+        <Link href="/blogs" className="bg-[var(--bg-panel)] hover:bg-amber-500 hover:text-[#170D08] text-[var(--text-primary)] font-primary font-bold text-xs uppercase px-6 py-3 rounded-full transition-colors">
           Back to Blogs Listing
         </Link>
       </div>
@@ -56,20 +56,20 @@ export default function BlogDetailPage({ params }: PageProps) {
   const popularBlogs = allBlogs.filter(b => b.id !== blog.id).slice(3, 5);
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-20 md:py-24 text-slate-800 font-secondary text-left">
-      <div className="container max-w-7xl mx-auto px-4 flex flex-col">
-        
+    <div className="w-full min-h-screen py-20 md:py-24 text-[var(--text-primary)] font-secondary text-left">
+      <div className="container mx-auto px-4 flex flex-col">
+
         {/* Breadcrumb navigation */}
-        <div className="text-slate-400 text-xs font-primary mb-6 flex flex-wrap items-center gap-2">
-          <Link href="/" className="hover:text-slate-600">Home</Link>
+        <div className="text-[var(--text-muted)] text-xs font-primary mb-6 flex flex-wrap items-center gap-2">
+          <Link href="/" className="hover:text-amber-400">Home</Link>
           <span>/</span>
-          <Link href="/blogs" className="hover:text-slate-600">Blogs</Link>
+          <Link href="/blogs" className="hover:text-amber-400">Blogs</Link>
           <span>/</span>
-          <span className="text-slate-600 font-semibold truncate">{blog.title}</span>
+          <span className="text-[var(--text-secondary)] font-semibold truncate">{blog.title}</span>
         </div>
 
         {/* Large Rounded Cover Image Banner with Text Overlay */}
-        <div className="relative rounded-[32px] overflow-hidden shadow-sm border border-slate-200/80 aspect-[16/9] md:aspect-[21/9] bg-[#070b19]">
+        <div className="relative rounded-[32px] overflow-hidden shadow-sm border border-[var(--border-color)] aspect-[16/9] md:aspect-[21/9] bg-black/30">
           {blog.imageUrl ? (
             <img
               src={blog.imageUrl}
@@ -77,53 +77,53 @@ export default function BlogDetailPage({ params }: PageProps) {
               className="w-full h-full object-cover opacity-75"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center"><ImageIcon size={36} className="text-slate-600" /></div>
+            <div className="w-full h-full flex items-center justify-center"><ImageIcon size={36} className="text-[var(--text-muted)]" /></div>
           )}
           {/* Dark overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-          
+
           <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full text-left">
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-black font-primary text-white uppercase tracking-tight leading-tight max-w-4xl">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight leading-tight max-w-4xl">
               {blog.title}
             </h1>
           </div>
         </div>
 
         {/* Metadata Details Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 border-b border-slate-200/60 mt-2 font-primary text-xs">
-          
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 border-b border-[var(--border-color)] mt-2 font-primary text-xs">
+
           {/* Date info */}
           <div className="flex flex-col text-left font-primary">
-            <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px] leading-none">Published On</span>
-            <span className="font-bold text-slate-700 text-[11px] mt-1.5">{blog.publishedAt}</span>
+            <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider text-[9px] leading-none">Published On</span>
+            <span className="font-bold text-[var(--text-secondary)] text-[11px] mt-1.5">{blog.publishedAt}</span>
           </div>
 
           {/* Category & read time */}
           <div className="flex items-center gap-3">
-            <span className="bg-emerald-50 text-emerald-800 px-3.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
+            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
               {blog.category}
             </span>
-            <span className="text-slate-300">•</span>
-            <span className="text-slate-500 font-bold flex items-center gap-1">
-              <Clock size={12} className="text-slate-400" /> {blog.readTime || "2 min read"}
+            <span className="text-[var(--border-color)]">•</span>
+            <span className="text-[var(--text-secondary)] font-bold flex items-center gap-1">
+              <Clock size={12} className="text-[var(--text-muted)]" /> {blog.readTime || "2 min read"}
             </span>
           </div>
 
           {/* Share links */}
           <div className="flex items-center gap-2">
-            <span className="text-slate-400 uppercase font-bold text-[9px] tracking-wider mr-1">Share:</span>
-            <button className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-500 hover:text-pink-500 hover:border-pink-200 transition-colors bg-white font-bold tracking-wider text-[9px] cursor-pointer">
+            <span className="text-[var(--text-muted)] uppercase font-bold text-[9px] tracking-wider mr-1 flex items-center gap-1"><Share2 size={10} /> Share:</span>
+            <button className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-400 hover:border-amber-500/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer">
               FB
             </button>
-            <button className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-500 hover:text-pink-500 hover:border-pink-200 transition-colors bg-white font-bold tracking-wider text-[9px] cursor-pointer">
+            <button className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-400 hover:border-amber-500/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer">
               TW
             </button>
-            <button 
+            <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 alert("Link copied to clipboard!");
               }}
-              className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-500 hover:text-pink-500 hover:border-pink-200 transition-colors bg-white font-bold tracking-wider text-[9px] cursor-pointer"
+              className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-400 hover:border-amber-500/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer"
             >
               COPY
             </button>
@@ -139,12 +139,12 @@ export default function BlogDetailPage({ params }: PageProps) {
             
             {/* Introductory Section */}
             <div className="flex flex-col gap-4">
-              <h2 className="text-xl md:text-2xl font-black font-primary text-slate-900 uppercase tracking-tight leading-snug">
+              <h2 className="text-xl md:text-2xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight leading-snug">
                 {blog.subheading || "WHAT ARE THE KEY HIGHLIGHTS?"}
               </h2>
               {/* blog.content is real HTML from the admin's rich text editor —
                   render it as HTML, not as an escaped text node. */}
-              <RichTextContent html={blog.content} className="text-slate-700 text-sm md:text-base font-secondary" />
+              <RichTextContent html={blog.content} className="text-[var(--text-secondary)] text-sm md:text-base font-secondary" />
             </div>
 
             {/* Key highlight bullets — plain highlight statements, not "title:
@@ -154,10 +154,10 @@ export default function BlogDetailPage({ params }: PageProps) {
               <div className="flex flex-col gap-3 pt-2">
                 {blog.bullets.map((bullet, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <span className="w-5 h-5 shrink-0 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-[10px] font-black font-primary mt-0.5">
+                    <span className="w-5 h-5 shrink-0 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-[10px] font-black font-primary mt-0.5">
                       {idx + 1}
                     </span>
-                    <p className="text-slate-600 text-sm leading-relaxed font-secondary">{bullet}</p>
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed font-secondary">{bullet}</p>
                   </div>
                 ))}
               </div>
@@ -168,7 +168,7 @@ export default function BlogDetailPage({ params }: PageProps) {
                 Hidden entirely (not a placeholder) when there's no real image,
                 since it would just duplicate an already-shown missing-image state. */}
             {blog.imageUrl && (
-              <div className="rounded-[24px] overflow-hidden border border-slate-200/80 aspect-[16/9] w-full bg-slate-50 mt-4 shadow-sm">
+              <div className="rounded-[24px] overflow-hidden border border-[var(--border-color)] aspect-[16/9] w-full bg-black/20 mt-4 shadow-sm">
                 <img
                   src={blog.imageUrl}
                   alt={blog.title}
@@ -182,19 +182,19 @@ export default function BlogDetailPage({ params }: PageProps) {
 
           {/* Right Column: Side panels */}
           <div className="lg:col-span-1 flex flex-col gap-8">
-            
-            <h3 className="text-base font-black font-primary text-slate-900 uppercase tracking-tight border-b border-slate-200/60 pb-3">
+
+            <h3 className="text-base font-black font-primary text-[var(--text-primary)] uppercase tracking-tight border-b border-[var(--border-color)] pb-3">
               Popular Post
             </h3>
-            
+
             <div className="flex flex-col gap-6">
               {popularBlogs.map((popBlog) => (
-                <Link 
+                <Link
                   key={popBlog.id}
                   href={`/blogs/${popBlog.slug}`}
                   className="group flex gap-4 items-start cursor-pointer text-left"
                 >
-                  <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200/85 bg-slate-50 shadow-sm flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-[var(--border-color)] bg-black/20 shadow-sm flex items-center justify-center">
                     {popBlog.imageUrl ? (
                       <img
                         src={popBlog.imageUrl}
@@ -202,17 +202,17 @@ export default function BlogDetailPage({ params }: PageProps) {
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <ImageIcon size={18} className="text-slate-300" />
+                      <ImageIcon size={18} className="text-[var(--text-muted)]" />
                     )}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[8px] font-bold text-pink-500 uppercase tracking-wider font-primary">
+                    <span className="text-[8px] font-bold text-amber-400 uppercase tracking-wider font-primary">
                       {popBlog.category}
                     </span>
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-tight line-clamp-2 leading-snug group-hover:text-pink-500 transition-colors">
+                    <h4 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-tight line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">
                       {popBlog.title}
                     </h4>
-                    <span className="text-[9px] text-slate-400 font-primary mt-0.5">
+                    <span className="text-[9px] text-[var(--text-muted)] font-primary mt-0.5">
                       {popBlog.publishedAt}
                     </span>
                   </div>
@@ -225,9 +225,9 @@ export default function BlogDetailPage({ params }: PageProps) {
         </div>
 
         {/* Similar Articles Grid */}
-        <div className="border-t border-slate-200/65 pt-16 mt-16 flex flex-col gap-8">
-          
-          <h3 className="text-xl md:text-2xl font-black font-primary text-slate-900 uppercase tracking-tight text-left">
+        <div className="border-t border-[var(--border-color)] pt-16 mt-16 flex flex-col gap-8">
+
+          <h3 className="text-xl md:text-2xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight text-left">
             Similar articles for you
           </h3>
 

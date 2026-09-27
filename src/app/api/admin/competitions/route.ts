@@ -16,13 +16,14 @@ export async function POST(request: NextRequest) {
   const {
     name, slug, description, summary, bannerUrl, eventDate, deadline, venue, city,
     prizePool, registrationFee, categories, rules, judges, faqs, regionalHubs, organizer,
+    registrationFormFields,
   } = body;
   if (!name || !slug) return NextResponse.json({ error: 'name and slug required' }, { status: 400 });
 
   const id = 'comp-' + Date.now();
   const [competition] = await sql`
-    INSERT INTO competitions (id, name, slug, description, summary, banner_url, event_date, deadline, venue, city, prize_pool, registration_fee, categories, rules, judges, faqs, regional_hubs, organizer)
-    VALUES (${id}, ${name}, ${slug}, ${description || ''}, ${summary || ''}, ${bannerUrl || ''}, ${eventDate || null}, ${deadline || null}, ${venue || ''}, ${city || ''}, ${prizePool || ''}, ${registrationFee ?? 0}, ${JSON.stringify(categories ?? [])}, ${JSON.stringify(rules ?? [])}, ${JSON.stringify(judges ?? [])}, ${JSON.stringify(faqs ?? [])}, ${JSON.stringify(regionalHubs ?? [])}, ${JSON.stringify(organizer ?? {})})
+    INSERT INTO competitions (id, name, slug, description, summary, banner_url, event_date, deadline, venue, city, prize_pool, registration_fee, categories, rules, judges, faqs, regional_hubs, organizer, registration_form_fields)
+    VALUES (${id}, ${name}, ${slug}, ${description || ''}, ${summary || ''}, ${bannerUrl || ''}, ${eventDate || null}, ${deadline || null}, ${venue || ''}, ${city || ''}, ${prizePool || ''}, ${registrationFee ?? 0}, ${JSON.stringify(categories ?? [])}, ${JSON.stringify(rules ?? [])}, ${JSON.stringify(judges ?? [])}, ${JSON.stringify(faqs ?? [])}, ${JSON.stringify(regionalHubs ?? [])}, ${JSON.stringify(organizer ?? {})}, ${JSON.stringify(registrationFormFields ?? [])})
     RETURNING *
   `;
   return NextResponse.json({ success: true, competition }, { status: 201 });
@@ -34,6 +35,7 @@ export async function PUT(request: NextRequest) {
   const {
     id, name, slug, description, summary, bannerUrl, eventDate, deadline, venue, city,
     prizePool, registrationFee, categories, rules, judges, faqs, regionalHubs, organizer, isActive,
+    registrationFormFields,
   } = body;
   if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
@@ -45,7 +47,8 @@ export async function PUT(request: NextRequest) {
       registration_fee = ${registrationFee ?? 0}, categories = ${JSON.stringify(categories ?? [])},
       rules = ${JSON.stringify(rules ?? [])}, judges = ${JSON.stringify(judges ?? [])},
       faqs = ${JSON.stringify(faqs ?? [])}, regional_hubs = ${JSON.stringify(regionalHubs ?? [])},
-      organizer = ${JSON.stringify(organizer ?? {})}, is_active = ${isActive ?? true}, updated_at = NOW()
+      organizer = ${JSON.stringify(organizer ?? {})}, is_active = ${isActive ?? true},
+      registration_form_fields = ${JSON.stringify(registrationFormFields ?? [])}, updated_at = NOW()
     WHERE id = ${id}
     RETURNING *
   `;

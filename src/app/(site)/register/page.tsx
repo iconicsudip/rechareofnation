@@ -48,18 +48,18 @@ function RegisterContent() {
   };
 
   return (
-    <div className="min-h-[90vh] flex items-center justify-center py-12 px-4 bg-[#f8fafc]">
-      <div className="w-full max-w-2xl bg-white border border-slate-200/90 shadow-[0_12px_45px_rgba(0,0,0,0.06)] rounded-[32px] p-8 md:p-10 relative overflow-hidden text-slate-800 text-left">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-pink-500 to-cyan-500"></div>
+    <div className="min-h-[90vh] flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-[0_12px_45px_rgba(0,0,0,0.3)] rounded-[32px] p-8 md:p-10 relative overflow-hidden text-[var(--text-primary)] text-left">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400"></div>
 
         <div className="flex flex-col items-center text-center gap-2 mb-8">
-          <span className="text-[10px] font-primary font-bold tracking-widest text-indigo-600 uppercase">Join Recharge Nation</span>
-          <h2 className="text-2xl sm:text-3xl font-black font-primary text-slate-900 uppercase tracking-tight">Create Account</h2>
-          <p className="text-slate-500 text-[11px] sm:text-xs font-secondary leading-relaxed max-w-md mx-auto mt-0.5">Enter your details to manage tickets, register for competitions, and update profiles</p>
+          <span className="text-[10px] font-primary font-bold tracking-widest text-amber-400 uppercase">Join Recharge Nation</span>
+          <h2 className="text-2xl sm:text-3xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight">Create Account</h2>
+          <p className="text-[var(--text-secondary)] text-[11px] sm:text-xs font-secondary leading-relaxed max-w-md mx-auto mt-0.5">Enter your details to manage tickets, register for competitions, and update profiles</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs flex items-start gap-2.5 text-left">
+          <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl text-xs flex items-start gap-2.5 text-left">
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -67,13 +67,13 @@ function RegisterContent() {
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="md:col-span-2 flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Full Name *</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <User className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="John Doe" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Full Name *</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <User className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="text"
+                placeholder="John Doe"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -82,13 +82,13 @@ function RegisterContent() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Email Address *</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="email" 
-                placeholder="you@example.com" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Email Address *</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <Mail className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -97,13 +97,13 @@ function RegisterContent() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Password *</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <Lock className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Password *</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <Lock className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -112,13 +112,13 @@ function RegisterContent() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Mobile Number</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <Phone className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="tel" 
-                placeholder="+91 99999 88888" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Mobile Number</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <Phone className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="tel"
+                placeholder="+91 99999 88888"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
               />
@@ -126,13 +126,13 @@ function RegisterContent() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">School / College / Organization</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <Building className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="IIT Bangalore / XYZ Corp" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">School / College / Organization</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <Building className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="text"
+                placeholder="IIT Bangalore / XYZ Corp"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
               />
@@ -140,13 +140,13 @@ function RegisterContent() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">City</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <MapPin className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Mumbai" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">City</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <MapPin className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="text"
+                placeholder="Mumbai"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
               />
@@ -154,13 +154,13 @@ function RegisterContent() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">State</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <MapPin className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Maharashtra" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">State</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <MapPin className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="text"
+                placeholder="Maharashtra"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
               />
@@ -168,9 +168,9 @@ function RegisterContent() {
           </div>
 
           <div className="md:col-span-2 pt-2">
-            <button 
-              type="submit" 
-              className="w-full py-3.5 bg-gradient-to-r from-indigo-600 via-pink-600 to-rose-500 hover:from-indigo-700 hover:to-rose-600 text-white font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 hover:from-amber-500 hover:to-amber-300 text-[#170D08] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               disabled={isLoading}
             >
               <UserPlus size={16} />
@@ -179,9 +179,9 @@ function RegisterContent() {
           </div>
         </form>
 
-        <div className="mt-8 text-center text-xs text-slate-500 font-secondary">
+        <div className="mt-8 text-center text-xs text-[var(--text-secondary)] font-secondary">
           Already have an account?{" "}
-          <Link href={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-indigo-600 hover:text-indigo-700 font-bold underline font-primary transition-colors">
+          <Link href={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-amber-400 hover:text-amber-300 font-bold underline font-primary transition-colors">
             Sign In Here
           </Link>
         </div>
@@ -193,7 +193,7 @@ function RegisterContent() {
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-[80vh] flex items-center justify-center text-gray-400 text-sm">
+      <div className="min-h-[80vh] flex items-center justify-center text-[var(--text-muted)] text-sm">
         Loading Registration Module...
       </div>
     }>

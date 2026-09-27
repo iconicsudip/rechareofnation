@@ -167,26 +167,26 @@ export default function AdminScannerPage() {
   }, [scanning, cameraActive, scanFrame]);
 
   const S = {
-    card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
+    card: { background: "rgba(23,13,8,0.6)", border: "1px solid rgba(217, 119, 6,0.12)", borderRadius: "16px" },
     input: {
-      background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)",
-      borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "10px 14px", fontSize: "14px", width: "100%",
+      background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)",
+      borderRadius: "10px", color: "#F5EEE2", outline: "none", padding: "10px 14px", fontSize: "14px", width: "100%",
     },
   };
 
   return (
-    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#E2E8F0" }}>
+    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#F5EEE2" }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-white">QR Scanner</h1>
-          <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.6)" }}>
+          <p className="text-xs mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>
             Scan attendee passes to validate entry · {scanCount} scans this session
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full"
-          style={{ background: scanning ? "rgba(16,185,129,0.1)" : "rgba(99,102,241,0.1)", border: `1px solid ${scanning ? "rgba(52,211,153,0.3)" : "rgba(99,102,241,0.2)"}`, color: scanning ? "#34D399" : "#818CF8" }}>
-          <div className={`w-1.5 h-1.5 rounded-full ${scanning ? "bg-emerald-400 animate-pulse" : "bg-indigo-400"}`} />
+          style={{ background: scanning ? "rgba(16,185,129,0.1)" : "rgba(217, 119, 6,0.1)", border: `1px solid ${scanning ? "rgba(52,211,153,0.3)" : "rgba(217, 119, 6,0.2)"}`, color: scanning ? "#34D399" : "#fbbf24" }}>
+          <div className={`w-1.5 h-1.5 rounded-full ${scanning ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
           {scanning ? "Scanning..." : "Camera Off"}
         </div>
       </div>
@@ -195,13 +195,13 @@ export default function AdminScannerPage() {
         <div className="p-6 rounded-2xl" style={S.card}>
           <h2 className="text-lg font-bold text-white mb-4">Scanner Setup</h2>
           {setupLoading ? (
-            <div className="text-sm text-indigo-300">Loading assignments...</div>
+            <div className="text-sm text-amber-300">Loading assignments...</div>
           ) : setupEvents.length === 0 ? (
             <div className="text-sm text-red-300">You have not been assigned to any active events.</div>
           ) : (
             <div className="flex flex-col gap-4 max-w-md">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-indigo-300 mb-1.5">Select Event</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-1.5">Select Event</label>
                 <select 
                   style={S.input} 
                   value={selectedEventId} 
@@ -227,10 +227,10 @@ export default function AdminScannerPage() {
             {!cameraActive && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                  style={{ background: "rgba(99,102,241,0.15)", border: "2px dashed rgba(99,102,241,0.3)" }}>
-                  <QrCode size={36} style={{ color: "rgba(129,140,248,0.6)" }} />
+                  style={{ background: "rgba(217, 119, 6,0.15)", border: "2px dashed rgba(217, 119, 6,0.3)" }}>
+                  <QrCode size={36} style={{ color: "rgba(245, 158, 11,0.6)" }} />
                 </div>
-                <p className="text-sm text-center px-6" style={{ color: "rgba(148,163,184,0.5)" }}>
+                <p className="text-sm text-center px-6" style={{ color: "rgba(203,185,160,0.5)" }}>
                   Start camera to scan QR codes on attendee passes
                 </p>
               </div>
@@ -249,12 +249,12 @@ export default function AdminScannerPage() {
                       "bottom-0 right-0 border-b-2 border-r-2",
                     ].map((cls, i) => (
                       <div key={i} className={`absolute w-6 h-6 ${cls}`}
-                        style={{ borderColor: "#4F46E5", borderRadius: "2px" }} />
+                        style={{ borderColor: "#d97706", borderRadius: "2px" }} />
                     ))}
                     {/* Scan line */}
                     <div className="absolute left-0 right-0 h-0.5 animate-[scanline_2s_linear_infinite]"
                       style={{
-                        background: "linear-gradient(90deg, transparent, #4F46E5, transparent)",
+                        background: "linear-gradient(90deg, transparent, #d97706, transparent)",
                         top: "50%",
                         animation: "scanline 2s ease-in-out infinite",
                       }} />
@@ -276,7 +276,7 @@ export default function AdminScannerPage() {
             {!cameraActive ? (
               <button onClick={startCamera}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all"
-                style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff" }}>
+                style={{ background: "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff" }}>
                 <Camera size={16} /> Start Camera
               </button>
             ) : (
@@ -288,7 +288,7 @@ export default function AdminScannerPage() {
                 </button>
                 <button onClick={resetScan}
                   className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm flex-1"
-                  style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+                  style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24", border: "1px solid rgba(217, 119, 6,0.2)" }}>
                   <RotateCcw size={15} /> Reset
                 </button>
               </>
@@ -300,11 +300,11 @@ export default function AdminScannerPage() {
         <div className="flex flex-col gap-4">
           {/* Scan Result */}
           {processing && (
-            <div className="p-6 rounded-2xl flex items-center gap-3" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
-              <div className="w-8 h-8 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin flex-shrink-0" />
+            <div className="p-6 rounded-2xl flex items-center gap-3" style={{ background: "rgba(217, 119, 6,0.1)", border: "1px solid rgba(217, 119, 6,0.2)" }}>
+              <div className="w-8 h-8 rounded-full border-2 border-amber-400 border-t-transparent animate-spin flex-shrink-0" />
               <div>
                 <div className="font-bold text-white text-sm">Validating pass...</div>
-                <div className="text-xs mt-0.5" style={{ color: "rgba(148,163,184,0.5)" }}>Checking database</div>
+                <div className="text-xs mt-0.5" style={{ color: "rgba(203,185,160,0.5)" }}>Checking database</div>
               </div>
             </div>
           )}
@@ -326,16 +326,16 @@ export default function AdminScannerPage() {
                     {scanResult.result === "allowed" ? "✓ ACCESS GRANTED" : "✗ ACCESS DENIED"}
                   </div>
                   {scanResult.reason && (
-                    <div className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.7)" }}>{scanResult.reason}</div>
+                    <div className="text-xs mt-1" style={{ color: "rgba(203,185,160,0.7)" }}>{scanResult.reason}</div>
                   )}
                 </div>
               </div>
 
               {/* Attendee Details */}
               {scanResult.attendee && (
-                <div className="p-5 flex flex-col gap-3" style={{ background: "rgba(15,23,42,0.5)" }}>
+                <div className="p-5 flex flex-col gap-3" style={{ background: "rgba(23,13,8,0.5)" }}>
                   <div className="text-xs font-bold uppercase tracking-widest mb-1"
-                    style={{ color: "rgba(148,163,184,0.4)" }}>Attendee Details</div>
+                    style={{ color: "rgba(203,185,160,0.4)" }}>Attendee Details</div>
                   {[
                     ["Name", scanResult.attendee.name],
                     ["Pass Type", scanResult.attendee.type],
@@ -346,7 +346,7 @@ export default function AdminScannerPage() {
                     scanResult.attendee.quantity ? ["Seats", String(scanResult.attendee.quantity)] : null,
                   ].filter(Boolean).map((row) => (
                     <div key={row![0]} className="flex justify-between items-start gap-4 text-sm">
-                      <span style={{ color: "rgba(148,163,184,0.5)" }}>{row![0]}</span>
+                      <span style={{ color: "rgba(203,185,160,0.5)" }}>{row![0]}</span>
                       <span className="text-white font-semibold text-right">{row![1] || "—"}</span>
                     </div>
                   ))}
@@ -356,7 +356,7 @@ export default function AdminScannerPage() {
               <div className="p-4 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                 <button onClick={resetScan}
                   className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"
-                  style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+                  style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24", border: "1px solid rgba(217, 119, 6,0.2)" }}>
                   <RotateCcw size={14} /> Scan Next
                 </button>
               </div>
@@ -365,9 +365,9 @@ export default function AdminScannerPage() {
 
           {!scanResult && !processing && (
             <div className="p-8 rounded-2xl flex flex-col items-center gap-3 text-center" style={S.card}>
-              <Zap size={32} style={{ color: "rgba(99,102,241,0.3)" }} />
+              <Zap size={32} style={{ color: "rgba(217, 119, 6,0.3)" }} />
               <div className="font-bold text-white text-sm">Ready to Scan</div>
-              <div className="text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>
+              <div className="text-xs" style={{ color: "rgba(203,185,160,0.4)" }}>
                 Point the camera at a QR code on an attendee's pass to validate entry.
               </div>
             </div>
@@ -376,7 +376,7 @@ export default function AdminScannerPage() {
           {/* Manual Entry */}
           <div className="p-5 rounded-2xl" style={S.card}>
             <div className="text-xs font-bold uppercase tracking-widest mb-3"
-              style={{ color: "rgba(148,163,184,0.5)" }}>Manual QR Entry</div>
+              style={{ color: "rgba(203,185,160,0.5)" }}>Manual QR Entry</div>
             <div className="flex gap-2">
               <input
                 style={S.input}
@@ -389,11 +389,11 @@ export default function AdminScannerPage() {
                 onClick={() => manualHash.trim() && processQRHash(manualHash.trim())}
                 disabled={!manualHash.trim() || processing}
                 className="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>
+                style={{ background: "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>
                 <Zap size={14} /> Validate
               </button>
             </div>
-            <p className="text-[11px] mt-2" style={{ color: "rgba(148,163,184,0.35)" }}>
+            <p className="text-[11px] mt-2" style={{ color: "rgba(203,185,160,0.35)" }}>
               For passes where camera scan isn't possible. Enter the unique QR hash and press Enter.
             </p>
           </div>

@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 });
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/') && file.type !== 'application/pdf') {
+      return NextResponse.json({ error: 'Only image, video, or PDF files are allowed' }, { status: 400 });
     }
 
     const key = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;

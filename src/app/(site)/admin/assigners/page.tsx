@@ -26,19 +26,19 @@ interface Event {
 const ASSIGNER_ROLES = ["Scanner", "Coordinator", "Security", "Hospitality", "Stage Manager", "Technical"];
 
 const ROLE_COLORS: Record<string, { color: string; bg: string; border: string }> = {
-  Scanner:       { color: "#818CF8", bg: "rgba(79,70,229,0.12)",   border: "rgba(99,102,241,0.25)" },
+  Scanner:       { color: "#fbbf24", bg: "rgba(180, 83, 9,0.12)",   border: "rgba(217, 119, 6,0.25)" },
   Coordinator:   { color: "#34D399", bg: "rgba(16,185,129,0.1)",   border: "rgba(52,211,153,0.2)" },
   Security:      { color: "#F87171", bg: "rgba(239,68,68,0.1)",    border: "rgba(248,113,113,0.2)" },
-  Hospitality:   { color: "#F472B6", bg: "rgba(219,39,119,0.1)",   border: "rgba(244,114,182,0.2)" },
+  Hospitality:   { color: "#fbbf24", bg: "rgba(217, 119, 6,0.1)",   border: "rgba(251, 191, 36,0.2)" },
   "Stage Manager":{ color: "#FBBF24", bg: "rgba(251,191,36,0.1)",  border: "rgba(251,191,36,0.2)" },
   Technical:     { color: "#60A5FA", bg: "rgba(37,99,235,0.1)",    border: "rgba(96,165,250,0.2)" },
 };
 
 const S = {
-  card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
+  card: { background: "rgba(23,13,8,0.6)", border: "1px solid rgba(217, 119, 6,0.12)", borderRadius: "16px" },
   input: {
-    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)",
-    borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "9px 12px",
+    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)",
+    borderRadius: "10px", color: "#F5EEE2", outline: "none", padding: "9px 12px",
     fontSize: "13px", width: "100%", fontFamily: "var(--font-primary)",
   },
   btn: {
@@ -122,20 +122,20 @@ export default function AdminAssignersPage() {
   );
 
   return (
-    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#E2E8F0" }}>
+    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#F5EEE2" }}>
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-extrabold text-white">Event Assigners</h1>
-          <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.6)" }}>
+          <h1 className="text-2xl font-extrabold text-[#F5EEE2]">Event Assigners</h1>
+          <p className="text-xs mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>
             Assign staff & volunteers to events
           </p>
         </div>
         <div className="flex gap-3">
-          <button onClick={load} style={{ ...S.btn, background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+          <button onClick={load} style={{ ...S.btn, background: "rgba(217, 119, 6,0.1)", color: "#fbbf24", border: "1px solid rgba(217, 119, 6,0.2)" }}>
             <RefreshCw size={14} /> Refresh
           </button>
-          <button onClick={() => setPanelOpen(true)} style={{ ...S.btn, background: "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff" }}>
+          <button onClick={() => setPanelOpen(true)} style={{ ...S.btn, background: "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff" }}>
             <Plus size={14} /> Assign Staff
           </button>
         </div>
@@ -144,11 +144,11 @@ export default function AdminAssignersPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-44">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(148,163,184,0.4)" }} />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(203,185,160,0.4)" }} />
           <input style={{ ...S.input, paddingLeft: "32px" }} placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="relative">
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(148,163,184,0.4)" }} />
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(203,185,160,0.4)" }} />
           <select style={{ ...S.input, paddingRight: "32px", minWidth: "200px" }} value={filterEvent} onChange={e => setFilterEvent(e.target.value)}>
             <option value="">All Events</option>
             {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name}</option>)}
@@ -174,13 +174,13 @@ export default function AdminAssignersPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "rgba(99,102,241,0.06)" }} />
+            <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "rgba(217, 119, 6,0.06)" }} />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 flex flex-col items-center gap-3 rounded-2xl" style={S.card}>
-          <UserCog size={36} style={{ color: "rgba(99,102,241,0.25)" }} />
-          <p className="text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>No staff assigned yet. Click &apos;Assign Staff&apos; to get started.</p>
+          <UserCog size={36} style={{ color: "rgba(217, 119, 6,0.25)" }} />
+          <p className="text-sm" style={{ color: "rgba(203,185,160,0.4)" }}>No staff assigned yet. Click &apos;Assign Staff&apos; to get started.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -199,7 +199,7 @@ export default function AdminAssignersPage() {
                       <button onClick={() => handleDelete(a.id)} className="text-[11px] font-bold px-2 py-1 rounded-lg"
                         style={{ background: "rgba(239,68,68,0.15)", color: "#F87171" }}>Confirm</button>
                       <button onClick={() => setDeleteId(null)} className="text-[11px] font-bold px-2 py-1 rounded-lg"
-                        style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8" }}>Cancel</button>
+                        style={{ background: "rgba(255,255,255,0.05)", color: "rgba(203,185,160,0.7)" }}>Cancel</button>
                     </div>
                   ) : (
                     <button onClick={() => setDeleteId(a.id)} className="p-1.5 rounded-lg cursor-pointer"
@@ -216,18 +216,18 @@ export default function AdminAssignersPage() {
                     {a.user_name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold text-white text-sm truncate">{a.user_name}</div>
-                    <div className="text-[11px] truncate" style={{ color: "rgba(148,163,184,0.5)" }}>{a.user_email}</div>
+                    <div className="font-bold text-[#F5EEE2] text-sm truncate">{a.user_name}</div>
+                    <div className="text-[11px] truncate" style={{ color: "rgba(203,185,160,0.5)" }}>{a.user_email}</div>
                   </div>
                 </div>
 
                 {/* Event */}
                 <div className="text-xs px-3 py-2 rounded-xl truncate"
-                  style={{ background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.12)", color: "rgba(148,163,184,0.7)" }}>
+                  style={{ background: "rgba(217, 119, 6,0.07)", border: "1px solid rgba(217, 119, 6,0.12)", color: "rgba(203,185,160,0.7)" }}>
                   📅 {a.event_name}
                 </div>
 
-                <div className="text-[10px]" style={{ color: "rgba(148,163,184,0.3)" }}>
+                <div className="text-[10px]" style={{ color: "rgba(203,185,160,0.3)" }}>
                   Assigned {new Date(a.created_at).toLocaleDateString("en-IN")}
                 </div>
               </div>
@@ -241,12 +241,12 @@ export default function AdminAssignersPage() {
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPanelOpen(false)} />
           <div className="relative w-full max-w-md h-full overflow-y-auto flex flex-col"
-            style={{ background: "#0F1729", borderLeft: "1px solid rgba(99,102,241,0.2)" }}>
+            style={{ background: "#2A1510", borderLeft: "1px solid rgba(217, 119, 6,0.2)" }}>
             <div className="flex items-center justify-between p-6 border-b sticky top-0 z-10"
-              style={{ borderColor: "rgba(99,102,241,0.15)", background: "#0F1729" }}>
-              <h2 className="font-extrabold text-white text-lg">Assign Staff</h2>
+              style={{ borderColor: "rgba(217, 119, 6,0.15)", background: "#2A1510" }}>
+              <h2 className="font-extrabold text-[#F5EEE2] text-lg">Assign Staff</h2>
               <button onClick={() => setPanelOpen(false)} className="p-2 rounded-lg"
-                style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8" }}>
+                style={{ background: "rgba(255,255,255,0.05)", color: "rgba(203,185,160,0.7)" }}>
                 <X size={16} />
               </button>
             </div>
@@ -259,7 +259,7 @@ export default function AdminAssignersPage() {
               )}
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>Select Event *</label>
+                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(203,185,160,0.5)" }}>Select Event *</label>
                 <select style={S.input} value={form.eventId} onChange={e => setForm(p => ({ ...p, eventId: e.target.value }))} required>
                   <option value="">— Choose Event —</option>
                   {events.map(ev => <option key={ev.id} value={ev.id}>{ev.name} ({ev.city})</option>)}
@@ -267,7 +267,7 @@ export default function AdminAssignersPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>Select Staff Member *</label>
+                <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(203,185,160,0.5)" }}>Select Staff Member *</label>
                 <select style={S.input} value={form.userId} onChange={e => setForm(p => ({ ...p, userId: e.target.value }))} required>
                   <option value="">— Choose User —</option>
                   {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
@@ -275,7 +275,7 @@ export default function AdminAssignersPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "rgba(148,163,184,0.5)" }}>Assigner Role *</label>
+                <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "rgba(203,185,160,0.5)" }}>Assigner Role *</label>
                 <div className="grid grid-cols-2 gap-2">
                   {ASSIGNER_ROLES.map(role => {
                     const rc = ROLE_COLORS[role];
@@ -287,7 +287,7 @@ export default function AdminAssignersPage() {
                         style={{
                           background: selected ? rc.bg : "rgba(255,255,255,0.03)",
                           border: `1px solid ${selected ? rc.border : "rgba(255,255,255,0.06)"}`,
-                          color: selected ? rc.color : "rgba(148,163,184,0.5)",
+                          color: selected ? rc.color : "rgba(203,185,160,0.5)",
                         }}>
                         {role}
                       </button>
@@ -298,11 +298,11 @@ export default function AdminAssignersPage() {
 
               <div className="flex gap-3 mt-2">
                 <button type="button" onClick={() => setPanelOpen(false)}
-                  style={{ ...S.btn, flex: 1, justifyContent: "center", background: "rgba(255,255,255,0.05)", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  style={{ ...S.btn, flex: 1, justifyContent: "center", background: "rgba(255,255,255,0.05)", color: "rgba(203,185,160,0.7)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={saving}
-                  style={{ ...S.btn, flex: 2, justifyContent: "center", background: saving ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff" }}>
+                  style={{ ...S.btn, flex: 2, justifyContent: "center", background: saving ? "rgba(217, 119, 6,0.3)" : "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff" }}>
                   {saving ? "Assigning..." : "Assign Staff Member"}
                 </button>
               </div>

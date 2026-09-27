@@ -52,18 +52,18 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 bg-[#f8fafc]">
-      <div className="w-full max-w-md bg-white border border-slate-200/90 shadow-[0_12px_45px_rgba(0,0,0,0.06)] rounded-[32px] p-8 md:p-10 relative overflow-hidden text-slate-800 text-left">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-pink-500 to-cyan-500"></div>
+    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-color)] shadow-[0_12px_45px_rgba(0,0,0,0.3)] rounded-[32px] p-8 md:p-10 relative overflow-hidden text-[var(--text-primary)] text-left">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400"></div>
 
         <div className="flex flex-col items-center text-center gap-2 mb-8">
-          <span className="text-[10px] font-primary font-bold tracking-widest text-indigo-600 uppercase">Join Us</span>
-          <h2 className="text-2xl sm:text-3xl font-black font-primary text-slate-900 uppercase tracking-tight">Welcome Back</h2>
-          <p className="text-slate-500 text-[11px] sm:text-xs font-secondary leading-relaxed max-w-md mx-auto mt-0.5">Enter your credentials to access your tickets and registrations</p>
+          <span className="text-[10px] font-primary font-bold tracking-widest text-amber-400 uppercase">Join Us</span>
+          <h2 className="text-2xl sm:text-3xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight">Welcome Back</h2>
+          <p className="text-[var(--text-secondary)] text-[11px] sm:text-xs font-secondary leading-relaxed max-w-md mx-auto mt-0.5">Enter your credentials to access your tickets and registrations</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs flex items-start gap-2.5 text-left">
+          <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl text-xs flex items-start gap-2.5 text-left">
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -71,13 +71,13 @@ function LoginContent() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col">
-            <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Email Address</label>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="email" 
-                placeholder="you@example.com" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Email Address</label>
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <Mail className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -87,21 +87,21 @@ function LoginContent() {
 
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase block">Password</label>
-              <button 
-                type="button" 
+              <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase block">Password</label>
+              <button
+                type="button"
                 onClick={() => setIsForgotModalOpen(true)}
-                className="text-[9.5px] font-primary font-bold text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-wider cursor-pointer"
+                className="text-[9.5px] font-primary font-bold text-amber-400 hover:text-amber-300 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Forgot Password?
               </button>
             </div>
-            <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-              <Lock className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+              <Lock className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -109,9 +109,9 @@ function LoginContent() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full py-3.5 bg-gradient-to-r from-indigo-600 via-pink-600 to-rose-500 hover:from-indigo-700 hover:to-rose-600 text-white font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-2"
+          <button
+            type="submit"
+            className="w-full py-3.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 hover:from-amber-500 hover:to-amber-300 text-[#170D08] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mt-2"
             disabled={isLoading}
           >
             <LogIn size={16} />
@@ -119,33 +119,33 @@ function LoginContent() {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-xs text-slate-500 font-secondary">
+        <div className="mt-8 text-center text-xs text-[var(--text-secondary)] font-secondary">
           Don't have an account?{" "}
-          <Link href={`/register?redirect=${encodeURIComponent(redirect)}`} className="text-indigo-600 hover:text-indigo-700 font-bold underline font-primary transition-colors">
+          <Link href={`/register?redirect=${encodeURIComponent(redirect)}`} className="text-amber-400 hover:text-amber-300 font-bold underline font-primary transition-colors">
             Register Here
           </Link>
         </div>
 
         {/* Forgot Password Modal */}
         {isForgotModalOpen && (
-          <div className="absolute inset-0 bg-white/98 z-20 p-8 flex flex-col justify-center animate-fade-in text-slate-800 text-left">
+          <div className="absolute inset-0 bg-[#170D08]/98 z-20 p-8 flex flex-col justify-center animate-fade-in text-[var(--text-primary)] text-left">
             <div className="flex flex-col items-center text-center gap-2 mb-6">
-              <Key size={32} className="text-indigo-600 mb-2 animate-bounce" />
-              <h3 className="text-xl font-black font-primary text-slate-900 uppercase tracking-tight">Reset Password</h3>
-              <p className="text-slate-500 text-[11px] font-secondary leading-relaxed">Enter your email and we'll send reset instructions</p>
+              <Key size={32} className="text-amber-400 mb-2 animate-bounce" />
+              <h3 className="text-xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight">Reset Password</h3>
+              <p className="text-[var(--text-secondary)] text-[11px] font-secondary leading-relaxed">Enter your email and we'll send reset instructions</p>
             </div>
 
             {forgotMessage ? (
               <div className="flex flex-col gap-4 items-center text-center">
-                <div className="p-4 bg-indigo-50 border border-indigo-205 text-indigo-700 rounded-2xl text-xs font-secondary leading-relaxed">
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-2xl text-xs font-secondary leading-relaxed">
                   {forgotMessage}
                 </div>
-                <button 
+                <button
                   onClick={() => {
                     setIsForgotModalOpen(false);
                     setForgotMessage(null);
                   }}
-                  className="bg-slate-950 text-white text-[10px] font-primary font-bold tracking-widest py-3 px-8 rounded-2xl uppercase hover:bg-indigo-600 transition-all cursor-pointer shadow-sm mt-2"
+                  className="bg-[var(--bg-panel)] text-[var(--text-primary)] text-[10px] font-primary font-bold tracking-widest py-3 px-8 rounded-2xl uppercase hover:bg-amber-500 hover:text-[#170D08] transition-all cursor-pointer shadow-sm mt-2"
                 >
                   Back to Login
                 </button>
@@ -153,13 +153,13 @@ function LoginContent() {
             ) : (
               <form onSubmit={handleForgotSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col">
-                  <label className="text-[10px] font-primary tracking-wider font-bold text-slate-400 uppercase mb-1.5 block">Email Address</label>
-                  <div className="relative rounded-xl border border-slate-200 bg-slate-50/50 hover:border-slate-300 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600/25 transition-all">
-                    <Mail className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
-                    <input 
-                      type="email" 
-                      placeholder="you@example.com" 
-                      className="w-full text-xs text-slate-800 placeholder-slate-400 bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
+                  <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Email Address</label>
+                  <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+                    <Mail className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      className="w-full text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-transparent pl-10 pr-4 py-3 outline-none font-secondary"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
                       required
@@ -167,16 +167,16 @@ function LoginContent() {
                   </div>
                 </div>
                 <div className="flex gap-3.5 mt-2">
-                  <button 
-                    type="submit" 
-                    className="py-3 bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-600 text-white font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex-grow cursor-pointer"
+                  <button
+                    type="submit"
+                    className="py-3 bg-gradient-to-r from-amber-600 to-amber-400 hover:from-amber-500 hover:to-amber-300 text-[#170D08] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex-grow cursor-pointer"
                   >
                     Send Reset Link
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setIsForgotModalOpen(false)}
-                    className="py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all cursor-pointer"
+                    className="py-3 px-6 bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -193,7 +193,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-[80vh] flex items-center justify-center text-gray-400 text-sm">
+      <div className="min-h-[80vh] flex items-center justify-center text-[var(--text-muted)] text-sm">
         Loading Login Module...
       </div>
     }>

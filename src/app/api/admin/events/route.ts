@@ -36,16 +36,34 @@ export async function POST(request: NextRequest) {
     await ensureSchema();
     const body = await request.json();
     const {
-      name, slug, category, description, summary, bannerUrl,
+      name, slug, category, description, summary, bannerUrl, videoUrl, galleryUrls,
       eventDate, eventTime, venue, city, googleMapUrl,
       isFeatured, isUpcoming, ticketPrices, organizer, rating, reviewCount,
       sponsorshipTiers, stallOptions, adRates, dateIsTentative,
-      headliners, faqs, scheduleDays, qrStages
+      headliners, faqs, scheduleDays, qrStages,
+      brochurePdfUrl, exhibitInfo, visitInfo, eventSections,
+      bookingFormFields, inquiryFormFields
     } = body;
 
     const events = await sql`
-      INSERT INTO events (name, slug, category, description, summary, banner_url, event_date, event_time, venue, city, google_map_url, is_featured, is_upcoming, ticket_prices, organizer, rating, review_count, sponsorship_tiers, stall_options, ad_rates, date_is_tentative, headliners, faqs, schedule_days, qr_stages)
-      VALUES (${name}, ${slug}, ${category}, ${description}, ${summary}, ${bannerUrl}, ${eventDate}, ${eventTime}, ${venue}, ${city}, ${googleMapUrl}, ${isFeatured ?? false}, ${isUpcoming ?? true}, ${JSON.stringify(ticketPrices ?? [])}, ${JSON.stringify(organizer ?? {})}, ${rating ?? 4.6}, ${reviewCount ?? 25}, ${JSON.stringify(sponsorshipTiers ?? [])}, ${JSON.stringify(stallOptions ?? [])}, ${JSON.stringify(adRates ?? [])}, ${dateIsTentative ?? false}, ${JSON.stringify(headliners ?? [])}, ${JSON.stringify(faqs ?? [])}, ${JSON.stringify(scheduleDays ?? [])}, ${JSON.stringify(qrStages ?? [{id:"entry",name:"Entry Gate",order:1}])})
+      INSERT INTO events (
+        name, slug, category, description, summary, banner_url, video_url, gallery_urls,
+        event_date, event_time, venue, city, google_map_url, is_featured, is_upcoming,
+        ticket_prices, organizer, rating, review_count, sponsorship_tiers, stall_options,
+        ad_rates, date_is_tentative, headliners, faqs, schedule_days, qr_stages,
+        brochure_pdf_url, exhibit_info, visit_info, event_sections,
+        booking_form_fields, inquiry_form_fields
+      )
+      VALUES (
+        ${name}, ${slug}, ${category}, ${description}, ${summary}, ${bannerUrl}, ${videoUrl ?? ''}, ${JSON.stringify(galleryUrls ?? [])},
+        ${eventDate}, ${eventTime}, ${venue}, ${city}, ${googleMapUrl}, ${isFeatured ?? false}, ${isUpcoming ?? true},
+        ${JSON.stringify(ticketPrices ?? [])}, ${JSON.stringify(organizer ?? {})}, ${rating ?? 4.6}, ${reviewCount ?? 25},
+        ${JSON.stringify(sponsorshipTiers ?? [])}, ${JSON.stringify(stallOptions ?? [])}, ${JSON.stringify(adRates ?? [])},
+        ${dateIsTentative ?? false}, ${JSON.stringify(headliners ?? [])}, ${JSON.stringify(faqs ?? [])},
+        ${JSON.stringify(scheduleDays ?? [])}, ${JSON.stringify(qrStages ?? [{id:"entry",name:"Entry Gate",order:1}])},
+        ${brochurePdfUrl ?? ''}, ${exhibitInfo ?? ''}, ${visitInfo ?? ''}, ${JSON.stringify(eventSections ?? [])},
+        ${JSON.stringify(bookingFormFields ?? [])}, ${JSON.stringify(inquiryFormFields ?? [])}
+      )
       RETURNING *
     `;
     return NextResponse.json({ event: events[0] }, { status: 201 });
@@ -60,16 +78,20 @@ export async function PUT(request: NextRequest) {
     await ensureSchema();
     const body = await request.json();
     const {
-      id, name, category, description, summary, bannerUrl, eventDate, eventTime, venue, city,
+      id, name, category, description, summary, bannerUrl, videoUrl, galleryUrls, eventDate, eventTime, venue, city,
       googleMapUrl, isFeatured, isUpcoming, ticketPrices, organizer, rating, reviewCount,
       sponsorshipTiers, stallOptions, adRates, dateIsTentative,
-      headliners, faqs, scheduleDays, qrStages
+      headliners, faqs, scheduleDays, qrStages,
+      brochurePdfUrl, exhibitInfo, visitInfo, eventSections,
+      bookingFormFields, inquiryFormFields
     } = body;
 
     const events = await sql`
       UPDATE events SET
         name = ${name}, category = ${category}, description = ${description},
-        summary = ${summary}, banner_url = ${bannerUrl}, event_date = ${eventDate},
+        summary = ${summary}, banner_url = ${bannerUrl}, video_url = ${videoUrl ?? ''},
+        gallery_urls = ${JSON.stringify(galleryUrls ?? [])},
+        event_date = ${eventDate},
         event_time = ${eventTime}, venue = ${venue}, city = ${city},
         google_map_url = ${googleMapUrl ?? ''},
         is_featured = ${isFeatured}, is_upcoming = ${isUpcoming},
@@ -84,6 +106,12 @@ export async function PUT(request: NextRequest) {
         faqs = ${JSON.stringify(faqs ?? [])},
         schedule_days = ${JSON.stringify(scheduleDays ?? [])},
         qr_stages = ${JSON.stringify(qrStages ?? [{id:"entry",name:"Entry Gate",order:1}])},
+        brochure_pdf_url = ${brochurePdfUrl ?? ''},
+        exhibit_info = ${exhibitInfo ?? ''},
+        visit_info = ${visitInfo ?? ''},
+        event_sections = ${JSON.stringify(eventSections ?? [])},
+        booking_form_fields = ${JSON.stringify(bookingFormFields ?? [])},
+        inquiry_form_fields = ${JSON.stringify(inquiryFormFields ?? [])},
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *

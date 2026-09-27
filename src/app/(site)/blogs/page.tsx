@@ -50,19 +50,19 @@ export default function BlogsPage() {
   });
 
   return (
-    <div className="w-full min-h-screen bg-[#F8FAFC] py-20 md:py-24 text-slate-800">
-      
+    <div className="w-full min-h-screen py-20 md:py-24 text-[var(--text-primary)]">
+
       {/* Main Page Layout */}
-      <div className="container max-w-7xl mx-auto px-4 flex flex-col gap-12 font-secondary">
-        
+      <div className="container mx-auto px-4 flex flex-col gap-12 font-secondary">
+
         {/* HERO GRID SECTION (Only visible when all items are loaded) */}
         {blogs.length >= 3 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             {/* Main Featured Card (Left, Spans 2 columns) */}
-            <Link 
+            <Link
               href={`/blogs/${blogs[0].slug}`}
-              className="lg:col-span-2 group cursor-pointer relative rounded-[32px] overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 min-h-[350px] lg:min-h-[450px] flex flex-col justify-end"
+              className="lg:col-span-2 group cursor-pointer relative rounded-[32px] overflow-hidden border border-[var(--border-color)] shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-amber-500/40 transition-all duration-300 min-h-[350px] lg:min-h-[450px] flex flex-col justify-end"
             >
               {/* Background Image */}
               {blogs[0].imageUrl ? (
@@ -72,20 +72,20 @@ export default function BlogsPage() {
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
-                <div className="absolute inset-0 bg-slate-800 flex items-center justify-center"><ImageIcon size={32} className="text-slate-500" /></div>
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><ImageIcon size={32} className="text-[var(--text-muted)]" /></div>
               )}
               {/* Dark Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-95" />
-              
+
               {/* Content */}
               <div className="relative z-10 p-6 md:p-10 flex flex-col justify-end items-start text-left h-full w-full">
-                <span className="text-[9px] font-primary font-bold tracking-widest text-white/75 uppercase">
+                <span className="text-[9px] font-primary font-bold tracking-widest text-[var(--text-secondary)] uppercase">
                   PUBLISHED ON {blogs[0].publishedAt}
                 </span>
-                <h2 className="text-xl md:text-3xl font-black font-primary uppercase text-white leading-tight mt-2 max-w-2xl group-hover:text-pink-400 transition-colors">
+                <h2 className="text-xl md:text-3xl font-black font-primary uppercase text-[var(--text-primary)] leading-tight mt-2 max-w-2xl group-hover:text-amber-400 transition-colors">
                   {blogs[0].title}
                 </h2>
-                <span className="mt-4 bg-white/10 border border-white/20 text-white rounded-full px-4 py-1 text-[9px] font-primary font-bold uppercase tracking-wider">
+                <span className="mt-4 bg-black/40 border border-amber-500/30 text-amber-400 rounded-full px-4 py-1 text-[9px] font-primary font-bold uppercase tracking-wider">
                   {blogs[0].category}
                 </span>
               </div>
@@ -94,10 +94,10 @@ export default function BlogsPage() {
             {/* Stacked Cards (Right, Spans 1 column) */}
             <div className="flex flex-col gap-6 lg:col-span-1">
               {blogs.slice(1, 3).map((blog) => (
-                <Link 
+                <Link
                   key={blog.id}
                   href={`/blogs/${blog.slug}`}
-                  className="group cursor-pointer relative rounded-[32px] overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 flex-1 min-h-[180px] lg:min-h-[212px] flex flex-col justify-end"
+                  className="group cursor-pointer relative rounded-[32px] overflow-hidden border border-[var(--border-color)] shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:border-amber-500/40 transition-all duration-300 flex-1 min-h-[180px] lg:min-h-[212px] flex flex-col justify-end"
                 >
                   {/* Background Image */}
                   {blog.imageUrl ? (
@@ -107,17 +107,17 @@ export default function BlogsPage() {
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-slate-800 flex items-center justify-center"><ImageIcon size={24} className="text-slate-500" /></div>
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><ImageIcon size={24} className="text-[var(--text-muted)]" /></div>
                   )}
                   {/* Dark Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent opacity-95" />
-                  
+
                   {/* Content */}
                   <div className="relative z-10 p-6 flex flex-col justify-end items-start text-left h-full w-full">
-                    <span className="bg-white/10 border border-white/20 text-white rounded-full px-3 py-0.5 text-[8px] font-primary font-bold uppercase tracking-wider">
+                    <span className="bg-black/40 border border-amber-500/30 text-amber-400 rounded-full px-3 py-0.5 text-[8px] font-primary font-bold uppercase tracking-wider">
                       {blog.category}
                     </span>
-                    <h3 className="text-sm md:text-base font-black font-primary uppercase text-white leading-snug mt-2 group-hover:text-pink-400 transition-colors line-clamp-2">
+                    <h3 className="text-sm md:text-base font-black font-primary uppercase text-[var(--text-primary)] leading-snug mt-2 group-hover:text-amber-400 transition-colors line-clamp-2">
                       {blog.title}
                     </h3>
                   </div>
@@ -130,19 +130,19 @@ export default function BlogsPage() {
 
         {/* LOWER SECTION: Filter Bar & Dynamic Grid */}
         <div className="flex flex-col gap-8 mt-4">
-          
+
           {/* Header */}
           <div className="flex flex-col gap-2 text-left">
-            <h1 className="text-3xl md:text-5xl font-black font-primary text-slate-900 tracking-tight uppercase">
+            <h1 className="text-3xl md:text-5xl font-black font-primary text-[var(--text-primary)] tracking-tight uppercase">
               {pageContent.heading}
             </h1>
-            <p className="text-slate-500 text-xs md:text-sm max-w-2xl leading-relaxed font-secondary">
+            <p className="text-[var(--text-secondary)] text-xs md:text-sm max-w-2xl leading-relaxed font-secondary">
               {pageContent.description}
             </p>
           </div>
 
           {/* Search & Filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-color)] pb-6">
             {/* Category pills */}
             <div className="flex flex-wrap items-center gap-2">
               {categories.map((category) => (
@@ -151,8 +151,8 @@ export default function BlogsPage() {
                   onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all cursor-pointer border ${
                     selectedCategory === category
-                      ? "bg-slate-900 border-slate-900 text-white"
-                      : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                      ? "bg-amber-500 border-amber-500 text-[#170D08]"
+                      : "bg-transparent border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-white/5"
                   }`}
                 >
                   {category}
@@ -162,13 +162,13 @@ export default function BlogsPage() {
 
             {/* Search Input */}
             <div className="relative w-full md:w-72 shrink-0">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+              <input
                 type="text"
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-full pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-pink-500 transition-all font-secondary"
+                className="w-full bg-white/5 border border-[var(--border-color)] rounded-full pl-9 pr-4 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-amber-500/40 transition-all font-secondary"
               />
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function BlogsPage() {
           {filteredBlogs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredBlogs.map((blog) => (
-                <BlogCard 
+                <BlogCard
                   key={blog.id}
                   title={blog.title}
                   slug={blog.slug}
@@ -191,8 +191,8 @@ export default function BlogsPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white border border-slate-200/80 rounded-[32px]">
-              <p className="text-slate-400 text-sm font-secondary">No articles match your search or category selection.</p>
+            <div className="text-center py-16 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[32px]">
+              <p className="text-[var(--text-muted)] text-sm font-secondary">No articles match your search or category selection.</p>
             </div>
           )}
 

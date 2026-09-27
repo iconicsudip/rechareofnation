@@ -14,8 +14,8 @@ interface RichTextEditorProps {
 const barBtn = (active: boolean): React.CSSProperties => ({
   width: "28px", height: "28px", borderRadius: "6px", display: "flex",
   alignItems: "center", justifyContent: "center", cursor: "pointer", border: "none",
-  background: active ? "rgba(99,102,241,0.25)" : "transparent",
-  color: active ? "#818CF8" : "rgba(148,163,184,0.7)",
+  background: active ? "rgba(217, 119, 6,0.25)" : "transparent",
+  color: active ? "#fbbf24" : "rgba(148,163,184,0.7)",
 });
 
 export default function RichTextEditor({ label, value, onChange }: RichTextEditorProps) {
@@ -39,9 +39,9 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
           {label}
         </label>
       )}
-      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "10px", overflow: "hidden" }}>
+      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)", borderRadius: "10px", overflow: "hidden" }}>
         {editor && (
-          <div className="flex items-center gap-1 px-2 py-1.5 flex-wrap" style={{ borderBottom: "1px solid rgba(99,102,241,0.15)" }}>
+          <div className="flex items-center gap-1 px-2 py-1.5 flex-wrap" style={{ borderBottom: "1px solid rgba(217, 119, 6,0.15)" }}>
             <button type="button" style={barBtn(editor.isActive("bold"))} onClick={() => editor.chain().focus().toggleBold().run()}><Bold size={13} /></button>
             <button type="button" style={barBtn(editor.isActive("italic"))} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic size={13} /></button>
             <button type="button" style={barBtn(editor.isActive("heading", { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={13} /></button>

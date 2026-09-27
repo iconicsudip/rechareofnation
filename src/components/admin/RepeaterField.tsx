@@ -6,7 +6,7 @@ import ImageUploadField from "./ImageUploadField";
 export interface RepeaterColumn {
   key: string;
   label: string;
-  type?: "text" | "number" | "textarea" | "image";
+  type?: "text" | "number" | "textarea" | "image" | "media";
   placeholder?: string;
   span?: 1 | 2; // grid column span within a row (default 1)
 }
@@ -23,7 +23,7 @@ interface RepeaterFieldProps<T extends Record<string, unknown>> {
 
 const S = {
   input: {
-    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)",
+    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)",
     borderRadius: "8px", color: "#E2E8F0", outline: "none", padding: "8px 10px", fontSize: "12.5px", width: "100%",
   },
   btn: {
@@ -64,11 +64,12 @@ export default function RepeaterField<T extends Record<string, unknown>>({
             <div className="grid grid-cols-2 gap-2">
               {columns.map((col) => (
                 <div key={col.key} className={col.span === 2 ? "col-span-2" : ""}>
-                  {col.type === "image" ? (
+                  {col.type === "image" || col.type === "media" ? (
                     <ImageUploadField
                       label={col.label}
                       value={(row[col.key] as string) ?? ""}
                       onChange={(url) => updateRow(i, col.key, url)}
+                      allowVideo={col.type === "media"}
                     />
                   ) : col.type === "textarea" ? (
                     <textarea
@@ -106,7 +107,7 @@ export default function RepeaterField<T extends Record<string, unknown>>({
         type="button"
         onClick={addRow}
         className="flex items-center gap-1.5 mt-2.5"
-        style={{ ...S.btn, background: "rgba(99,102,241,0.12)", color: "#818CF8" }}
+        style={{ ...S.btn, background: "rgba(217, 119, 6,0.12)", color: "#fbbf24" }}
       >
         <Plus size={12} /> {addLabel}
       </button>

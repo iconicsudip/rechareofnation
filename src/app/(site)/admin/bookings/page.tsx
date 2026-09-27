@@ -45,10 +45,10 @@ function QRImage({ value, size = 120 }: { value: string; size?: number }) {
 }
 
 const S = {
-  card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
+  card: { background: "rgba(23,13,8,0.6)", border: "1px solid rgba(217, 119, 6,0.12)", borderRadius: "16px" },
   input: {
-    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)",
-    borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "9px 12px", fontSize: "13px",
+    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)",
+    borderRadius: "10px", color: "#F5EEE2", outline: "none", padding: "9px 12px", fontSize: "13px",
   },
   btn: {
     display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 14px",
@@ -99,14 +99,14 @@ export default function AdminBookingsPage() {
   const totalPages = Math.ceil(total / 20);
 
   return (
-    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#E2E8F0" }}>
+    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#F5EEE2" }}>
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-extrabold text-white">Ticket Bookings</h1>
-          <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.6)" }}>{total} total bookings</p>
+          <p className="text-xs mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>{total} total bookings</p>
         </div>
-        <button onClick={load} style={{ ...S.btn, background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+        <button onClick={load} style={{ ...S.btn, background: "rgba(217, 119, 6,0.1)", color: "#fbbf24", border: "1px solid rgba(217, 119, 6,0.2)" }}>
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -114,7 +114,7 @@ export default function AdminBookingsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(148,163,184,0.4)" }} />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(203,185,160,0.4)" }} />
           <input
             style={{ ...S.input, paddingLeft: "32px", width: "100%" }}
             placeholder="Search by name, email, event or booking ref..."
@@ -123,7 +123,7 @@ export default function AdminBookingsPage() {
           />
         </div>
         <div className="relative">
-          <Filter size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(148,163,184,0.4)" }} />
+          <Filter size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(203,185,160,0.4)" }} />
           <select
             style={{ ...S.input, paddingLeft: "32px", paddingRight: "12px" }}
             value={statusFilter}
@@ -141,22 +141,22 @@ export default function AdminBookingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: "1px solid rgba(99,102,241,0.1)", background: "rgba(99,102,241,0.05)" }}>
+              <tr style={{ borderBottom: "1px solid rgba(217, 119, 6,0.1)", background: "rgba(217, 119, 6,0.05)" }}>
                 {["Visitor", "Event", "Ticket", "Amount", "Status", "Check-in", "Date", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider"
-                    style={{ color: "rgba(148,163,184,0.5)" }}>{h}</th>
+                    style={{ color: "rgba(203,185,160,0.5)" }}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[rgba(99,102,241,0.06)]">
+            <tbody className="divide-y divide-[rgba(217, 119, 6,0.06)]">
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <tr key={i}><td colSpan={8} className="px-5 py-4">
-                    <div className="h-4 rounded animate-pulse w-2/3" style={{ background: "rgba(99,102,241,0.08)" }} />
+                    <div className="h-4 rounded animate-pulse w-2/3" style={{ background: "rgba(217, 119, 6,0.08)" }} />
                   </td></tr>
                 ))
               ) : bookings.length === 0 ? (
-                <tr><td colSpan={8} className="px-5 py-12 text-center text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>
+                <tr><td colSpan={8} className="px-5 py-12 text-center text-sm" style={{ color: "rgba(203,185,160,0.4)" }}>
                   No bookings found.
                 </td></tr>
               ) : bookings.map((b) => {
@@ -165,15 +165,15 @@ export default function AdminBookingsPage() {
                   <tr key={b.id} className="transition-colors hover:bg-white/[0.02]">
                     <td className="px-4 py-3">
                       <div className="font-semibold text-white text-sm">{b.visitor_name}</div>
-                      <div className="text-[11px] mt-0.5" style={{ color: "rgba(148,163,184,0.4)" }}>{b.visitor_email}</div>
+                      <div className="text-[11px] mt-0.5" style={{ color: "rgba(203,185,160,0.4)" }}>{b.visitor_email}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-xs font-semibold" style={{ color: "rgba(148,163,184,0.7)" }}>{b.event_name}</div>
-                      <div className="text-[10px] mt-0.5" style={{ color: "rgba(148,163,184,0.4)" }}>Ref: {b.booking_ref}</div>
+                      <div className="text-xs font-semibold" style={{ color: "rgba(203,185,160,0.7)" }}>{b.event_name}</div>
+                      <div className="text-[10px] mt-0.5" style={{ color: "rgba(203,185,160,0.4)" }}>Ref: {b.booking_ref}</div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-bold"
-                        style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+                        style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24", border: "1px solid rgba(217, 119, 6,0.2)" }}>
                         {b.ticket_type} x {b.quantity}
                       </span>
                     </td>
@@ -187,20 +187,20 @@ export default function AdminBookingsPage() {
                     <td className="px-4 py-3">
                       {(b.scan_history?.length ?? 0) > 0 || b.scanned_at ? (
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 w-fit"
-                          style={{ background: "rgba(6,182,212,0.1)", color: "#22D3EE", border: "1px solid rgba(34,211,238,0.2)" }}>
+                          style={{ background: "rgba(156,122,29,0.15)", color: "#fbbf24", border: "1px solid rgba(201,162,39,0.25)" }}>
                           <ScanLine size={10} /> {b.scan_history?.length ?? 0} scan{(b.scan_history?.length ?? 0) === 1 ? "" : "s"}
                         </span>
                       ) : (
-                        <span className="text-[10px]" style={{ color: "rgba(148,163,184,0.35)" }}>Not yet</span>
+                        <span className="text-[10px]" style={{ color: "rgba(203,185,160,0.35)" }}>Not yet</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs" style={{ color: "rgba(148,163,184,0.5)" }}>
+                    <td className="px-4 py-3 text-xs" style={{ color: "rgba(203,185,160,0.5)" }}>
                       {new Date(b.created_at).toLocaleDateString("en-IN")}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <button onClick={() => setViewBooking(b)}
-                          className="p-1.5 rounded-lg" style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8" }} title="View">
+                          className="p-1.5 rounded-lg" style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24" }} title="View">
                           <Eye size={13} />
                         </button>
                         {b.status === "confirmed" && (
@@ -219,15 +219,15 @@ export default function AdminBookingsPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: "rgba(99,102,241,0.1)" }}>
-            <span className="text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>Page {page} of {totalPages}</span>
+          <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: "rgba(217, 119, 6,0.1)" }}>
+            <span className="text-xs" style={{ color: "rgba(203,185,160,0.4)" }}>Page {page} of {totalPages}</span>
             <div className="flex gap-2">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8" }}>
+                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24" }}>
                 <ChevronLeft size={14} />
               </button>
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8" }}>
+                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24" }}>
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -240,11 +240,11 @@ export default function AdminBookingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setViewBooking(null)} />
           <div className="relative w-full max-w-lg rounded-2xl overflow-hidden"
-            style={{ background: "#0F1729", border: "1px solid rgba(99,102,241,0.25)" }}>
-            <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "rgba(99,102,241,0.15)" }}>
+            style={{ background: "#2A1510", border: "1px solid rgba(217, 119, 6,0.25)" }}>
+            <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "rgba(217, 119, 6,0.15)" }}>
               <h3 className="font-bold text-white">Booking Details</h3>
               <button onClick={() => setViewBooking(null)} className="p-1.5 rounded-lg"
-                style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8" }}>
+                style={{ background: "rgba(255,255,255,0.05)", color: "#CBB9A0" }}>
                 <X size={15} />
               </button>
             </div>
@@ -269,21 +269,21 @@ export default function AdminBookingsPage() {
               ].map(([label, val]) => (
                 <div key={label}>
                   <div className="text-[10px] uppercase font-bold tracking-wider mb-0.5"
-                    style={{ color: "rgba(148,163,184,0.4)" }}>{label}</div>
+                    style={{ color: "rgba(203,185,160,0.4)" }}>{label}</div>
                   <div className="text-white font-semibold capitalize">{val || "—"}</div>
                 </div>
               ))}
             </div>
             
-            <div className="p-5 border-t border-[rgba(99,102,241,0.15)] flex flex-col md:flex-row gap-6">
+            <div className="p-5 border-t border-[rgba(217, 119, 6,0.15)] flex flex-col md:flex-row gap-6">
               {viewBooking.qr_hash && (
                 <div className="flex-shrink-0 flex flex-col items-center">
-                  <div className="text-[10px] uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(148,163,184,0.4)" }}>QR Pass</div>
+                  <div className="text-[10px] uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(203,185,160,0.4)" }}>QR Pass</div>
                   <QRImage value={viewBooking.qr_hash} size={110} />
                 </div>
               )}
               <div className="flex-1">
-                <div className="text-[10px] uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(148,163,184,0.4)" }}>Scan Activity</div>
+                <div className="text-[10px] uppercase font-bold tracking-wider mb-2" style={{ color: "rgba(203,185,160,0.4)" }}>Scan Activity</div>
                 {viewBooking.scan_history && viewBooking.scan_history.length > 0 ? (
                   <div className="flex flex-col gap-2">
                     {viewBooking.scan_history.map((s: any, i: number) => (
@@ -296,7 +296,7 @@ export default function AdminBookingsPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>No check-in scans recorded yet.</div>
+                  <div className="text-xs" style={{ color: "rgba(203,185,160,0.4)" }}>No check-in scans recorded yet.</div>
                 )}
               </div>
             </div>

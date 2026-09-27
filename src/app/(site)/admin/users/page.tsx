@@ -22,17 +22,17 @@ interface User {
 const ROLE_OPTS = ["user", "admin", "scanner", "coordinator"];
 
 const ROLE_STYLES: Record<string, { color: string; bg: string; border: string }> = {
-  admin:       { color: "#F472B6", bg: "rgba(219,39,119,0.12)", border: "rgba(244,114,182,0.25)" },
-  scanner:     { color: "#818CF8", bg: "rgba(79,70,229,0.12)",  border: "rgba(99,102,241,0.25)" },
+  admin:       { color: "#fbbf24", bg: "rgba(217, 119, 6,0.12)", border: "rgba(251, 191, 36,0.25)" },
+  scanner:     { color: "#fbbf24", bg: "rgba(180, 83, 9,0.12)",  border: "rgba(217, 119, 6,0.25)" },
   coordinator: { color: "#34D399", bg: "rgba(16,185,129,0.1)",  border: "rgba(52,211,153,0.2)" },
-  user:        { color: "#94A3B8", bg: "rgba(100,116,139,0.1)", border: "rgba(148,163,184,0.2)" },
+  user:        { color: "rgba(203,185,160,0.7)", bg: "rgba(203,185,160,0.1)", border: "rgba(203,185,160,0.2)" },
 };
 
 const S = {
-  card: { background: "rgba(15,23,42,0.6)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "16px" },
+  card: { background: "rgba(23,13,8,0.6)", border: "1px solid rgba(217, 119, 6,0.12)", borderRadius: "16px" },
   input: {
-    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(99,102,241,0.2)",
-    borderRadius: "10px", color: "#E2E8F0", outline: "none", padding: "9px 12px", fontSize: "13px",
+    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(217, 119, 6,0.2)",
+    borderRadius: "10px", color: "#F5EEE2", outline: "none", padding: "9px 12px", fontSize: "13px",
   },
   btn: {
     display: "inline-flex" as const, alignItems: "center", gap: "6px", padding: "8px 14px",
@@ -95,18 +95,18 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#E2E8F0" }}>
+    <div className="p-6 md:p-8 flex flex-col gap-6" style={{ color: "#F5EEE2" }}>
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-extrabold text-white">User Management</h1>
-          <p className="text-xs mt-1" style={{ color: "rgba(148,163,184,0.6)" }}>{total} registered users</p>
+          <h1 className="text-2xl font-extrabold text-[#F5EEE2]">User Management</h1>
+          <p className="text-xs mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>{total} registered users</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={load} style={{ ...S.btn, background: "rgba(99,102,241,0.1)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.2)" }}>
+          <button onClick={load} style={{ ...S.btn, background: "rgba(217, 119, 6,0.1)", color: "#fbbf24", border: "1px solid rgba(217, 119, 6,0.2)" }}>
             <RefreshCw size={14} /> Refresh
           </button>
-          <button onClick={openCreate} style={{ ...S.btn, background: "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff" }}>
+          <button onClick={openCreate} style={{ ...S.btn, background: "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff" }}>
             <Plus size={14} /> Add User
           </button>
         </div>
@@ -128,7 +128,7 @@ export default function AdminUsersPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(148,163,184,0.4)" }} />
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(203,185,160,0.4)" }} />
         <input
           style={{ ...S.input, paddingLeft: "32px", width: "100%" }}
           placeholder="Search by name or email..."
@@ -142,22 +142,22 @@ export default function AdminUsersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: "1px solid rgba(99,102,241,0.1)", background: "rgba(99,102,241,0.05)" }}>
+              <tr style={{ borderBottom: "1px solid rgba(217, 119, 6,0.1)", background: "rgba(217, 119, 6,0.05)" }}>
                 {["User", "Contact", "Organization", "Role", "Verified", "Joined", "Actions"].map(h => (
                   <th key={h} className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider"
-                    style={{ color: "rgba(148,163,184,0.5)" }}>{h}</th>
+                    style={{ color: "rgba(203,185,160,0.5)" }}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[rgba(99,102,241,0.06)]">
+            <tbody className="divide-y divide-[rgba(217, 119, 6,0.06)]">
               {loading ? (
                 [...Array(7)].map((_, i) => (
                   <tr key={i}><td colSpan={7} className="px-5 py-4">
-                    <div className="h-4 rounded animate-pulse w-3/4" style={{ background: "rgba(99,102,241,0.08)" }} />
+                    <div className="h-4 rounded animate-pulse w-3/4" style={{ background: "rgba(217, 119, 6,0.08)" }} />
                   </td></tr>
                 ))
               ) : users.length === 0 ? (
-                <tr><td colSpan={7} className="px-5 py-12 text-center text-sm" style={{ color: "rgba(148,163,184,0.4)" }}>
+                <tr><td colSpan={7} className="px-5 py-12 text-center text-sm" style={{ color: "rgba(203,185,160,0.4)" }}>
                   No users found.
                 </td></tr>
               ) : users.map(u => {
@@ -172,16 +172,16 @@ export default function AdminUsersPage() {
                           {u.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-semibold text-white text-sm">{u.name}</div>
-                          <div className="text-[11px]" style={{ color: "rgba(148,163,184,0.4)" }}>{u.email}</div>
+                          <div className="font-semibold text-[#F5EEE2] text-sm">{u.name}</div>
+                          <div className="text-[11px]" style={{ color: "rgba(203,185,160,0.4)" }}>{u.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-xs" style={{ color: "rgba(148,163,184,0.6)" }}>
+                    <td className="px-5 py-3 text-xs" style={{ color: "rgba(203,185,160,0.6)" }}>
                       {u.mobile || "—"}<br />
-                      <span style={{ color: "rgba(148,163,184,0.4)" }}>{u.city || "—"}</span>
+                      <span style={{ color: "rgba(203,185,160,0.4)" }}>{u.city || "—"}</span>
                     </td>
-                    <td className="px-5 py-3 text-xs" style={{ color: "rgba(148,163,184,0.6)" }}>
+                    <td className="px-5 py-3 text-xs" style={{ color: "rgba(203,185,160,0.6)" }}>
                       {u.organization || "—"}
                     </td>
                     <td className="px-5 py-3">
@@ -200,7 +200,7 @@ export default function AdminUsersPage() {
                         onClick={() => updateUser(u.id, { isVerified: !u.is_verified })}
                         disabled={isUpdating}
                         className="flex items-center gap-1.5 text-xs font-semibold"
-                        style={{ background: "none", border: "none", cursor: "pointer", color: u.is_verified ? "#34D399" : "#94A3B8" }}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: u.is_verified ? "#34D399" : "rgba(203,185,160,0.7)" }}
                       >
                         {u.is_verified
                           ? <><CheckCircle size={13} /> Verified</>
@@ -208,13 +208,13 @@ export default function AdminUsersPage() {
                         }
                       </button>
                     </td>
-                    <td className="px-5 py-3 text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>
+                    <td className="px-5 py-3 text-xs" style={{ color: "rgba(203,185,160,0.4)" }}>
                       {new Date(u.created_at).toLocaleDateString("en-IN")}
                     </td>
                     <td className="px-5 py-3">
                       {isUpdating && (
                         <div className="w-4 h-4 border-2 rounded-full animate-spin"
-                          style={{ borderColor: "rgba(99,102,241,0.3)", borderTopColor: "#818CF8" }} />
+                          style={{ borderColor: "rgba(217, 119, 6,0.3)", borderTopColor: "#fbbf24" }} />
                       )}
                     </td>
                   </tr>
@@ -225,15 +225,15 @@ export default function AdminUsersPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: "rgba(99,102,241,0.1)" }}>
-            <span className="text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>Page {page} of {totalPages}</span>
+          <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: "rgba(217, 119, 6,0.1)" }}>
+            <span className="text-xs" style={{ color: "rgba(203,185,160,0.4)" }}>Page {page} of {totalPages}</span>
             <div className="flex gap-2">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8" }}>
+                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24" }}>
                 <ChevronLeft size={14} />
               </button>
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(99,102,241,0.1)", color: "#818CF8" }}>
+                className="p-1.5 rounded-lg disabled:opacity-30" style={{ background: "rgba(217, 119, 6,0.1)", color: "#fbbf24" }}>
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -242,7 +242,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs" style={{ color: "rgba(148,163,184,0.4)" }}>
+      <div className="flex flex-wrap gap-4 text-xs" style={{ color: "rgba(203,185,160,0.4)" }}>
         <div className="flex items-center gap-1.5"><Shield size={12} /> Click role dropdown to change user role</div>
         <div className="flex items-center gap-1.5"><UserCheck size={12} /> Click verified status to toggle</div>
       </div>
@@ -252,12 +252,12 @@ export default function AdminUsersPage() {
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPanelOpen(false)} />
           <div className="relative w-full max-w-md h-full overflow-y-auto flex flex-col"
-            style={{ background: "#0F1729", borderLeft: "1px solid rgba(99,102,241,0.2)" }}>
+            style={{ background: "#2A1510", borderLeft: "1px solid rgba(217, 119, 6,0.2)" }}>
             <div className="flex items-center justify-between p-6 border-b sticky top-0 z-10"
-              style={{ borderColor: "rgba(99,102,241,0.15)", background: "#0F1729" }}>
-              <h2 className="font-extrabold text-white text-lg">Add User</h2>
+              style={{ borderColor: "rgba(217, 119, 6,0.15)", background: "#2A1510" }}>
+              <h2 className="font-extrabold text-[#F5EEE2] text-lg">Add User</h2>
               <button onClick={() => setPanelOpen(false)} className="p-2 rounded-lg"
-                style={{ background: "rgba(255,255,255,0.05)", color: "#94A3B8" }}>
+                style={{ background: "rgba(255,255,255,0.05)", color: "rgba(203,185,160,0.7)" }}>
                 <X size={16} />
               </button>
             </div>
@@ -273,7 +273,7 @@ export default function AdminUsersPage() {
               ].map((f) => (
                 <div key={f.key}>
                   <label className="text-xs font-bold uppercase tracking-wider block mb-1.5"
-                    style={{ color: "rgba(148,163,184,0.5)" }}>{f.label}</label>
+                    style={{ color: "rgba(203,185,160,0.5)" }}>{f.label}</label>
                   <input
                     type={f.type}
                     style={S.input}
@@ -286,7 +286,7 @@ export default function AdminUsersPage() {
 
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider block mb-1.5"
-                  style={{ color: "rgba(148,163,184,0.5)" }}>Role</label>
+                  style={{ color: "rgba(203,185,160,0.5)" }}>Role</label>
                 <select style={S.input} value={form.role}
                   onChange={(e) => setForm(prev => ({ ...prev, role: e.target.value }))}>
                   {ROLE_OPTS.map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
@@ -296,24 +296,24 @@ export default function AdminUsersPage() {
               <label className="flex items-center gap-2.5 cursor-pointer mt-2">
                 <div
                   className="relative w-9 h-5 rounded-full transition-colors flex-shrink-0"
-                  style={{ background: form.isVerified ? "#4F46E5" : "rgba(99,102,241,0.15)" }}
+                  style={{ background: form.isVerified ? "#d97706" : "rgba(217, 119, 6,0.15)" }}
                   onClick={() => setForm(prev => ({ ...prev, isVerified: !prev.isVerified }))}
                 >
                   <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
                     style={{ transform: form.isVerified ? "translateX(16px)" : "translateX(0)" }} />
                 </div>
-                <span className="text-xs font-medium" style={{ color: "rgba(148,163,184,0.7)" }}>
+                <span className="text-xs font-medium" style={{ color: "rgba(203,185,160,0.7)" }}>
                   Verified Account
                 </span>
               </label>
 
               <div className="flex gap-3 mt-6">
                 <button type="button" onClick={() => setPanelOpen(false)}
-                  style={{ ...S.btn, flex: 1, justifyContent: "center", background: "rgba(255,255,255,0.05)", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  style={{ ...S.btn, flex: 1, justifyContent: "center", background: "rgba(255,255,255,0.05)", color: "rgba(203,185,160,0.7)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={saving}
-                  style={{ ...S.btn, flex: 2, justifyContent: "center", background: saving ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4F46E5, #DB2777)", color: "#fff" }}>
+                  style={{ ...S.btn, flex: 2, justifyContent: "center", background: saving ? "rgba(217, 119, 6,0.3)" : "linear-gradient(135deg, #F59E0B, #B45309)", color: "#fff" }}>
                   {saving ? "Saving..." : "Create User"}
                   {!saving && <UserCheck size={14} />}
                 </button>

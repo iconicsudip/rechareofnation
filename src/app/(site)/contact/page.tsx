@@ -71,49 +71,49 @@ export default function ContactPage() {
     <div className="container !py-20 !md:py-24 flex flex-col gap-16">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
-        <span className="inline-flex items-center gap-2 bg-pink-50 border border-pink-100 text-pink-600 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary">
+        <span className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary">
           <MessageCircle size={12} /> {content?.eyebrow}
         </span>
-        <h1 className="text-4xl md:text-5xl font-black font-primary text-slate-900 tracking-tight">{content?.heading}</h1>
-        <p className="text-slate-500 text-sm max-w-lg">{content?.subheading}</p>
+        <h1 className="text-4xl md:text-5xl font-black font-primary text-[var(--text-primary)] tracking-tight">{content?.heading}</h1>
+        <p className="text-[var(--text-secondary)] text-sm max-w-lg">{content?.subheading}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
         {/* Left Column: Details (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-indigo-50 border border-indigo-100">
-              <MapPin className="text-indigo-600" size={18} />
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-amber-500/10 border border-amber-500/20">
+              <MapPin className="text-amber-400" size={18} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-sm font-primary">Office Address</h4>
-              <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">
+              <h4 className="font-bold text-[var(--text-primary)] text-sm font-primary">Office Address</h4>
+              <p className="text-[var(--text-secondary)] text-xs mt-1.5 leading-relaxed">
                 {content?.address}
               </p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-pink-50 border border-pink-100">
-              <Phone className="text-pink-600" size={18} />
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-amber-500/10 border border-amber-500/20">
+              <Phone className="text-amber-400" size={18} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-sm font-primary">Calling Helpline</h4>
-              <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">
+              <h4 className="font-bold text-[var(--text-primary)] text-sm font-primary">Calling Helpline</h4>
+              <p className="text-[var(--text-secondary)] text-xs mt-1.5 leading-relaxed">
                 {content?.phone} <br />
                 {content?.phoneHours}
               </p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-emerald-50 border border-emerald-100">
-              <Mail className="text-emerald-600" size={18} />
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20">
+              <Mail className="text-emerald-400" size={18} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-sm font-primary">Email Support</h4>
-              <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">
+              <h4 className="font-bold text-[var(--text-primary)] text-sm font-primary">Email Support</h4>
+              <p className="text-[var(--text-secondary)] text-xs mt-1.5 leading-relaxed">
                 {content?.salesEmail} <br />
                 {content?.supportEmail}
               </p>
@@ -121,7 +121,7 @@ export default function ContactPage() {
           </div>
 
           {/* Map Embed */}
-          <div className="h-60 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+          <div className="h-60 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-sm">
             <iframe
               src={content?.mapEmbedUrl}
               width="100%"
@@ -134,18 +134,18 @@ export default function ContactPage() {
         </div>
 
         {/* Right Column: Form (8 cols) */}
-        <div className="lg:col-span-8 bg-white border border-slate-200/90 rounded-[28px] shadow-sm p-8 md:p-10">
-          <h3 className="text-xl font-bold text-slate-900 font-primary mb-2">{content?.formHeading}</h3>
-          <p className="text-slate-500 text-xs mb-8">{content?.formHelperText}</p>
+        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[28px] shadow-sm p-8 md:p-10">
+          <h3 className="text-xl font-bold text-[var(--text-primary)] font-primary mb-2">{content?.formHeading}</h3>
+          <p className="text-[var(--text-secondary)] text-xs mb-8">{content?.formHelperText}</p>
 
           {isSubmitted ? (
-            <div className="py-10 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl text-center flex flex-col items-center gap-3">
+            <div className="py-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl text-center flex flex-col items-center gap-3">
               <CheckCircle size={36} />
               <h4 className="font-bold font-primary text-base">{content?.successHeading}</h4>
               <p className="text-xs max-w-sm">{content?.successBody}</p>
               <button
                 onClick={() => setIsSubmitted(false)}
-                className="border border-slate-200 text-slate-700 hover:bg-slate-50 py-2 px-6 text-xs font-semibold rounded-full mt-4 transition-colors cursor-pointer"
+                className="border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-white/5 py-2 px-6 text-xs font-semibold rounded-full mt-4 transition-colors cursor-pointer"
               >
                 Send Another Message
               </button>
@@ -154,22 +154,22 @@ export default function ContactPage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600">Full Name *</label>
+                  <label className="text-xs font-bold text-[var(--text-secondary)]">Full Name *</label>
                   <input
                     type="text"
                     placeholder="John Doe"
-                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full text-sm rounded-xl bg-white/5 border border-[var(--border-color)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 transition-colors"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600">Email Address *</label>
+                  <label className="text-xs font-bold text-[var(--text-secondary)]">Email Address *</label>
                   <input
                     type="email"
                     placeholder="john@example.com"
-                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full text-sm rounded-xl bg-white/5 border border-[var(--border-color)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 transition-colors"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -179,21 +179,21 @@ export default function ContactPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600">Mobile Number</label>
+                  <label className="text-xs font-bold text-[var(--text-secondary)]">Mobile Number</label>
                   <input
                     type="tel"
                     placeholder="+91 99999 88888"
-                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full text-sm rounded-xl bg-white/5 border border-[var(--border-color)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 transition-colors"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600">Subject *</label>
+                  <label className="text-xs font-bold text-[var(--text-secondary)]">Subject *</label>
                   <input
                     type="text"
                     placeholder="Sponsorship, Booking question..."
-                    className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
+                    className="w-full text-sm rounded-xl bg-white/5 border border-[var(--border-color)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 transition-colors"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     required
@@ -202,10 +202,10 @@ export default function ContactPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-600">Message Content *</label>
+                <label className="text-xs font-bold text-[var(--text-secondary)]">Message Content *</label>
                 <textarea
                   placeholder="Outline your question or request details here..."
-                  className="w-full text-sm rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-800 placeholder-slate-400 outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-400 transition-colors h-32 resize-none"
+                  className="w-full text-sm rounded-xl bg-white/5 border border-[var(--border-color)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 transition-colors h-32 resize-none"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   required
@@ -213,25 +213,25 @@ export default function ContactPage() {
               </div>
 
               {/* Spam Protection Simulator Box */}
-              <div className="p-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-between gap-4 mt-2">
+              <div className="p-4 rounded-xl border border-dashed border-[var(--border-color)] bg-white/5 flex items-center justify-between gap-4 mt-2">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="captcha-check"
-                    className="w-4 h-4 cursor-pointer accent-indigo-600 rounded border-slate-300 bg-white focus:ring-0 focus:ring-offset-0"
+                    className="w-4 h-4 cursor-pointer accent-amber-500 rounded border-[var(--border-color)] bg-transparent focus:ring-0 focus:ring-offset-0"
                     checked={isCaptchaVerified}
                     onChange={(e) => setIsCaptchaVerified(e.target.checked)}
                   />
-                  <label htmlFor="captcha-check" className="text-xs font-semibold text-slate-500 cursor-pointer select-none">
+                  <label htmlFor="captcha-check" className="text-xs font-semibold text-[var(--text-secondary)] cursor-pointer select-none">
                     I am not a robot (reCAPTCHA Verification Check)
                   </label>
                 </div>
-                <ShieldCheck size={20} className={isCaptchaVerified ? "text-emerald-500" : "text-slate-300"} />
+                <ShieldCheck size={20} className={isCaptchaVerified ? "text-emerald-400" : "text-[var(--text-muted)]"} />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 text-white rounded-xl py-3.5 mt-2 font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-500 text-[#170D08] rounded-xl py-3.5 mt-2 font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 disabled={isSubmitting || !isCaptchaVerified}
               >
                 <Send size={18} />

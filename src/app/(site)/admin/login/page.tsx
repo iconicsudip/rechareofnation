@@ -39,9 +39,9 @@ export default function AdminLoginPage() {
 
   const inputStyle: React.CSSProperties = {
     background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(99,102,241,0.25)",
+    border: "1px solid rgba(217, 119, 6,0.25)",
     borderRadius: "12px",
-    color: "#E2E8F0",
+    color: "#F5EEE2",
     outline: "none",
     padding: "12px 16px 12px 44px",
     fontSize: "14px",
@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
     <div
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        background: "radial-gradient(ellipse at 30% 20%, rgba(79,70,229,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(219,39,119,0.1) 0%, transparent 60%), #0B0F1A",
+        background: "radial-gradient(ellipse at 30% 20%, rgba(180, 83, 9,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(217, 119, 6,0.1) 0%, transparent 60%), #170D08",
         fontFamily: "var(--font-primary)",
       }}
     >
@@ -63,27 +63,27 @@ export default function AdminLoginPage() {
         <div className="flex flex-col items-center mb-8">
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: "linear-gradient(135deg, #4F46E5, #DB2777)", boxShadow: "0 8px 32px rgba(79,70,229,0.4)" }}
+            style={{ background: "linear-gradient(135deg, #F59E0B, #B45309)", boxShadow: "0 8px 32px rgba(180, 83, 9,0.4)" }}
           >
             <Zap size={28} className="text-white" />
           </div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Portal</h1>
-          <p className="text-sm mt-1" style={{ color: "rgba(148,163,184,0.6)" }}>Recharge Nation Dashboard</p>
+          <p className="text-sm mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>Recharge Nation Dashboard</p>
         </div>
 
         {/* Card */}
         <div
           className="rounded-3xl p-8"
           style={{
-            background: "rgba(15,23,42,0.7)",
+            background: "rgba(23,13,8,0.7)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(99,102,241,0.2)",
+            border: "1px solid rgba(217, 119, 6,0.2)",
             boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
           }}
         >
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-xl mb-6 text-xs font-semibold"
-            style={{ background: "rgba(79,70,229,0.1)", border: "1px solid rgba(99,102,241,0.2)", color: "#818CF8" }}
+            style={{ background: "rgba(180, 83, 9,0.1)", border: "1px solid rgba(217, 119, 6,0.2)", color: "#fbbf24" }}
           >
             <ShieldCheck size={13} />
             Restricted to administrators only
@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {/* Email */}
             <div className="relative">
-              <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(148,163,184,0.4)" }} />
+              <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(203,185,160,0.4)" }} />
               <input
                 type="email"
                 required
@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
 
             {/* Password */}
             <div className="relative">
-              <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(148,163,184,0.4)" }} />
+              <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(203,185,160,0.4)" }} />
               <input
                 type={showPw ? "text" : "password"}
                 required
@@ -130,7 +130,7 @@ export default function AdminLoginPage() {
                 type="button"
                 onClick={() => setShowPw(!showPw)}
                 className="absolute right-4 top-1/2 -translate-y-1/2"
-                style={{ color: "rgba(148,163,184,0.4)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                style={{ color: "rgba(203,185,160,0.4)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
               >
                 {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -141,10 +141,10 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-all"
               style={{
-                background: loading ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, #4F46E5 0%, #DB2777 100%)",
+                background: loading ? "rgba(217, 119, 6,0.3)" : "linear-gradient(135deg, #F59E0B 0%, #B45309 100%)",
                 border: "none",
                 cursor: loading ? "not-allowed" : "pointer",
-                boxShadow: loading ? "none" : "0 4px 20px rgba(79,70,229,0.4)",
+                boxShadow: loading ? "none" : "0 4px 20px rgba(180, 83, 9,0.4)",
                 fontFamily: "var(--font-primary)",
               }}
             >
