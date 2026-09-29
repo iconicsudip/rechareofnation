@@ -24,13 +24,25 @@ export const metadata: Metadata = {
   keywords: ["Recharge Nation", "Event Tickets", "Dance Competition", "Singing Competition", "Business Expo", "Cultural Festival", "Food Festival", "India Events"],
   authors: [{ name: "Recharge Nation Team" }],
   robots: "index, follow",
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon-32x32.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: "https://rechargenation.in",
     title: "Recharge Nation - Premium Event Management Platform",
     description: "Discover and participate in premium cultural, educational, business, and entertainment events across India.",
-    siteName: "Recharge Nation"
+    siteName: "Recharge Nation",
+    images: [{ url: "/images/logo.png", width: 764, height: 616, alt: "Recharge Nation" }],
   }
 };
 

@@ -11,20 +11,12 @@ interface BlogsPageContent {
   description: string;
 }
 
-// Mirrors the copy currently seeded in `site_content` (key: blogs_page) so
-// the header renders identically before the fetch below resolves — no flash.
-const FALLBACK_BLOGS_CONTENT: BlogsPageContent = {
-  heading: "Blog",
-  description:
-    "Curated road trip itineraries, expert driving guides, and premium destination logs across Mewar and Rajasthan.",
-};
-
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [pageContent, setPageContent] = useState<BlogsPageContent>(FALLBACK_BLOGS_CONTENT);
+  const [pageContent, setPageContent] = useState<BlogsPageContent>({ heading: "", description: "" });
 
   useEffect(() => {
     const fetchBlogs = async () => {

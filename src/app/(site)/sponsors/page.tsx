@@ -9,7 +9,12 @@ import {
   Building,
   CheckCircle,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  Trophy,
+  Star,
+  Maximize2,
+  ExternalLink,
+  X
 } from "lucide-react";
 import { ApiClient, Sponsor } from "@/lib/api-client";
 
@@ -23,27 +28,27 @@ interface TierData {
   placements: string;
 }
 
-// Sensible placeholder shown briefly while the real tier data is being fetched
-// from `site_content` (key: sponsorship_tiers). Prevents a crash/NaN flash on
-// first render, before the useEffect below resolves.
-const FALLBACK_TIER: TierData = {
-  name: "Loading...",
-  price: 0,
-  baseImpressions: 1,
-  space: "—",
-  allotments: "—",
-  entitlements: ["—", "—", "—"],
-  placements: "—"
-};
-
-const FALLBACK_TIERS: Record<string, TierData> = {
-  TITLE: FALLBACK_TIER,
-  PLATINUM: FALLBACK_TIER,
-  GOLD: FALLBACK_TIER,
-  ASSOCIATE: FALLBACK_TIER
-};
-
 interface PartnerLogo { category: string; name: string; logoUrl?: string }
+
+interface FoodExpoSponsorTier {
+  no: number;
+  rank?: string;
+  name: string;
+  price: string;
+  tag: string;
+  desc?: string;
+  bg: string;
+}
+
+interface FoodExpoConfig {
+  exhibitors: string[];
+  visitors: string[];
+  sponsorshipTiers: FoodExpoSponsorTier[];
+  benefits: string[];
+  portals: { name: string; url: string }[];
+  slogans: { primary: string; motto: string };
+  images: { chartPoster: string; sponsorshipPoster: string };
+}
 
 interface SponsorsPageContent {
   heroBadge: string;
@@ -56,31 +61,6 @@ interface SponsorsPageContent {
   enlistBullets: string[];
   partners: PartnerLogo[];
 }
-
-// Mirrors the copy currently seeded in `site_content` (key: sponsors_page) so
-// the page renders identically before the fetch below resolves — no flash.
-const FALLBACK_SPONSORS_CONTENT: SponsorsPageContent = {
-  heroBadge: "Brand Alignment & Ecosystem Expansion",
-  heroTitle: "CATALYZING INDIA'S LIVE & EXPERIENTIAL MARKETS",
-  heroDescription:
-    "Recharge Nation is proud to collaborate with industry-leading corporate brands driving technological development, sustainability, and cultural preservation. Together, we power secure smart admissions, high-speed regional networking, and luxury handloom revival across South Asia.",
-  stats: [
-    { label: "Total Audience Reach", value: "15 Lakhs+" },
-    { label: "Allied Brands", value: "50+ Active" },
-    { label: "Weaver Payouts", value: "₹85,00,000+" },
-    { label: "Gate Transits", value: "99.98% Smooth" }
-  ],
-  enlistEyebrow: "B2B Co-Creation & Media",
-  enlistHeading: "ENLIST YOUR BRAND",
-  enlistDescription:
-    "Gain premier brand recall and highly localized exposure to massive energetic audiences. We offer physical experiential stalls, interactive app integrations, visual custom stage banners, and direct category sponsorships.",
-  enlistBullets: [
-    "Access over 2,00,000+ highly active demographics",
-    "Custom physical experiential display zones",
-    "Live app telemetry-integrated promotional badges"
-  ],
-  partners: []
-};
 
 // Renders a stylized text lockup in place of a broken <img> when a sponsor
 // has no logoUrl (e.g. Paytm Checkout) or its logoUrl fails to load. Fully
@@ -127,14 +107,17 @@ export default function SponsorsPage() {
   // Forecaster state
   const [selectedTier, setSelectedTier] = useState<"TITLE" | "PLATINUM" | "GOLD" | "ASSOCIATE">("TITLE");
   const [footfallMultiplier, setFootfallMultiplier] = useState<number>(1.0); // ranges from 0.5 to 2.5
-  const [tiers, setTiers] = useState<Record<string, TierData>>(FALLBACK_TIERS);
+  const [tiers, setTiers] = useState<Record<string, TierData>>({});
 
   // Allied Brand Patrons showcase state
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [isShowcaseLoading, setIsShowcaseLoading] = useState(true);
 
   // CMS-driven page copy (hero + enlist panel)
-  const [pageContent, setPageContent] = useState<SponsorsPageContent>(FALLBACK_SPONSORS_CONTENT);
+  const [pageContent, setPageContent] = useState<SponsorsPageContent>({
+    heroBadge: "", heroTitle: "", heroDescription: "", stats: [],
+    enlistEyebrow: "", enlistHeading: "", enlistDescription: "", enlistBullets: [], partners: [],
+  });
 
   // Form states
   const [companyName, setCompanyName] = useState("");
@@ -143,18 +126,25 @@ export default function SponsorsPage() {
   const [tierInterest, setTierInterest] = useState("Gold Sponsor Package");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showFoodSponsorModal, setShowFoodSponsorModal] = useState(false);
+  const [foodExpoConfig, setFoodExpoConfig] = useState<FoodExpoConfig>({
+    exhibitors: [], visitors: [], sponsorshipTiers: [], benefits: [],
+    portals: [], slogans: { primary: "", motto: "" }, images: { chartPoster: "", sponsorshipPoster: "" },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       setIsShowcaseLoading(true);
-      const [sponsorsData, tiersData, sponsorsPageData] = await Promise.all([
+      const [sponsorsData, tiersData, sponsorsPageData, foodExpoData] = await Promise.all([
         ApiClient.getSponsors(),
         ApiClient.getSiteContent<Record<string, TierData>>("sponsorship_tiers"),
         ApiClient.getSiteContent<SponsorsPageContent>("sponsors_page"),
+        ApiClient.getSiteContent<FoodExpoConfig>("food_expo_config"),
       ]);
       setSponsors(sponsorsData);
       if (tiersData) setTiers(tiersData);
       if (sponsorsPageData) setPageContent(sponsorsPageData);
+      if (foodExpoData && foodExpoData.sponsorshipTiers) setFoodExpoConfig(foodExpoData);
       setIsShowcaseLoading(false);
     };
     fetchData();
@@ -196,9 +186,9 @@ export default function SponsorsPage() {
     setEmail("");
   };
 
-  const currentTierInfo = tiers[selectedTier] ?? FALLBACK_TIER;
-  const calculatedImpressions = Math.round(currentTierInfo.baseImpressions * footfallMultiplier);
-  const calculatedCPM = calculatedImpressions > 0 ? (currentTierInfo.price / calculatedImpressions) * 1000 : 0;
+  const currentTierInfo = tiers[selectedTier] ?? Object.values(tiers)[0];
+  const calculatedImpressions = currentTierInfo ? Math.round(currentTierInfo.baseImpressions * footfallMultiplier) : 0;
+  const calculatedCPM = currentTierInfo && calculatedImpressions > 0 ? (currentTierInfo.price / calculatedImpressions) * 1000 : 0;
 
   // Group the "Our Partners & Associates" logo wall by category (Universities,
   // Brands, Institutions, Hospitality Partners, ...) while preserving the
@@ -299,6 +289,7 @@ export default function SponsorsPage() {
         )}
 
         {/* ROI FORECASTER SECTION */}
+        {currentTierInfo && (
         <div className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-sm p-6 md:p-10 relative overflow-hidden bg-[radial-gradient(rgba(201,162,39,0.08)_1.2px,transparent_1.2px)] [background-size:24px_24px]">
 
           {/* Header Row */}
@@ -478,6 +469,216 @@ export default function SponsorsPage() {
           </div>
 
         </div>
+        )}
+
+        {/* FOOD EXPO 2026-2027 FEATURED SPONSORSHIP SPOTLIGHT */}
+        <div className="w-full bg-[var(--bg-card)] border border-amber-500/25 rounded-3xl shadow-2xl p-6 md:p-10 flex flex-col gap-8 relative overflow-hidden">
+          {/* Ambient Glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-color)] pb-6 relative z-10">
+            <div className="flex flex-col gap-1.5 text-left">
+              <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1 rounded-full w-fit">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[10px] md:text-xs font-bold tracking-widest text-amber-400 uppercase">
+                  Flagship Festival Deck &bull; 3rd Edition
+                </span>
+              </div>
+              <h2 className="text-xl md:text-3xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight">
+                Udaipur Catering &amp; Food Expo 2026–2027
+              </h2>
+              <p className="text-[var(--text-secondary)] text-xs md:text-sm font-secondary">
+                Jan 6, 7 &amp; 8, 2027 &bull; Organized by AANYA GROUP &bull; Official B2B Hospitality, Catering &amp; Tourism Expo.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href="https://www.udaipurfoodexpo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold font-primary uppercase tracking-wider transition-colors"
+              >
+                <span>udaipurfoodexpo.com</span>
+                <ExternalLink size={12} />
+              </a>
+              <a
+                href="https://www.uhcvs.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-stone-300 hover:text-white text-xs font-bold font-primary uppercase tracking-wider transition-colors"
+              >
+                <span>uhcvs.org</span>
+                <ExternalLink size={12} />
+              </a>
+              <button
+                type="button"
+                onClick={() => setShowFoodSponsorModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#170D08] text-xs font-black font-primary uppercase tracking-wider transition-colors shadow-md cursor-pointer"
+              >
+                <Maximize2 size={13} />
+                <span>View Full Poster</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Slogan Banner */}
+          <div className="w-full p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/30 text-center shadow-inner relative z-10">
+            <h3 className="text-sm md:text-base font-black text-amber-300 font-serif italic tracking-wide">
+              &ldquo;{foodExpoConfig.slogans.primary}&rdquo;
+            </h3>
+          </div>
+
+          {/* 2-Column Deck: 7 Categories & 9 Benefits */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+            {/* Left: 7 Sponsorship Categories */}
+            <div className="lg:col-span-5 flex flex-col gap-4 text-left">
+              <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
+                <span className="text-xs font-black font-primary text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                  <Trophy size={14} /> Sponsorship Categories
+                </span>
+                <span className="text-[10px] text-stone-400 font-mono bg-white/5 px-2.5 py-0.5 rounded-lg border border-white/10">
+                  {foodExpoConfig.sponsorshipTiers.length} Tiers Available
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                {foodExpoConfig.sponsorshipTiers.map((tier) => (
+                  <div
+                    key={tier.rank || tier.no}
+                    className="flex flex-col gap-2.5 px-3.5 py-3 rounded-2xl bg-[var(--bg-panel)] hover:bg-white/[0.05] border border-[var(--border-color)] hover:border-amber-500/40 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`w-7 h-7 rounded-xl text-xs font-black flex items-center justify-center text-white bg-gradient-to-br ${tier.bg} shadow-md shrink-0`}>
+                        {tier.rank || tier.no}
+                      </span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs sm:text-sm font-black text-white font-primary uppercase tracking-tight whitespace-nowrap">
+                          {tier.name}
+                        </span>
+                        <span className="text-[9.5px] text-[var(--text-muted)] font-secondary truncate">
+                          {tier.desc || tier.tag}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pl-10">
+                      <span className="text-xs sm:text-sm font-black font-mono text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl border border-amber-500/20">
+                        {tier.price}
+                      </span>
+                      <a
+                        href="#enlist"
+                        onClick={() => setTierInterest(`Food Expo: ${tier.name} (${tier.price})`)}
+                        className="inline-flex px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-[#170D08] text-[9.5px] font-primary font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        Enlist
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: 9 Sponsorship Benefits */}
+            <div className="lg:col-span-7 flex flex-col gap-4 text-left">
+              <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
+                <span className="text-xs font-black font-primary text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                  <Star size={14} /> Sponsorship Deliverables &amp; Benefits
+                </span>
+                <span className="text-[10px] text-stone-400 font-mono bg-white/5 px-2.5 py-0.5 rounded-lg border border-white/10">
+                  {foodExpoConfig.benefits.length} Core Privileges
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {foodExpoConfig.benefits.map((benefit, bIdx) => (
+                  <div
+                    key={bIdx}
+                    className="flex items-start gap-3 p-3.5 rounded-2xl bg-[var(--bg-panel)] border border-[var(--border-color)] text-xs text-[var(--text-secondary)] leading-relaxed font-secondary hover:border-amber-500/30 transition-colors"
+                  >
+                    <span className="w-5 h-5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                      {bIdx + 1}
+                    </span>
+                    <span>{benefit}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-[var(--border-color)] mt-auto">
+                <span className="text-xs text-[var(--text-muted)] italic font-primary">
+                  {foodExpoConfig.slogans.motto}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFoodSponsorModal(true)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#170D08] font-primary font-bold text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
+                  >
+                    <Maximize2 size={13} />
+                    <span>View Official Poster</span>
+                  </button>
+                  <a
+                    href="#enlist"
+                    className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-[var(--text-primary)] text-xs font-primary font-bold uppercase tracking-wider transition-colors"
+                  >
+                    <span>Enlist Brand</span>
+                    <ArrowRight size={13} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Clickable Graphic Poster Preview */}
+          <div
+            onClick={() => setShowFoodSponsorModal(true)}
+            className="group relative rounded-2xl overflow-hidden border border-amber-500/30 shadow-xl bg-[#120B07] p-2 sm:p-4 cursor-pointer relative z-10 flex items-center justify-center max-h-[480px] aspect-[16/9] sm:aspect-[16/8]"
+          >
+            <img
+              src={foodExpoConfig.images.sponsorshipPoster}
+              alt="Food Expo Sponsorship Categories &amp; Benefits Poster"
+              className="w-full h-full max-h-full max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+              <span className="px-5 py-2.5 rounded-xl bg-amber-500 text-[#170D08] font-primary font-black text-xs uppercase tracking-wider shadow-2xl flex items-center gap-2">
+                <Maximize2 size={14} /> Click to Enlarge Official Poster
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Lightbox modal for Food Expo Sponsorship Chart on Sponsors Page */}
+        {showFoodSponsorModal && (
+          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+            <div className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-[#120B07] border border-amber-500/30 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-white/10 mb-3">
+                <div className="flex flex-col text-left">
+                  <span className="text-[9px] font-primary font-bold text-amber-400 uppercase tracking-widest">
+                    Food Expo 2026–2027 Official Blueprint
+                  </span>
+                  <h3 className="text-sm sm:text-lg font-black font-primary text-white uppercase">
+                    Sponsorship Categories &amp; Benefits Poster
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowFoodSponsorModal(false)}
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="overflow-hidden max-h-[78vh] w-full rounded-2xl flex items-center justify-center p-2 bg-black/40">
+                <img
+                  src={foodExpoConfig.images.sponsorshipPoster}
+                  alt="Food Expo Sponsorship Poster"
+                  className="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-xl shadow-2xl"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SHOWCASE SECTION */}
         <div className="flex flex-col gap-12 py-6 font-secondary">

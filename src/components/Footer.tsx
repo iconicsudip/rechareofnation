@@ -22,7 +22,7 @@ interface FooterContent {
 // Literal defaults mirror the current hardcoded copy so there's no visible
 // flash while the CMS fetch resolves; the fetch overwrites this if it returns data.
 const defaultFooterContent: FooterContent = {
-  brandName: "RECHARGENATION",
+  brandName: "RECHARGE FOR NATION",
   brandTagline: "",
   brandDescription:
     "Recharge Nation is the central portal for premium cultural programs, nationwide dance and singing clashes, style showcases, culinary festivals, and industrial exhibitions across India.",
@@ -151,12 +151,21 @@ export default function Footer() {
 
           {/* Column 1: Brand Info (2 Columns wide on large screens) */}
           <div className="lg:col-span-2 flex flex-col gap-5">
-            {/* Two-tone logo with ticket icon */}
-            <Link href="/" className="flex items-center gap-2">
-              <Ticket className="text-amber-400 w-6 h-6 shrink-0" />
-              <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] font-primary">
-                RECHARGE<span className="text-amber-400">NATION</span>
-              </span>
+            {/* Brand Logo with Official Emblem */}
+            <Link href="/" className="flex items-center gap-3.5 group select-none">
+              <img
+                src="/images/logo-transparent.png"
+                alt="Recharge For Nation"
+                className="h-14 sm:h-16 w-auto object-contain drop-shadow-[0_4px_16px_rgba(245,158,11,0.35)] group-hover:scale-105 transition-all duration-300"
+              />
+              <div className="flex flex-col text-left">
+                <span className="text-xl font-black tracking-tight text-[var(--text-primary)] font-primary uppercase leading-tight">
+                  RECHARGE<span className="text-amber-400"> FOR NATION</span>
+                </span>
+                <span className="text-[8px] font-primary font-bold tracking-[0.25em] text-amber-500/80 uppercase mt-1">
+                  ONE NATION • ONE ENERGY • ONE FUTURE
+                </span>
+              </div>
             </Link>
 
             <p className="leading-relaxed text-xs max-w-sm font-secondary">

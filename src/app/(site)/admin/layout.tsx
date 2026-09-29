@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarDays,
+  CalendarRange,
   ClipboardList,
   QrCode,
   UserCog,
@@ -27,6 +28,7 @@ import { useState } from "react";
 const NAV_ITEMS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/events", label: "Events", icon: CalendarDays },
+  { href: "/admin/calendar", label: "Event Calendar", icon: CalendarRange },
   { href: "/admin/bookings", label: "Ticket Bookings", icon: Ticket },
   { href: "/admin/competitions", label: "Competitions", icon: Trophy },
   { href: "/admin/registrations", label: "Registrations", icon: ClipboardList },
@@ -88,15 +90,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         {/* Logo */}
-        <div className="p-6 border-b" style={{ borderColor: "rgba(201, 162, 39, 0.12)" }}>
-          <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #E4C465, #9C7A1D)" }}>
-              <Zap size={16} className="text-[#170D08]" />
-            </div>
+        <div className="p-5 border-b" style={{ borderColor: "rgba(201, 162, 39, 0.12)" }}>
+          <Link href="/admin" className="flex items-center gap-2.5 group">
+            <img
+              src="/images/logo-icon-transparent.png"
+              alt="RFN Admin"
+              className="w-9 h-9 rounded-xl object-contain border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.25)] group-hover:scale-105 transition-all shrink-0"
+            />
             <div>
-              <div className="text-[#F5EEE2] font-extrabold text-sm tracking-tight leading-none">Admin</div>
-              <div className="text-[10px]" style={{ color: "rgba(203,185,160,0.6)" }}>Recharge Nation</div>
+              <div className="text-[#F5EEE2] font-extrabold text-sm tracking-tight leading-none">Admin Portal</div>
+              <div className="text-[10px] uppercase font-bold tracking-wider mt-0.5" style={{ color: "rgba(203,185,160,0.7)" }}>Recharge For Nation</div>
             </div>
           </Link>
         </div>

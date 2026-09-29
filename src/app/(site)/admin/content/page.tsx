@@ -29,6 +29,9 @@ const KEY_META: Record<string, { label: string; description: string }> = {
   homepage_stats: { label: "About Recharge Nation", description: "The \"who we are\" intro section on the homepage, plus its trust/stat tiles." },
   homepage_newsletter: { label: "Homepage Newsletter Banner", description: "The VIP gateway email signup banner copy." },
   sponsors_page: { label: "Sponsors Page", description: "Hero copy, stat tiles, the Enlist Your Brand panel, and the categorized partner logo wall." },
+  homepage_allied_ventures: { label: "Brand Ecosystem (Allied Ventures)", description: "The 4 key allied ventures: Laxmi Publicity, B.B. Creative Worlds, Recharge for Nation, and New Venture." },
+  homepage_serial_events: { label: "Homepage Serial Events (9 Events)", description: "Configure the 9 curated serial events, order, badges, dates, and categories shown on the homepage." },
+  food_expo_config: { label: "Food Expo 2026-2027 Blueprint", description: "18 Exhibitor sectors, 16 Visitor profiles, 7 Sponsorship Tiers, 9 Deliverables, Portals, and Posters." },
   gallery_page: { label: "Gallery Page", description: "Hero eyebrow, heading, and description." },
   blogs_page: { label: "Blogs Page", description: "Hero heading and description." },
   event_form_fields: { label: "Event Form Fields", description: "Which fields appear in the admin Add/Edit Event form, and in what order." },
@@ -432,6 +435,135 @@ export default function AdminContentPage() {
                   addLabel="Add stat tile"
                 />
               </>
+            )}
+
+            {activeKey === "homepage_allied_ventures" && (
+              <RepeaterField
+                label="Allied Ventures (Group Network)"
+                hint="Configure the venture cards under 'Our Core Ecosystem'. Set Flagship to 'true' to give the card the prominent gold glowing border and center logo."
+                columns={[
+                  { key: "name", label: "Brand / Venture Name" },
+                  { key: "category", label: "Category / Tagline" },
+                  { key: "badge", label: "Badge (e.g. Media & PR, Event Platform)" },
+                  { key: "tag", label: "Tag (e.g. 26+ Yrs Legacy, Flagship Platform)" },
+                  { key: "desc", label: "Description", type: "textarea", span: 2 },
+                  { key: "logoUrl", label: "Logo URL (optional, for flagship brand)", type: "media", span: 2 },
+                  { key: "iconType", label: "Icon Name (Megaphone, Palette, Rocket, Building2, Tv, Globe, etc.)" },
+                  { key: "link", label: "Target URL / Link (optional, e.g. /events or https://...)" },
+                  { key: "isFlagship", label: "Flagship Card? (true / false)" },
+                ]}
+                value={(structured.ventures as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ ventures: v })}
+                emptyRow={{ name: "", category: "", desc: "", tag: "", badge: "", logoUrl: "", iconType: "Rocket", link: "", isFlagship: false }}
+                addLabel="Add Venture"
+              />
+            )}
+
+            {activeKey === "homepage_serial_events" && (
+              <RepeaterField
+                label="Curated Serial Events (Homepage Flow)"
+                hint="Order and configure the 9 serial events. The 'Event Slug' connects to live tickets, dates, and venues in the Events database."
+                columns={[
+                  { key: "serial", label: "Serial No. (e.g. 01)" },
+                  { key: "slug", label: "Event Slug (must match DB slug)" },
+                  { key: "badge", label: "Badge Label (e.g. Dance Competition)" },
+                  { key: "dates", label: "Date / Season Text (e.g. 16 & 17 December)" },
+                  { key: "subtitle", label: "Subtitle / Tagline", span: 2 },
+                  { key: "filterCategory", label: "Filter Category (dance, food, conclave, lifestyle, all)" },
+                ]}
+                value={(structured.events as Record<string, unknown>[]) ?? []}
+                onChange={(v) => setStruct({ events: v })}
+                emptyRow={{ serial: "01", slug: "", badge: "", dates: "", subtitle: "", filterCategory: "all" }}
+                addLabel="Add Serial Event"
+              />
+            )}
+
+            {activeKey === "food_expo_config" && (
+              <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(203,185,160,0.5)" }}>
+                      Primary Slogan
+                    </label>
+                    <input
+                      style={S.input}
+                      value={((structured.slogans as Record<string, string>)?.primary) ?? ""}
+                      onChange={(e) => setStruct({ slogans: { ...((structured.slogans as Record<string, string>) ?? {}), primary: e.target.value } })}
+                      placeholder="e.g. Let's Build a Stronger Food Ecosystem Together"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(203,185,160,0.5)" }}>
+                      Motto / Sub-slogan
+                    </label>
+                    <input
+                      style={S.input}
+                      value={((structured.slogans as Record<string, string>)?.motto) ?? ""}
+                      onChange={(e) => setStruct({ slogans: { ...((structured.slogans as Record<string, string>) ?? {}), motto: e.target.value } })}
+                      placeholder="e.g. Your Support • Our Strength"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ImageUploadField
+                    label="Food Expo Chart Poster"
+                    value={((structured.images as Record<string, string>)?.chartPoster) ?? ""}
+                    onChange={(url) => setStruct({ images: { ...((structured.images as Record<string, string>) ?? {}), chartPoster: url } })}
+                  />
+                  <ImageUploadField
+                    label="Food Expo Sponsorship Poster"
+                    value={((structured.images as Record<string, string>)?.sponsorshipPoster) ?? ""}
+                    onChange={(url) => setStruct({ images: { ...((structured.images as Record<string, string>) ?? {}), sponsorshipPoster: url } })}
+                  />
+                </div>
+
+                <RepeaterField
+                  label="Official Portals & Domains"
+                  columns={[
+                    { key: "name", label: "Display Domain / Name (e.g. www.udaipurfoodexpo.com)" },
+                    { key: "url", label: "Full URL (e.g. https://www.udaipurfoodexpo.com)" },
+                  ]}
+                  value={(structured.portals as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ portals: v })}
+                  emptyRow={{ name: "", url: "" }}
+                  addLabel="Add Official Portal"
+                />
+
+                <SimpleListEditor
+                  label="Exhibitor Categories (18 Sectors)"
+                  value={(structured.exhibitors as string[]) ?? []}
+                  onChange={(v) => setStruct({ exhibitors: v })}
+                  placeholder="Add an exhibitor sector (e.g. Bakery Ingredients)..."
+                />
+                <SimpleListEditor
+                  label="Visitor Profiles (16 Profiles)"
+                  value={(structured.visitors as string[]) ?? []}
+                  onChange={(v) => setStruct({ visitors: v })}
+                  placeholder="Add a visitor profile (e.g. Caterers)..."
+                />
+                <RepeaterField
+                  label="Sponsorship Tiers"
+                  columns={[
+                    { key: "rank", label: "Rank / Number (e.g. 1)" },
+                    { key: "name", label: "Tier Name (e.g. Presents)" },
+                    { key: "price", label: "Price (e.g. ₹11,00,000)" },
+                    { key: "tag", label: "Tag / Category" },
+                    { key: "desc", label: "Description", span: 2 },
+                    { key: "bg", label: "Color Gradient (e.g. from-amber-500 to-amber-600)", span: 2 },
+                  ]}
+                  value={(structured.sponsorshipTiers as Record<string, unknown>[]) ?? []}
+                  onChange={(v) => setStruct({ sponsorshipTiers: v })}
+                  emptyRow={{ rank: "1", name: "", price: "", tag: "", desc: "", bg: "from-amber-500 to-amber-600" }}
+                  addLabel="Add Sponsorship Tier"
+                />
+                <SimpleListEditor
+                  label="Sponsorship Deliverables & Benefits (9 Core Deliverables)"
+                  value={(structured.benefits as string[]) ?? []}
+                  onChange={(v) => setStruct({ benefits: v })}
+                  placeholder="Add a sponsorship deliverable..."
+                />
+              </div>
             )}
 
             {activeKey === "sponsors_page" && (

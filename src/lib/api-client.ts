@@ -281,9 +281,15 @@ const mapDbEvent = (e: any): Event => ({
   googleMapEmbedUrl: e.google_map_url || '',
   isFeatured: e.is_featured ?? false,
   isUpcoming: e.is_upcoming ?? true,
-  ticketPrices: Array.isArray(e.ticket_prices)
+  ticketPrices: (Array.isArray(e.ticket_prices)
     ? e.ticket_prices
-    : (() => { try { return JSON.parse(e.ticket_prices || '[]'); } catch { return []; } })(),
+    : (() => { try { return JSON.parse(e.ticket_prices || '[]'); } catch { return []; } })()
+  ).map((t: any) => ({
+    type: (t.type || t.tier || t.name || 'General Admission') as TicketType,
+    price: Number(t.price ?? 0),
+    available: Number(t.available ?? t.total ?? 100),
+    description: t.description || '',
+  })),
   organizer: (typeof e.organizer === 'object' && e.organizer !== null)
     ? e.organizer
     : (() => { try { return JSON.parse(e.organizer || '{}'); } catch { return { name: '', contact: '', email: '', phone: '' }; } })(),

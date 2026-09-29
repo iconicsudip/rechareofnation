@@ -13,13 +13,6 @@ interface GalleryPageContent {
   description: string;
 }
 
-const FALLBACK_GALLERY_CONTENT: GalleryPageContent = {
-  eyebrow: "Moments Captured",
-  heading: "Experience Highlights",
-  description:
-    "Witness spectacular frames from our biggest past editions. Concert arenas, traditional runways, and dense technology presentations.",
-};
-
 function getGalleryEmbedUrl(url: string): string | null {
   if (!url) return null;
   const clean = url.trim();
@@ -67,7 +60,7 @@ export default function GalleryPage() {
   // Lightbox Modal
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [pageContent, setPageContent] = useState<GalleryPageContent>(FALLBACK_GALLERY_CONTENT);
+  const [pageContent, setPageContent] = useState<GalleryPageContent>({ eyebrow: "", heading: "", description: "" });
 
   const gridTopRef = useRef<HTMLDivElement>(null);
 
@@ -243,7 +236,7 @@ export default function GalleryPage() {
                 <img
                   src={activeLightboxItem.url}
                   alt={activeLightboxItem.title}
-                  className="max-w-full max-h-[75vh] object-contain"
+                  className="max-w-full max-h-full w-auto h-auto object-contain"
                 />
               </div>
             )}

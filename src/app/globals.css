@@ -63,6 +63,28 @@ h1, h2, h3, h4, h5, h6 {
   /* color: var(--text-primary); */
 }
 
+/* Ensure all images and videos conform strictly to parent container size */
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+/* Parent-fitting utilities */
+.img-fill-parent {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.img-contain-parent {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

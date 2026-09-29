@@ -61,14 +61,13 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-            style={{ background: "linear-gradient(135deg, #F59E0B, #B45309)", boxShadow: "0 8px 32px rgba(180, 83, 9,0.4)" }}
-          >
-            <Zap size={28} className="text-white" />
-          </div>
+          <img
+            src="/images/logo-transparent.png"
+            alt="Recharge For Nation"
+            className="w-24 sm:w-28 h-auto object-contain mb-4 drop-shadow-[0_8px_32px_rgba(245,158,11,0.35)]"
+          />
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Portal</h1>
-          <p className="text-sm mt-1" style={{ color: "rgba(203,185,160,0.6)" }}>Recharge Nation Dashboard</p>
+          <p className="text-xs uppercase tracking-widest font-semibold mt-1" style={{ color: "rgba(203,185,160,0.7)" }}>Recharge For Nation Dashboard</p>
         </div>
 
         {/* Card */}

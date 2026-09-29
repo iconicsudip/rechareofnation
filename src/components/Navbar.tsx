@@ -46,7 +46,7 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [primaryLinks, setPrimaryLinks] = useState<NavItem[]>(DEFAULT_PRIMARY_LINKS);
-  const [brandTagline, setBrandTagline] = useState("Experience India");
+  const [brandTagline, setBrandTagline] = useState("One Nation • One Energy • One Future");
 
 
 
@@ -122,17 +122,19 @@ export default function Navbar() {
           {/* Brand Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 group select-none shrink-0 outline-none focus:outline-none"
+            className="flex items-center gap-2.5 sm:gap-3 group select-none shrink-0 outline-none focus:outline-none"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-[#170D08] shadow-[0_0_15px_rgba(245,158,11,0.25)] group-hover:shadow-[0_0_22px_rgba(245,158,11,0.4)] transition-all shrink-0">
-              <Ticket size={16} className="shrink-0 group-hover:scale-105 transition-transform" />
-            </div>
+            <img
+              src="/images/logo-transparent.png"
+              alt="Recharge For Nation"
+              className="h-10 sm:h-11 w-auto object-contain drop-shadow-[0_2px_12px_rgba(245,158,11,0.3)] group-hover:scale-105 transition-all duration-300"
+            />
             <div className="flex flex-col text-left leading-none">
-              <span className="text-[13.5px] font-black tracking-tight text-white font-primary uppercase leading-tight">
-                RECHARGE<span className="text-amber-400">NATION</span>
+              <span className="text-[13px] sm:text-[14.5px] font-black tracking-tight text-white font-primary uppercase leading-tight">
+                RECHARGE<span className="text-amber-400"> FOR NATION</span>
               </span>
-              <span className="text-[7.5px] font-primary font-bold tracking-[0.25em] text-stone-400 uppercase mt-0.5 leading-none">
-                {brandTagline}
+              <span className="text-[6.8px] sm:text-[7.5px] font-primary font-bold tracking-[0.22em] text-amber-500/80 uppercase mt-0.5 leading-none">
+                {brandTagline === "Experience India" ? "ONE NATION • ONE ENERGY • ONE FUTURE" : brandTagline}
               </span>
             </div>
           </Link>
