@@ -141,27 +141,42 @@ export default function Navbar() {
 
           {/* Desktop Minimal Navigation Links */}
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {primaryLinks.map((link) => {
-              const isActive =
-                pathname === link.href ||
-                (link.href !== "/" && pathname.startsWith(link.href));
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 outline-none focus:outline-none ${
-                    isActive
-                      ? "text-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
-                      : "text-stone-300 hover:text-amber-300 hover:bg-white/[0.04]"
-                  }`}
-                >
-                  {link.name}
-                  {isActive && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400 animate-pulse" />
-                  )}
-                </Link>
-              );
-            })}
+            <Link
+              href="/"
+              className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 outline-none focus:outline-none ${
+                pathname === "/"
+                  ? "text-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
+                  : "text-stone-300 hover:text-amber-300 hover:bg-white/[0.04]"
+              }`}
+            >
+              Home
+              {pathname === "/" && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400 animate-pulse" />
+              )}
+            </Link>
+            {primaryLinks
+              .filter((link) => link.href !== "/" && !link.name.toLowerCase().includes("home"))
+              .map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(link.href));
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 outline-none focus:outline-none ${
+                      isActive
+                        ? "text-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
+                        : "text-stone-300 hover:text-amber-300 hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400 animate-pulse" />
+                    )}
+                  </Link>
+                );
+              })}
           </nav>
 
           {/* Desktop Right Actions */}
@@ -289,24 +304,26 @@ export default function Navbar() {
               <ChevronRight size={14} className="text-stone-500" />
             </Link>
 
-            {primaryLinks.map((link) => {
-              const isActive =
-                pathname === link.href ||
-                (link.href !== "/" && pathname.startsWith(link.href));
-              return (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center justify-between text-xs font-bold py-2.5 px-3 rounded-xl uppercase tracking-wider transition-colors ${
-                    isActive ? "bg-amber-500/10 text-amber-400" : "text-stone-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <span>{link.name}</span>
-                  <ChevronRight size={14} className="text-stone-500" />
-                </Link>
-              );
-            })}
+            {primaryLinks
+              .filter((link) => link.href !== "/" && !link.name.toLowerCase().includes("home"))
+              .map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  (link.href !== "/" && pathname.startsWith(link.href));
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center justify-between text-xs font-bold py-2.5 px-3 rounded-xl uppercase tracking-wider transition-colors ${
+                      isActive ? "bg-amber-500/10 text-amber-400" : "text-stone-300 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    <ChevronRight size={14} className="text-stone-500" />
+                  </Link>
+                );
+              })}
           </div>
 
           <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
