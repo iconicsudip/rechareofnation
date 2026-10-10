@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+import GlobalLoader from "@/components/GlobalLoader";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -58,6 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <GlobalLoader />
         {children}
       </body>
     </html>
