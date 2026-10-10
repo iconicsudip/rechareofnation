@@ -97,16 +97,57 @@ export default function AdminCompetitionsPage() {
   const openEdit = (c: Competition) => {
     setEditTarget(c);
     setForm({
-      name: c.name, slug: c.slug, city: c.city || "", venue: c.venue || "",
+      name: c.name || "", slug: c.slug || "", city: c.city || "", venue: c.venue || "",
       eventDate: c.event_date?.slice(0, 10) || "", deadline: c.deadline?.slice(0, 10) || "",
       bannerUrl: c.banner_url || "", prizePool: c.prize_pool || "",
       registrationFee: String(c.registration_fee ?? 0), summary: c.summary || "", description: c.description || "",
     });
-    setCategories(Array.isArray(c.categories) ? c.categories : []);
-    setRules(Array.isArray(c.rules) ? c.rules : []);
-    setJudges(Array.isArray(c.judges) ? c.judges : []);
-    setFaqs(Array.isArray(c.faqs) ? c.faqs : []);
-    setRegionalHubs(Array.isArray(c.regional_hubs) ? c.regional_hubs : []);
+    setCategories(
+      Array.isArray(c.categories)
+        ? c.categories.map((cat) => ({
+            ...cat,
+            name: (cat?.name || "") as string,
+            ageGroup: ((cat as any)?.ageGroup || (cat as any)?.age_group || "") as string,
+            fee: Number((cat as any)?.fee || 0),
+          }))
+        : []
+    );
+    setRules(
+      Array.isArray(c.rules)
+        ? c.rules.map((r) =>
+            typeof r === "string" ? r : ((r as any)?.title || (r as any)?.rule || (r as any)?.text || String(r || ""))
+          )
+        : []
+    );
+    setJudges(
+      Array.isArray(c.judges)
+        ? c.judges.map((j) => ({
+            ...j,
+            name: (j?.name || "") as string,
+            role: (j?.role || "") as string,
+            desc: (j?.desc || (j as any)?.description || "") as string,
+          }))
+        : []
+    );
+    setFaqs(
+      Array.isArray(c.faqs)
+        ? c.faqs.map((f) => ({
+            ...f,
+            q: (f?.q || (f as any)?.question || "") as string,
+            a: (f?.a || (f as any)?.answer || "") as string,
+          }))
+        : []
+    );
+    setRegionalHubs(
+      Array.isArray(c.regional_hubs)
+        ? c.regional_hubs.map((h) => ({
+            ...h,
+            city: (h?.city || "") as string,
+            venue: (h?.venue || "") as string,
+            date: (h?.date || "") as string,
+          }))
+        : []
+    );
     setOrganizer(c.organizer && c.organizer.name !== undefined ? c.organizer : { ...EMPTY_ORGANIZER });
     setRegistrationFormFields(
       Array.isArray(c.registration_form_fields) && c.registration_form_fields.length > 0
@@ -122,11 +163,13 @@ export default function AdminCompetitionsPage() {
     const body = {
       ...form,
       registrationFee: Number(form.registrationFee) || 0,
-      categories: categories.filter(c => c.name.trim()),
-      rules: rules.filter(r => r.trim()),
-      judges: judges.filter(j => j.name.trim()),
-      faqs: faqs.filter(f => f.q.trim()),
-      regionalHubs: regionalHubs.filter(h => h.city.trim()),
+      categories: categories.filter((c) => Boolean((c?.name ?? "").trim())),
+      rules: rules
+        .map((r) => (typeof r === "string" ? r : ((r as any)?.title || (r as any)?.rule || (r as any)?.text || String(r || ""))))
+        .filter((r) => Boolean((r ?? "").trim())),
+      judges: judges.filter((j) => Boolean((j?.name ?? "").trim())),
+      faqs: faqs.filter((f) => Boolean((f?.q || (f as any)?.question || "").trim())),
+      regionalHubs: regionalHubs.filter((h) => Boolean((h?.city ?? "").trim())),
       organizer,
       registrationFormFields,
       ...(editTarget ? { id: editTarget.id } : {}),

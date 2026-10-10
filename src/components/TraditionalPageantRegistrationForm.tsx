@@ -144,7 +144,7 @@ export default function TraditionalPageantRegistrationForm({ competition }: Trad
   if (result) {
     return (
       <div className="flex flex-col items-center gap-4 text-center py-2">
-        <span className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+        <span className="w-12 h-12 rounded-full bg-[#7B1123]/10 border border-[#C59B27]/40 flex items-center justify-center text-[#C59B27]">
           <Check size={22} />
         </span>
         <div>

@@ -39,6 +39,10 @@ export default function BlogCard({
             alt={title}
             loading="lazy"
             decoding="async"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "/images/logo.png";
+            }}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -47,16 +51,16 @@ export default function BlogCard({
           </div>
         )}
         {/* Badge */}
-        <span className="bg-[#170D08]/90 text-[var(--text-primary)] px-2.5 py-1 text-[8px] font-bold tracking-widest uppercase rounded-md absolute top-3 left-3 border border-[var(--border-color)] font-primary shadow-sm">
+        <span className="bg-white/95 text-[#7B1123] px-2.5 py-1 text-[8px] font-bold tracking-widest uppercase rounded-md absolute top-3 left-3 border border-[#C59B27]/40 font-primary shadow-sm">
           {category}
         </span>
       </div>
 
       {/* Content */}
       <div className="flex flex-col gap-2 px-1">
-        <h4 className="text-xs md:text-sm font-black text-[var(--text-primary)] font-primary uppercase leading-snug tracking-tight group-hover:text-amber-400 transition-colors flex items-start gap-2 justify-between">
+        <h4 className="text-xs md:text-sm font-black text-[var(--text-primary)] font-primary uppercase leading-snug tracking-tight group-hover:text-[#7B1123] transition-colors flex items-start gap-2 justify-between">
           <span className="flex-1 line-clamp-2">{title}</span>
-          <span className="inline-block shrink-0 text-[var(--text-muted)] group-hover:text-amber-400 transition-colors font-primary text-sm leading-none mt-0.5">
+          <span className="inline-block shrink-0 text-[#C59B27] group-hover:text-[#7B1123] transition-colors font-primary text-sm leading-none mt-0.5">
             ↗
           </span>
         </h4>

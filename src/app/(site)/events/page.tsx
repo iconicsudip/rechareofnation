@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { Search, Calendar, MapPin, Sliders } from "lucide-react";
+import { Search, Calendar, MapPin, Sliders, ChevronDown, ChevronUp } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { ApiClient } from "@/lib/api-client";
 import EventCard from "@/components/EventCard";
@@ -37,6 +37,15 @@ function EventsContent() {
   const [dateTimeline, setDateTimeline] = useState("all"); // all, today, weekend, next30
   const [priceFilter, setPriceFilter] = useState("all"); // all, free, under500, under1500, premium
   const [sortBy, setSortBy] = useState("rating-desc");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const activeFiltersCount = [
+    Boolean(search),
+    category !== "All",
+    location !== "All",
+    dateTimeline !== "all",
+    priceFilter !== "all"
+  ].filter(Boolean).length;
 
   // Helper to update URL params
   const updateUrlParam = (key: string, value: string | null) => {
@@ -223,10 +232,34 @@ function EventsContent() {
         </div>
 
         {/* 2. Directory Body */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+
+          {/* Mobile Filter Toggle Button */}
+          <div className="lg:hidden w-full">
+            <button
+              onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+              className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] px-4 py-3 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-amber-500/30 transition-all"
+            >
+              <div className="flex items-center gap-2 text-xs font-primary font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                <Sliders size={14} className="text-amber-500" />
+                <span>Filters & Search</span>
+                {activeFiltersCount > 0 && (
+                  <span className="bg-[#7B1123] text-[#F3BA2F] border border-[#C59B27]/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-[11px] font-primary font-bold text-amber-500 uppercase tracking-wider">
+                <span>{mobileFiltersOpen ? "Hide" : "Filter"}</span>
+                {mobileFiltersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
+            </button>
+          </div>
 
           {/* Left Panel: Filter Matrix */}
-          <div className="w-full lg:w-64 shrink-0 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[20px] p-5 flex flex-col gap-6 shadow-[0_4px_25px_rgba(0,0,0,0.25)] lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] overflow-y-auto z-10">
+          <div className={`w-full lg:w-64 shrink-0 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[20px] p-5 flex-col gap-6 shadow-[0_4px_25px_rgba(0,0,0,0.25)] lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] overflow-y-auto z-10 ${
+            mobileFiltersOpen ? "flex" : "hidden lg:flex"
+          }`}>
 
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
@@ -271,8 +304,8 @@ function EventsContent() {
                       onClick={() => { setCategory(cat); updateUrlParam("segment", cat); }}
                       className={`w-full text-left py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         isActive
-                          ? "text-amber-400 bg-amber-500/10"
-                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
+                          ? "text-[#7B1123] bg-[#7B1123]/10 font-bold border-l-2 border-[#C59B27]"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-stone-50"
                       }`}
                     >
                       {cat}
@@ -413,7 +446,7 @@ function EventsContent() {
                 <p className="text-[var(--text-secondary)] text-xs max-w-xs font-secondary">We couldn't find any events matching your selected filter guidelines. Try clearing your filters.</p>
                 <button
                   onClick={clearFilters}
-                  className="bg-[var(--bg-panel)] text-[var(--text-primary)] text-[10px] font-primary font-bold tracking-widest px-6 py-3 rounded-xl uppercase hover:bg-amber-500 hover:text-[#170D08] transition-all cursor-pointer"
+                  className="bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 text-[10px] font-primary font-bold tracking-widest px-6 py-3 rounded-xl uppercase hover:brightness-110 transition-all cursor-pointer shadow-md"
                 >
                   Reset Filter Matrix
                 </button>

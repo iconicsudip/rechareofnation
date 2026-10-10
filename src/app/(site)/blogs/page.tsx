@@ -71,10 +71,10 @@ export default function BlogsPage() {
 
               {/* Content */}
               <div className="relative z-10 p-6 md:p-10 flex flex-col justify-end items-start text-left h-full w-full">
-                <span className="text-[9px] font-primary font-bold tracking-widest text-[var(--text-secondary)] uppercase">
+                <span className="text-[9px] font-primary font-bold tracking-widest text-amber-300 uppercase">
                   PUBLISHED ON {blogs[0].publishedAt}
                 </span>
-                <h2 className="text-xl md:text-3xl font-black font-primary uppercase text-[var(--text-primary)] leading-tight mt-2 max-w-2xl group-hover:text-amber-400 transition-colors">
+                <h2 className="text-xl md:text-3xl font-black font-primary uppercase text-white drop-shadow-md leading-tight mt-2 max-w-2xl group-hover:text-amber-400 transition-colors">
                   {blogs[0].title}
                 </h2>
                 <span className="mt-4 bg-black/40 border border-amber-500/30 text-amber-400 rounded-full px-4 py-1 text-[9px] font-primary font-bold uppercase tracking-wider">
@@ -109,7 +109,7 @@ export default function BlogsPage() {
                     <span className="bg-black/40 border border-amber-500/30 text-amber-400 rounded-full px-3 py-0.5 text-[8px] font-primary font-bold uppercase tracking-wider">
                       {blog.category}
                     </span>
-                    <h3 className="text-sm md:text-base font-black font-primary uppercase text-[var(--text-primary)] leading-snug mt-2 group-hover:text-amber-400 transition-colors line-clamp-2">
+                    <h3 className="text-sm md:text-base font-black font-primary uppercase text-white drop-shadow-md leading-snug mt-2 group-hover:text-amber-400 transition-colors line-clamp-2">
                       {blog.title}
                     </h3>
                   </div>
@@ -136,15 +136,15 @@ export default function BlogsPage() {
           {/* Search & Filters */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-color)] pb-6">
             {/* Category pills */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-nowrap md:flex-wrap items-center gap-2 overflow-x-auto pb-1 md:pb-0 no-scrollbar max-w-full">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-xs font-black tracking-wider uppercase transition-all cursor-pointer border ${
+                  className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-primary font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     selectedCategory === category
-                      ? "bg-amber-500 border-amber-500 text-[#170D08]"
-                      : "bg-transparent border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-white/5"
+                      ? "bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 shadow-md"
+                      : "bg-white border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-stone-50"
                   }`}
                 >
                   {category}

@@ -76,6 +76,24 @@ export interface Event {
   eventSections?: EventSectionItem[];
   bookingFormFields?: BookingFormFieldConfig[];
   inquiryFormFields?: BookingFormFieldConfig[];
+  highlights?: EventHighlight[];
+  exhibitPillars?: InfoPillar[];
+  visitPillars?: InfoPillar[];
+}
+
+export interface EventHighlight {
+  [key: string]: unknown;
+  title: string;
+  desc: string;
+  image?: string;
+  tags?: string[];
+}
+
+export interface InfoPillar {
+  [key: string]: unknown;
+  title: string;
+  desc: string;
+  image?: string;
 }
 
 export interface EventSectionItem {
@@ -334,6 +352,15 @@ const mapDbEvent = (e: any): Event => ({
   inquiryFormFields: Array.isArray(e.inquiry_form_fields)
     ? e.inquiry_form_fields
     : (() => { try { return JSON.parse(e.inquiry_form_fields || '[]'); } catch { return []; } })(),
+  highlights: Array.isArray(e.highlights)
+    ? e.highlights
+    : (() => { try { return JSON.parse(e.highlights || '[]'); } catch { return []; } })(),
+  exhibitPillars: Array.isArray(e.exhibit_pillars)
+    ? e.exhibit_pillars
+    : (() => { try { return JSON.parse(e.exhibit_pillars || '[]'); } catch { return []; } })(),
+  visitPillars: Array.isArray(e.visit_pillars)
+    ? e.visit_pillars
+    : (() => { try { return JSON.parse(e.visit_pillars || '[]'); } catch { return []; } })(),
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

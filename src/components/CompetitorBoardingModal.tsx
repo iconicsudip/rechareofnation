@@ -460,7 +460,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
                     </div>
                     <div className="flex justify-between text-[10px]">
                       <span className="text-slate-500 font-primary uppercase">ID Verified:</span>
-                      <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <span className="text-[#C59B27] font-bold flex items-center gap-1">
                         <Check size={10} /> Yes
                       </span>
                     </div>

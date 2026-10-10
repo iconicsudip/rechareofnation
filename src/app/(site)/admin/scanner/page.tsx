@@ -185,8 +185,8 @@ export default function AdminScannerPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full"
-          style={{ background: scanning ? "rgba(16,185,129,0.1)" : "rgba(217, 119, 6,0.1)", border: `1px solid ${scanning ? "rgba(52,211,153,0.3)" : "rgba(217, 119, 6,0.2)"}`, color: scanning ? "#34D399" : "#fbbf24" }}>
-          <div className={`w-1.5 h-1.5 rounded-full ${scanning ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+          style={{ background: scanning ? "rgba(197,155,39,0.15)" : "rgba(123,17,35,0.1)", border: `1px solid ${scanning ? "rgba(197,155,39,0.4)" : "rgba(123,17,35,0.2)"}`, color: scanning ? "#C59B27" : "#7B1123" }}>
+          <div className={`w-1.5 h-1.5 rounded-full ${scanning ? "bg-[#C59B27] animate-pulse" : "bg-[#7B1123]"}`} />
           {scanning ? "Scanning..." : "Camera Off"}
         </div>
       </div>

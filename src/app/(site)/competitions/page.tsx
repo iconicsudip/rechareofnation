@@ -22,8 +22,8 @@ export default function CompetitionsListingPage() {
 
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto flex flex-col gap-2.5">
-          <span className="inline-flex items-center gap-1.5 mx-auto px-3 py-1 rounded-full text-[10px] font-primary font-extrabold tracking-widest uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30">
-            <Trophy size={11} /> National Arenas
+          <span className="inline-flex items-center gap-1.5 mx-auto px-3 py-1 rounded-full text-[10px] font-primary font-extrabold tracking-widest uppercase bg-[#7B1123]/10 text-[#7B1123] border border-[#C59B27]/40">
+            <Trophy size={11} className="text-[#C59B27]" /> National Arenas
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-[var(--text-primary)] font-primary uppercase tracking-tight">
             All Competitions

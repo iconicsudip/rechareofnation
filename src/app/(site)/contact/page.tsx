@@ -68,23 +68,23 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="container !py-20 !md:py-24 flex flex-col gap-16">
+    <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col gap-12 md:gap-16">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
-        <span className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary">
-          <MessageCircle size={12} /> {content?.eyebrow}
+        <span className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-700 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary">
+          <MessageCircle size={12} className="text-amber-600" /> {content?.eyebrow}
         </span>
-        <h1 className="text-4xl md:text-5xl font-black font-primary text-[var(--text-primary)] tracking-tight">{content?.heading}</h1>
-        <p className="text-[var(--text-secondary)] text-sm max-w-lg">{content?.subheading}</p>
+        <h1 className="text-3xl md:text-5xl font-black font-primary text-[var(--text-primary)] tracking-tight">{content?.heading}</h1>
+        <p className="text-[var(--text-secondary)] text-xs md:text-sm max-w-lg">{content?.subheading}</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
 
         {/* Left Column: Details (4 cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
+        <div className="lg:col-span-4 flex flex-col gap-4 sm:gap-6">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-5 sm:p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
             <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-amber-500/10 border border-amber-500/20">
-              <MapPin className="text-amber-400" size={18} />
+              <MapPin className="text-amber-600" size={18} />
             </div>
             <div>
               <h4 className="font-bold text-[var(--text-primary)] text-sm font-primary">Office Address</h4>
@@ -94,9 +94,9 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-5 sm:p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
             <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-amber-500/10 border border-amber-500/20">
-              <Phone className="text-amber-400" size={18} />
+              <Phone className="text-amber-600" size={18} />
             </div>
             <div>
               <h4 className="font-bold text-[var(--text-primary)] text-sm font-primary">Calling Helpline</h4>
@@ -107,13 +107,13 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
-            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20">
-              <Mail className="text-emerald-400" size={18} />
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-5 sm:p-6 flex items-start gap-4 hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-[#7B1123]/10 border border-[#C59B27]/30">
+              <Mail className="text-[#7B1123]" size={18} />
             </div>
             <div>
               <h4 className="font-bold text-[var(--text-primary)] text-sm font-primary">Email Support</h4>
-              <p className="text-[var(--text-secondary)] text-xs mt-1.5 leading-relaxed">
+              <p className="text-[var(--text-secondary)] text-xs mt-1.5 leading-relaxed break-all">
                 {content?.salesEmail} <br />
                 {content?.supportEmail}
               </p>
@@ -134,12 +134,12 @@ export default function ContactPage() {
         </div>
 
         {/* Right Column: Form (8 cols) */}
-        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[28px] shadow-sm p-8 md:p-10">
-          <h3 className="text-xl font-bold text-[var(--text-primary)] font-primary mb-2">{content?.formHeading}</h3>
-          <p className="text-[var(--text-secondary)] text-xs mb-8">{content?.formHelperText}</p>
+        <div className="lg:col-span-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl md:rounded-[28px] shadow-sm p-5 sm:p-8 md:p-10">
+          <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] font-primary mb-2">{content?.formHeading}</h3>
+          <p className="text-[var(--text-secondary)] text-xs mb-6 sm:mb-8">{content?.formHelperText}</p>
 
           {isSubmitted ? (
-            <div className="py-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl text-center flex flex-col items-center gap-3">
+            <div className="py-10 bg-[#7B1123]/10 border border-[#C59B27]/40 text-[#7B1123] rounded-2xl text-center flex flex-col items-center gap-3">
               <CheckCircle size={36} />
               <h4 className="font-bold font-primary text-base">{content?.successHeading}</h4>
               <p className="text-xs max-w-sm">{content?.successBody}</p>
@@ -226,12 +226,12 @@ export default function ContactPage() {
                     I am not a robot (reCAPTCHA Verification Check)
                   </label>
                 </div>
-                <ShieldCheck size={20} className={isCaptchaVerified ? "text-emerald-400" : "text-[var(--text-muted)]"} />
+                <ShieldCheck size={20} className={isCaptchaVerified ? "text-[#C59B27]" : "text-[var(--text-muted)]"} />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-500 text-[#170D08] rounded-xl py-3.5 mt-2 font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="w-full bg-gradient-to-r from-[#7B1123] via-[#961E34] to-[#7B1123] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-[#F3BA2F] border border-[#C59B27]/40 rounded-xl py-3.5 mt-2 font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                 disabled={isSubmitting || !isCaptchaVerified}
               >
                 <Send size={18} />

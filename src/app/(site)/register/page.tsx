@@ -48,12 +48,12 @@ function RegisterContent() {
   };
 
   return (
-    <div className="min-h-[90vh] flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-[0_12px_45px_rgba(0,0,0,0.3)] rounded-[32px] p-8 md:p-10 relative overflow-hidden text-[var(--text-primary)] text-left">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400"></div>
+    <div className="min-h-[90vh] flex items-center justify-center py-8 sm:py-12 px-3 sm:px-4">
+      <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-[0_12px_45px_rgba(0,0,0,0.3)] rounded-2xl sm:rounded-[32px] p-5 sm:p-8 md:p-10 relative overflow-hidden text-[var(--text-primary)] text-left">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#7B1123] via-[#C59B27] to-[#7B1123]"></div>
 
         <div className="flex flex-col items-center text-center gap-2 mb-8">
-          <span className="text-[10px] font-primary font-bold tracking-widest text-amber-400 uppercase">Join Recharge Nation</span>
+          <span className="text-[10px] font-primary font-bold tracking-widest text-[#7B1123] uppercase">Join Recharge Nation</span>
           <h2 className="text-2xl sm:text-3xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight">Create Account</h2>
           <p className="text-[var(--text-secondary)] text-[11px] sm:text-xs font-secondary leading-relaxed max-w-md mx-auto mt-0.5">Enter your details to manage tickets, register for competitions, and update profiles</p>
         </div>
@@ -68,7 +68,7 @@ function RegisterContent() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="md:col-span-2 flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Full Name *</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <User className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="text"
@@ -83,7 +83,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Email Address *</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <Mail className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="email"
@@ -98,7 +98,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Password *</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <Lock className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="password"
@@ -113,7 +113,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">Mobile Number</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <Phone className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="tel"
@@ -127,7 +127,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">School / College / Organization</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <Building className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="text"
@@ -141,7 +141,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">City</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <MapPin className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="text"
@@ -155,7 +155,7 @@ function RegisterContent() {
 
           <div className="flex flex-col">
             <label className="text-[10px] font-primary tracking-wider font-bold text-[var(--text-muted)] uppercase mb-1.5 block">State</label>
-            <div className="relative rounded-xl border border-[var(--border-color)] bg-white/5 hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
+            <div className="relative rounded-xl border border-[var(--border-color)] bg-white shadow-sm hover:border-amber-500/30 focus-within:border-amber-500/50 focus-within:ring-1 focus-within:ring-amber-500/20 transition-all">
               <MapPin className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" size={16} />
               <input
                 type="text"
@@ -170,7 +170,7 @@ function RegisterContent() {
           <div className="md:col-span-2 pt-2">
             <button
               type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 hover:from-amber-500 hover:to-amber-300 text-[#170D08] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 bg-gradient-to-r from-[#7B1123] via-[#961E34] to-[#7B1123] hover:brightness-110 text-[#F3BA2F] border border-[#C59B27]/40 font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               disabled={isLoading}
             >
               <UserPlus size={16} />
@@ -181,7 +181,7 @@ function RegisterContent() {
 
         <div className="mt-8 text-center text-xs text-[var(--text-secondary)] font-secondary">
           Already have an account?{" "}
-          <Link href={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-amber-400 hover:text-amber-300 font-bold underline font-primary transition-colors">
+          <Link href={`/login?redirect=${encodeURIComponent(redirect)}`} className="text-[#7B1123] hover:text-[#961E34] font-bold underline font-primary transition-colors">
             Sign In Here
           </Link>
         </div>

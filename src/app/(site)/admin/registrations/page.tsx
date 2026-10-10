@@ -225,7 +225,7 @@ export default function AdminRegistrationsPage() {
                     <td className="px-4 py-3">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold capitalize ${
                         reg.payment_status === "paid"
-                          ? "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20"
+                          ? "text-[#C59B27] bg-[#7B1123]/25 border border-[#C59B27]/40"
                           : "text-yellow-400 bg-yellow-400/10 border border-yellow-400/20"
                       }`}>
                         {reg.payment_status}

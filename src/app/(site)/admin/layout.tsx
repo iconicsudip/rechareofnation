@@ -70,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // requests before this component ever renders) — no client-side gate needed here.
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#170D08", fontFamily: "var(--font-primary)" }}>
+    <div className="min-h-screen flex dark dark-surface bg-[#170D08]" style={{ background: "#170D08", fontFamily: "var(--font-primary)" }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -203,7 +203,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex-1" />
           <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full"
             style={{ background: "rgba(156,122,29,0.15)", border: "1px solid rgba(201,162,39,0.25)", color: "#E4C465" }}>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#C59B27] animate-pulse" />
             <span>Admin Panel</span>
           </div>
         </header>

@@ -83,7 +83,7 @@ export default function BlogDetailPage({ params }: PageProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
           <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full text-left">
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-black font-primary text-[var(--text-primary)] uppercase tracking-tight leading-tight max-w-4xl">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-black font-primary text-white uppercase tracking-tight leading-tight max-w-4xl drop-shadow-lg">
               {blog.title}
             </h1>
           </div>
@@ -100,7 +100,7 @@ export default function BlogDetailPage({ params }: PageProps) {
 
           {/* Category & read time */}
           <div className="flex items-center gap-3">
-            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
+            <span className="bg-amber-500/10 text-amber-800 border border-amber-600/25 px-3.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
               {blog.category}
             </span>
             <span className="text-[var(--border-color)]">•</span>
@@ -112,10 +112,10 @@ export default function BlogDetailPage({ params }: PageProps) {
           {/* Share links */}
           <div className="flex items-center gap-2">
             <span className="text-[var(--text-muted)] uppercase font-bold text-[9px] tracking-wider mr-1 flex items-center gap-1"><Share2 size={10} /> Share:</span>
-            <button className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-400 hover:border-amber-500/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer">
+            <button className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-800 hover:border-amber-600/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer">
               FB
             </button>
-            <button className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-400 hover:border-amber-500/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer">
+            <button className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-800 hover:border-amber-600/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer">
               TW
             </button>
             <button
@@ -123,7 +123,7 @@ export default function BlogDetailPage({ params }: PageProps) {
                 navigator.clipboard.writeText(window.location.href);
                 alert("Link copied to clipboard!");
               }}
-              className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-400 hover:border-amber-500/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer"
+              className="px-2.5 py-1 rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-amber-800 hover:border-amber-600/40 transition-colors bg-white/5 font-bold tracking-wider text-[9px] cursor-pointer"
             >
               COPY
             </button>
@@ -154,7 +154,7 @@ export default function BlogDetailPage({ params }: PageProps) {
               <div className="flex flex-col gap-3 pt-2">
                 {blog.bullets.map((bullet, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <span className="w-5 h-5 shrink-0 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-[10px] font-black font-primary mt-0.5">
+                    <span className="w-5 h-5 shrink-0 rounded-full bg-amber-500/15 text-amber-800 border border-amber-600/30 flex items-center justify-center text-[10px] font-black font-primary mt-0.5">
                       {idx + 1}
                     </span>
                     <p className="text-[var(--text-secondary)] text-sm leading-relaxed font-secondary">{bullet}</p>

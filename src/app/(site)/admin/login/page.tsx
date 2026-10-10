@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center p-4 dark dark-surface bg-[#170D08]"
       style={{
         background: "radial-gradient(ellipse at 30% 20%, rgba(180, 83, 9,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(217, 119, 6,0.1) 0%, transparent 60%), #170D08",
         fontFamily: "var(--font-primary)",

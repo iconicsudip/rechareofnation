@@ -179,11 +179,11 @@ export default function CompetitionDetailPage({ params }: PageProps) {
 
                 {/* Status & Category Pills */}
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-primary font-extrabold tracking-widest uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                    <Trophy size={11} className="text-amber-400" /> National Crown Championship
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-primary font-extrabold tracking-widest uppercase bg-amber-500/15 text-amber-800 border border-amber-600/30">
+                    <Trophy size={11} className="text-amber-600" /> National Crown Championship
                   </span>
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-primary font-bold tracking-widest uppercase border ${registrationsOpen ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" : "bg-rose-500/15 text-rose-300 border-rose-500/30"}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${registrationsOpen ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-primary font-bold tracking-widest uppercase border ${registrationsOpen ? "bg-[#7B1123]/10 text-[#7B1123] border-[#C59B27]/40" : "bg-stone-100 text-stone-600 border-stone-300"}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${registrationsOpen ? "bg-[#C59B27] animate-pulse" : "bg-stone-500"}`} />
                     {registrationsOpen ? "Registrations Open" : "Registrations Closed"}
                   </span>
                 </div>
@@ -200,39 +200,39 @@ export default function CompetitionDetailPage({ params }: PageProps) {
 
                 {/* Key Specs Capsule Bar */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2">
-                  <div className="bg-white/[0.03] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 backdrop-blur-sm">
-                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-400/80 uppercase">
-                      <Calendar size={12} className="text-amber-400 shrink-0" /> Grand Finale
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 shadow-sm">
+                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-800 uppercase">
+                      <Calendar size={12} className="text-amber-700 shrink-0" /> Grand Finale
                     </span>
                     <span className="text-xs sm:text-sm font-black font-primary text-[var(--text-primary)] uppercase truncate">
                       {competition.eventDate}
                     </span>
                   </div>
 
-                  <div className="bg-white/[0.03] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 backdrop-blur-sm">
-                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-400/80 uppercase">
-                      <MapPin size={12} className="text-amber-400 shrink-0" /> City Hub
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 shadow-sm">
+                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-800 uppercase">
+                      <MapPin size={12} className="text-amber-700 shrink-0" /> City Hub
                     </span>
                     <span className="text-xs sm:text-sm font-black font-primary text-[var(--text-primary)] uppercase truncate">
                       {competition.city}
                     </span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-secondary truncate">
+                    <span className="text-[10px] text-[var(--text-secondary)] font-secondary truncate">
                       {competition.venue}
                     </span>
                   </div>
 
-                  <div className="bg-white/[0.03] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 backdrop-blur-sm">
-                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-400/80 uppercase">
-                      <Trophy size={12} className="text-amber-400 shrink-0" /> Prize Pool
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 shadow-sm">
+                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-800 uppercase">
+                      <Trophy size={12} className="text-amber-700 shrink-0" /> Prize Pool
                     </span>
-                    <span className="text-[11px] sm:text-xs font-black font-primary text-amber-400 uppercase leading-snug">
+                    <span className="text-[11px] sm:text-xs font-black font-primary text-amber-800 uppercase leading-snug">
                       {competition.prizePool}
                     </span>
                   </div>
 
-                  <div className="bg-white/[0.03] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 backdrop-blur-sm">
-                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-400/80 uppercase">
-                      <ClipboardList size={12} className="text-amber-400 shrink-0" /> Entry Fee
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3.5 flex flex-col gap-1 shadow-sm">
+                    <span className="flex items-center gap-1.5 text-[8.5px] font-primary font-bold tracking-wider text-amber-800 uppercase">
+                      <ClipboardList size={12} className="text-amber-700 shrink-0" /> Entry Fee
                     </span>
                     <span className="text-xs sm:text-sm font-black font-primary text-[var(--text-primary)] uppercase">
                       {competition.registrationFee === 0 ? "Free" : `From ₹${competition.registrationFee.toLocaleString()}`}
@@ -335,7 +335,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
       {/* ========================================================================= */}
       {/* STICKY SUB-NAV STRIP (matches the event details page pattern)           */}
       {/* ========================================================================= */}
-      <nav className="sticky top-16 z-30 bg-[#120B07]/85 backdrop-blur-xl border-b border-amber-500/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] pt-3 pb-3">
+      <nav className="sticky top-16 z-30 bg-white/90 backdrop-blur-xl border-b border-amber-800/15 shadow-[0_4px_20px_rgba(180,130,30,0.06)] pt-3 pb-3">
         <div className="container max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 overflow-x-auto py-2.5 no-scrollbar">
           <div className="flex items-center gap-1.5 sm:gap-2">
             {[
@@ -355,8 +355,8 @@ export default function CompetitionDetailPage({ params }: PageProps) {
                   key={item.id}
                   href={`#${item.id}`}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-200 outline-none focus:outline-none ${isActive
-                    ? "text-amber-400 bg-amber-500/15 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
-                    : "text-stone-400 hover:text-stone-200 hover:bg-white/[0.04] border border-transparent"
+                    ? "text-amber-800 bg-amber-500/20 border border-amber-600/30 shadow-[0_0_12px_rgba(217,119,6,0.15)]"
+                    : "text-stone-700 hover:text-stone-900 hover:bg-stone-900/5 border border-transparent"
                     }`}
                 >
                   {item.label}
@@ -424,7 +424,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
                 </span>
                 <RichTextContent
                   html={competition.description}
-                  className="text-stone-300 text-xs sm:text-[13px] leading-relaxed font-secondary"
+                  className="text-stone-700 text-xs sm:text-[13px] leading-relaxed font-secondary"
                 />
               </div>
             )}
@@ -486,7 +486,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
                         <p className="text-[var(--text-secondary)] text-xs leading-relaxed font-secondary max-w-lg">{round.desc}</p>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {round.tags.map((tag, tIdx) => (
-                            <span key={tIdx} className="text-[9px] font-primary font-bold tracking-widest uppercase text-emerald-400 border border-emerald-500/40 rounded-md px-2.5 py-1">
+                            <span key={tIdx} className="text-[9px] font-primary font-bold tracking-widest uppercase text-[#7B1123] border border-[#C59B27]/40 bg-[#7B1123]/5 rounded-md px-2.5 py-1">
                               {tag}
                             </span>
                           ))}
@@ -900,10 +900,10 @@ export default function CompetitionDetailPage({ params }: PageProps) {
                   </div>
 
                   <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[var(--border-color)]">
-                    <span className="bg-emerald-500/10 border border-emerald-500/35 text-emerald-400 text-[6.5px] font-primary font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                    <span className="bg-[#7B1123]/10 border border-[#C59B27]/40 text-[#7B1123] text-[6.5px] font-primary font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
                       Verified Championship Contender
                     </span>
-                    <span className="bg-amber-500/10 border border-amber-500/35 text-amber-400 text-[6.5px] font-primary font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                    <span className="bg-[#C59B27]/10 border border-[#C59B27]/35 text-[#C59B27] text-[6.5px] font-primary font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
                       Stage Eligible
                     </span>
                   </div>
@@ -912,7 +912,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
                 {/* Submit Register Button */}
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl font-bold text-xs bg-amber-500 hover:bg-amber-400 text-[#170D08] font-primary uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-amber-500/20 transition-colors"
+                  className="w-full py-3.5 rounded-xl font-bold text-xs bg-gradient-to-r from-[#7B1123] via-[#961E34] to-[#7B1123] hover:brightness-110 text-[#F3BA2F] border border-[#C59B27]/40 font-primary uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all"
                 >
                   Register Athlete Slot <ArrowRight size={14} />
                 </button>

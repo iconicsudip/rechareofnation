@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
       sponsorshipTiers, stallOptions, adRates, dateIsTentative,
       headliners, faqs, scheduleDays, qrStages,
       brochurePdfUrl, exhibitInfo, visitInfo, eventSections,
-      bookingFormFields, inquiryFormFields
+      bookingFormFields, inquiryFormFields, highlights,
+      exhibitPillars, visitPillars
     } = body;
 
     const events = await sql`
@@ -52,7 +53,8 @@ export async function POST(request: NextRequest) {
         ticket_prices, organizer, rating, review_count, sponsorship_tiers, stall_options,
         ad_rates, date_is_tentative, headliners, faqs, schedule_days, qr_stages,
         brochure_pdf_url, exhibit_info, visit_info, event_sections,
-        booking_form_fields, inquiry_form_fields
+        booking_form_fields, inquiry_form_fields, highlights,
+        exhibit_pillars, visit_pillars
       )
       VALUES (
         ${name}, ${slug}, ${category}, ${description}, ${summary}, ${bannerUrl}, ${videoUrl ?? ''}, ${JSON.stringify(galleryUrls ?? [])},
@@ -62,7 +64,8 @@ export async function POST(request: NextRequest) {
         ${dateIsTentative ?? false}, ${JSON.stringify(headliners ?? [])}, ${JSON.stringify(faqs ?? [])},
         ${JSON.stringify(scheduleDays ?? [])}, ${JSON.stringify(qrStages ?? [{id:"entry",name:"Entry Gate",order:1}])},
         ${brochurePdfUrl ?? ''}, ${exhibitInfo ?? ''}, ${visitInfo ?? ''}, ${JSON.stringify(eventSections ?? [])},
-        ${JSON.stringify(bookingFormFields ?? [])}, ${JSON.stringify(inquiryFormFields ?? [])}
+        ${JSON.stringify(bookingFormFields ?? [])}, ${JSON.stringify(inquiryFormFields ?? [])}, ${JSON.stringify(highlights ?? [])},
+        ${JSON.stringify(exhibitPillars ?? [])}, ${JSON.stringify(visitPillars ?? [])}
       )
       RETURNING *
     `;
@@ -83,7 +86,8 @@ export async function PUT(request: NextRequest) {
       sponsorshipTiers, stallOptions, adRates, dateIsTentative,
       headliners, faqs, scheduleDays, qrStages,
       brochurePdfUrl, exhibitInfo, visitInfo, eventSections,
-      bookingFormFields, inquiryFormFields
+      bookingFormFields, inquiryFormFields, highlights,
+      exhibitPillars, visitPillars
     } = body;
 
     const events = await sql`
@@ -112,6 +116,9 @@ export async function PUT(request: NextRequest) {
         event_sections = ${JSON.stringify(eventSections ?? [])},
         booking_form_fields = ${JSON.stringify(bookingFormFields ?? [])},
         inquiry_form_fields = ${JSON.stringify(inquiryFormFields ?? [])},
+        highlights = ${JSON.stringify(highlights ?? [])},
+        exhibit_pillars = ${JSON.stringify(exhibitPillars ?? [])},
+        visit_pillars = ${JSON.stringify(visitPillars ?? [])},
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *

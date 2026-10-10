@@ -8,6 +8,7 @@ import {
   ExternalLink, FileSpreadsheet, ArrowUpDown, ChevronDown
 } from "lucide-react";
 import ImageUploadField from "@/components/admin/ImageUploadField";
+import { optimizeImageBeforeUpload } from "@/lib/client-image-optimizer";
 
 interface Sponsor {
   id: string;
@@ -370,7 +371,7 @@ export default function AdminSponsorsPage() {
     });
 
     setDynamicRows((prev) => {
-      const keep = prev.filter((r) => r.name.trim() || r.logo_url.trim());
+      const keep = prev.filter((r) => (r?.name ?? "").trim() || (r?.logo_url ?? "").trim());
       return [...keep, ...newRows];
     });
 
@@ -378,8 +379,9 @@ export default function AdminSponsorsPage() {
       fileArray.map(async (file, idx) => {
         const rowId = newRows[idx].id;
         try {
+          const optimizedFile = await optimizeImageBeforeUpload(file, 1200, 0.85);
           const formData = new FormData();
-          formData.append("file", file);
+          formData.append("file", optimizedFile);
           const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
           const data = await res.json();
           if (res.ok && data.success && data.url) {
@@ -405,8 +407,9 @@ export default function AdminSponsorsPage() {
       prev.map((r) => (r.id === id ? { ...r, isUploading: true } : r))
     );
     try {
+      const optimizedFile = await optimizeImageBeforeUpload(file, 1200, 0.85);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", optimizedFile);
       const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (res.ok && data.success && data.url) {
@@ -477,7 +480,7 @@ export default function AdminSponsorsPage() {
 
     if (parsedRows.length > 0) {
       setDynamicRows((prev) => [
-        ...prev.filter((r) => r.name.trim() !== ""),
+        ...prev.filter((r) => (r?.name ?? "").trim() !== ""),
         ...parsedRows,
       ]);
       setPasteText("");
@@ -487,7 +490,7 @@ export default function AdminSponsorsPage() {
 
   // Submit Bulk Add
   const validDynamicRows = useMemo(
-    () => dynamicRows.filter((r) => r.name.trim().length > 0),
+    () => dynamicRows.filter((r) => (r?.name ?? "").trim().length > 0),
     [dynamicRows]
   );
 
@@ -496,10 +499,10 @@ export default function AdminSponsorsPage() {
     setBulkSubmitting(true);
     try {
       const payload = validDynamicRows.map((r) => ({
-        name: r.name.trim(),
-        tier: r.tier || "Partner",
-        logo_url: r.logo_url.trim(),
-        website_url: r.website_url.trim(),
+        name: (r?.name ?? "").trim(),
+        tier: r?.tier || "Partner",
+        logo_url: (r?.logo_url ?? "").trim(),
+        website_url: (r?.website_url ?? "").trim(),
       }));
 
       const res = await fetch("/api/admin/sponsors", {

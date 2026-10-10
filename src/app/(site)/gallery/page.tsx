@@ -236,6 +236,10 @@ export default function GalleryPage() {
                 <img
                   src={activeLightboxItem.url}
                   alt={activeLightboxItem.title}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/images/logo.png";
+                  }}
                   className="max-w-full max-h-full w-auto h-auto object-contain"
                 />
               </div>
@@ -258,23 +262,23 @@ export default function GalleryPage() {
 
         {/* Header Section */}
         <div className="flex flex-col items-center gap-3 max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] font-bold tracking-[0.2em] uppercase font-primary">
-            <Sparkles size={11} className="text-amber-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7B1123]/10 border border-[#C59B27]/40 text-[#7B1123] text-[10px] font-bold tracking-[0.2em] uppercase font-primary shadow-sm">
+            <Sparkles size={11} className="text-[#C59B27]" />
             {pageContent.eyebrow}
           </span>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-primary text-white tracking-tight uppercase">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-primary text-[var(--text-primary)] tracking-tight uppercase">
             {pageContent.heading}
           </h1>
-          <p className="text-stone-300 text-xs sm:text-sm md:text-base leading-relaxed font-secondary max-w-2xl">
+          <p className="text-[var(--text-secondary)] text-xs sm:text-sm md:text-base leading-relaxed font-secondary max-w-2xl font-medium">
             {pageContent.description}
           </p>
         </div>
 
         {/* Filter Controls Bar */}
-        <div ref={gridTopRef} className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-b border-white/[0.08] pb-6">
+        <div ref={gridTopRef} className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-b border-[var(--border-color)] pb-6">
 
           {/* Categories Pill List */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
+          <div className="flex flex-nowrap sm:flex-wrap items-center justify-start gap-1.5 sm:gap-2 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 no-scrollbar max-w-full w-full">
             {categories.map((category) => {
               const isSelected = selectedFilter === category;
               return (
@@ -282,10 +286,10 @@ export default function GalleryPage() {
                   key={category}
                   type="button"
                   onClick={() => handleCategorySelect(category)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer outline-none focus:outline-none ${
+                  className={`shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer outline-none focus:outline-none ${
                     isSelected
-                      ? "text-amber-400 bg-amber-500/15 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
-                      : "text-stone-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08]"
+                      ? "text-[#F3BA2F] bg-gradient-to-r from-[#7B1123] to-[#961E34] border border-[#C59B27]/50 shadow-[0_0_12px_rgba(123,17,35,0.25)]"
+                      : "text-stone-700 hover:text-[#7B1123] bg-stone-100 hover:bg-stone-200/70 border border-stone-200"
                   }`}
                 >
                   {category}
@@ -295,14 +299,14 @@ export default function GalleryPage() {
           </div>
 
           {/* Media Type Toggle Pills */}
-          <div className="flex items-center bg-white/[0.04] p-1 rounded-full border border-white/[0.08] shrink-0">
+          <div className="flex items-center bg-stone-100 p-1 rounded-full border border-stone-200 shrink-0 shadow-inner">
             <button
               type="button"
               onClick={() => handleMediaTypeSelect("all")}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 selectedMediaType === "all"
-                  ? "bg-amber-500 text-[#170D08] font-black shadow-sm"
-                  : "text-stone-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 font-black shadow-sm"
+                  : "text-stone-600 hover:text-[#7B1123] font-bold"
               }`}
             >
               <Layers size={11} />
@@ -313,8 +317,8 @@ export default function GalleryPage() {
               onClick={() => handleMediaTypeSelect("photo")}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 selectedMediaType === "photo"
-                  ? "bg-amber-500 text-[#170D08] font-black shadow-sm"
-                  : "text-stone-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 font-black shadow-sm"
+                  : "text-stone-600 hover:text-[#7B1123] font-bold"
               }`}
             >
               <Camera size={11} />
@@ -325,8 +329,8 @@ export default function GalleryPage() {
               onClick={() => handleMediaTypeSelect("video")}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 selectedMediaType === "video"
-                  ? "bg-amber-500 text-[#170D08] font-black shadow-sm"
-                  : "text-stone-400 hover:text-white"
+                  ? "bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 font-black shadow-sm"
+                  : "text-stone-600 hover:text-[#7B1123] font-bold"
               }`}
             >
               <Film size={11} />
@@ -346,11 +350,11 @@ export default function GalleryPage() {
               />
             ))
           ) : galleryItems.length === 0 ? (
-            <div className="col-span-full py-20 text-center flex flex-col items-center justify-center gap-3 bg-[#160E09]/70 backdrop-blur-md border border-white/[0.08] rounded-3xl p-8">
-              <span className="text-amber-400 font-primary text-sm font-bold uppercase tracking-wider">
+            <div className="col-span-full py-20 text-center flex flex-col items-center justify-center gap-3 bg-white/80 backdrop-blur-md border border-amber-500/20 rounded-3xl p-8 shadow-sm">
+              <span className="text-amber-700 font-primary text-sm font-bold uppercase tracking-wider">
                 No Visual Highlights Found
               </span>
-              <p className="text-xs text-stone-400 font-secondary max-w-sm">
+              <p className="text-xs text-stone-600 font-secondary max-w-sm">
                 There are currently no media assets matching the selected category or format.
               </p>
             </div>
@@ -359,13 +363,17 @@ export default function GalleryPage() {
               <div
                 key={item.id}
                 onClick={() => setLightboxIndex(idx)}
-                className="group cursor-pointer relative aspect-[4/3] rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.35)] hover:shadow-[0_16px_40px_rgba(245,158,11,0.15)] border border-white/[0.08] hover:border-amber-500/40 bg-[#160E09]/80 transition-all duration-500"
+                className="group cursor-pointer relative aspect-[4/3] rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(180,130,30,0.08)] hover:shadow-[0_16px_40px_rgba(245,158,11,0.15)] border border-amber-500/20 hover:border-amber-500/40 bg-white transition-all duration-500"
               >
                 {/* Image / Thumbnail */}
                 <img
                   src={item.thumbnailUrl || item.url}
                   alt={item.title}
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/images/logo.png";
+                  }}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 
@@ -403,19 +411,19 @@ export default function GalleryPage() {
 
         {/* Pagination Section */}
         {!isLoading && totalItems > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/[0.08]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[var(--border-color)]">
 
             {/* Range Counter */}
-            <span className="text-xs text-stone-400 font-secondary">
+            <span className="text-xs text-stone-600 font-secondary font-medium">
               Showing{" "}
-              <strong className="text-white font-mono">
+              <strong className="text-stone-900 font-mono font-bold">
                 {(currentPage - 1) * ITEMS_PER_PAGE + 1}
               </strong>{" "}
               -{" "}
-              <strong className="text-white font-mono">
+              <strong className="text-stone-900 font-mono font-bold">
                 {Math.min(currentPage * ITEMS_PER_PAGE, totalItems)}
               </strong>{" "}
-              of <strong className="text-amber-400 font-mono">{totalItems}</strong> Moments
+              of <strong className="text-[#7B1123] font-mono font-bold">{totalItems}</strong> Moments
             </span>
 
             {/* Pagination Controls */}
@@ -428,8 +436,8 @@ export default function GalleryPage() {
                   disabled={currentPage <= 1}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     currentPage <= 1
-                      ? "opacity-30 cursor-not-allowed text-stone-500 border border-transparent"
-                      : "text-stone-300 hover:text-white bg-white/[0.04] hover:bg-white/10 border border-white/[0.08]"
+                      ? "opacity-30 cursor-not-allowed text-stone-400 border border-transparent"
+                      : "text-stone-700 hover:text-[#7B1123] bg-stone-100 hover:bg-stone-200 border border-stone-200"
                   }`}
                 >
                   <ChevronLeft size={13} />
@@ -457,8 +465,8 @@ export default function GalleryPage() {
                       onClick={() => handlePageChange(pageNum)}
                       className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         isActive
-                          ? "bg-amber-500 text-[#170D08] font-black shadow-[0_0_12px_rgba(245,158,11,0.3)]"
-                          : "text-stone-300 hover:text-white bg-white/[0.04] hover:bg-white/10 border border-white/[0.08]"
+                          ? "bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 font-black shadow-md"
+                          : "text-stone-700 hover:text-[#7B1123] bg-stone-100 hover:bg-stone-200 border border-stone-200"
                       }`}
                     >
                       {pageNum}
@@ -473,8 +481,8 @@ export default function GalleryPage() {
                   disabled={currentPage >= totalPages}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                     currentPage >= totalPages
-                      ? "opacity-30 cursor-not-allowed text-stone-500 border border-transparent"
-                      : "text-stone-300 hover:text-white bg-white/[0.04] hover:bg-white/10 border border-white/[0.08]"
+                      ? "opacity-30 cursor-not-allowed text-stone-400 border border-transparent"
+                      : "text-stone-700 hover:text-[#7B1123] bg-stone-100 hover:bg-stone-200 border border-stone-200"
                   }`}
                 >
                   <span>Next</span>

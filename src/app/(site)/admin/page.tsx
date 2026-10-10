@@ -164,8 +164,8 @@ export default function AdminOverviewPage() {
                 <div className="text-right flex-shrink-0">
                   <div className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                     item.status === "confirmed" || item.status === "approved"
-                      ? "text-emerald-400 bg-emerald-400/10"
-                      : "text-yellow-400 bg-yellow-400/10"
+                      ? "text-[#C59B27] bg-[#7B1123]/25 border border-[#C59B27]/40"
+                      : "text-amber-400 bg-amber-400/10"
                   }`}>
                     {item.status}
                   </div>

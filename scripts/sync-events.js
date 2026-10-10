@@ -47,8 +47,9 @@ async function syncAllEvents() {
       event_time = '10:00 AM - 07:00 PM',
       venue = 'The Lalit / Shikarbadi Grounds, Udaipur',
       city = 'Udaipur, Rajasthan',
-      category = 'Hospitality Conclaves',
-      summary = '3rd Edition of Udaipur premier hospitality, catering, tourism and food festival (6, 7 & 8 January 2027) uniting culinary masters, 18 exhibitor sectors, and 16 visitor profiles.',
+      category = 'Food • Hospitality • Catering',
+      summary = 'Where Food Meets Business. Connecting food, hospitality, catering, halwai, wedding, and tourism businesses on one platform (6, 7 & 8 January 2027, Udaipur, Rajasthan). Exhibition • Conclave • Live Demonstrations • B2B Networking.',
+      brochure_pdf_url = '/brochures/Food_Expo_2027_12_Page_Brochure.pdf',
       ticket_prices = ${JSON.stringify([
         { tier: "Trade Visitor Pass (Free B2B Entry)", price: 0, description: "Complimentary access for caterers, hoteliers, restaurant owners, and trade buyers" },
         { tier: "All-Access 3-Day Conclave Pass", price: 499, description: "Full access to all expo halls, culinary masterclasses, and HoReCa business seminars" },

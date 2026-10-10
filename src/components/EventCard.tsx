@@ -33,6 +33,10 @@ export default function EventCard(evt: EventCardProps) {
               alt={evt.name}
               loading="lazy"
               decoding="async"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/images/logo.png";
+              }}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
@@ -43,14 +47,14 @@ export default function EventCard(evt: EventCardProps) {
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/90 to-transparent pointer-events-none z-0" />
 
           {evt.tag && (
-            <span className="absolute top-2.5 right-2.5 bg-amber-500 text-[#170D08] font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider z-10">
+            <span className="absolute top-2.5 right-2.5 bg-[#7B1123] text-[#F3BA2F] border border-[#C59B27]/40 font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-md">
               {evt.tag}
             </span>
           )}
 
           {/* Location Badge */}
-          <div className="absolute bottom-2.5 left-2.5 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8.5px] font-extrabold text-[var(--text-primary)] tracking-widest font-primary uppercase z-10">
-            <MapPin size={10} className="text-amber-400 shrink-0" />
+          <div className="absolute bottom-2.5 left-2.5 bg-black/75 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8.5px] font-extrabold text-white tracking-widest font-primary uppercase z-10 shadow-md">
+            <MapPin size={10} className="text-[#C59B27] shrink-0" />
             <span>{evt.city}</span>
           </div>
         </div>
@@ -61,27 +65,27 @@ export default function EventCard(evt: EventCardProps) {
         <div>
           {/* Eyebrow: category label + rating */}
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[9px] font-primary font-bold text-amber-400 uppercase tracking-[0.15em] flex items-center gap-1.5">
-              <span className="text-amber-500/70">✦</span> {evt.category}
+            <span className="text-[9px] font-primary font-bold text-[#7B1123] uppercase tracking-[0.15em] flex items-center gap-1.5">
+              <span className="text-[#C59B27]">✦</span> {evt.category}
             </span>
-            <div className="flex items-center gap-1 text-[10.5px] font-bold text-amber-400 shrink-0">
-              <Star size={11} fill="#C9A227" className="text-amber-400" />
+            <div className="flex items-center gap-1 text-[10.5px] font-bold text-[#C59B27] shrink-0">
+              <Star size={11} fill="#C59B27" className="text-[#C59B27]" />
               <span>{evt.rating}</span>
             </div>
           </div>
 
           {/* Title */}
           <Link href={`/events/${evt.id}`}>
-            <h3 className="font-extrabold text-[var(--text-primary)] text-[14px] font-primary tracking-tight mt-2.5 uppercase line-clamp-2 leading-snug group-hover:text-amber-400 transition-colors">
+            <h3 className="font-extrabold text-[var(--text-primary)] text-[14px] font-primary tracking-tight mt-2.5 uppercase line-clamp-2 leading-snug group-hover:text-[#7B1123] transition-colors">
               {evt.name}
             </h3>
           </Link>
 
           {/* Description */}
-          <p className="text-[var(--text-secondary)] text-[10.5px] leading-relaxed font-secondary mt-2 line-clamp-2">
+          <p className="text-stone-700 text-[10.5px] leading-relaxed font-secondary mt-2 line-clamp-2">
             {evt.desc}
           </p>
-          <span className="text-[var(--text-muted)] text-[9.5px] font-secondary italic block mt-1">
+          <span className="text-stone-500 text-[9.5px] font-secondary italic block mt-1">
             ({evt.reviews} reviews)
           </span>
         </div>
@@ -89,12 +93,12 @@ export default function EventCard(evt: EventCardProps) {
         {/* Footer Pricing & Button */}
         <div className="pt-4 border-t border-dotted border-[var(--border-color)] flex items-center justify-between gap-2 mt-auto">
           <div>
-            <span className="text-[8px] text-[var(--text-muted)] font-primary uppercase block tracking-wider">Starting From</span>
-            <span className="text-amber-400 font-primary italic font-semibold text-[17px] mt-0.5 block">₹{evt.price}</span>
+            <span className="text-[8px] text-stone-600 font-primary uppercase block tracking-wider font-semibold">Starting From</span>
+            <span className="text-[#7B1123] font-primary italic font-bold text-[17px] mt-0.5 block">₹{evt.price}</span>
           </div>
           <Link
             href={`/events/${evt.id}`}
-            className="border border-amber-500/40 hover:bg-amber-500 text-amber-400 hover:text-[#170D08] font-primary text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase transition-all duration-300 flex items-center gap-1.5"
+            className="bg-[#7B1123] hover:bg-[#580B17] text-[#F3BA2F] border border-[#C59B27]/50 font-primary text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase transition-all duration-300 flex items-center gap-1.5 shadow-sm"
           >
             Book
             <ArrowUpRight size={11} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

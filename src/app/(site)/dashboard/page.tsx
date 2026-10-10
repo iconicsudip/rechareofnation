@@ -79,7 +79,7 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
             ].map(([label, val]) => (
               <div key={label} className="flex justify-between">
                 <span className="text-[var(--text-muted)]">{label}</span>
-                <span className={`font-bold ${label === "Status" && (val === "confirmed" || val === "approved") ? "text-emerald-400" : "text-[var(--text-primary)]"}`}>
+                <span className={`font-bold ${label === "Status" && (val === "confirmed" || val === "approved") ? "text-[#7B1123]" : "text-[var(--text-primary)]"}`}>
                   {val}
                 </span>
               </div>
@@ -87,9 +87,9 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
           </div>
 
           {pass.scanHistory && pass.scanHistory.length > 0 && (
-            <div className="w-full mt-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex flex-col gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 text-left">Completed Stages</span>
-              <div className="flex flex-col gap-1.5 text-xs text-emerald-300 text-left">
+            <div className="w-full mt-2 bg-[#7B1123]/10 border border-[#C59B27]/30 rounded-xl p-3 flex flex-col gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#7B1123] text-left">Completed Stages</span>
+              <div className="flex flex-col gap-1.5 text-xs text-[#C59B27] text-left">
                 {pass.scanHistory.map((s, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <CheckCircle size={12} />
@@ -218,15 +218,15 @@ export default function DashboardPage() {
           <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center mx-auto font-black text-2xl text-[#170D08] bg-gradient-to-br from-amber-500 to-amber-600 font-primary">
             {currentUser.name.charAt(0).toUpperCase()}
             {currentUser.isVerified && (
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center bg-emerald-500">
-                <CheckCircle size={11} className="text-white" />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center bg-gradient-to-br from-[#7B1123] to-[#961E34] text-[#F3BA2F] shadow-sm">
+                <CheckCircle size={11} className="text-[#F3BA2F]" />
               </div>
             )}
           </div>
           <div>
             <h3 className="text-base font-bold text-[var(--text-primary)] font-primary">{currentUser.name}</h3>
             <span className="text-xs block mt-0.5 text-[var(--text-muted)]">{currentUser.email}</span>
-            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#7B1123]/10 border border-[#C59B27]/30 text-[#7B1123]">
               <Shield size={9} /> {currentUser.isVerified ? "Verified" : "Unverified"}
             </span>
           </div>
@@ -305,7 +305,7 @@ export default function DashboardPage() {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                           REF: {b.booking_ref || b.bookingRef}
                         </span>
-                        <span className="text-[9px] px-2 py-0.5 rounded uppercase font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                        <span className="text-[9px] px-2 py-0.5 rounded uppercase font-bold bg-[#7B1123]/10 border border-[#C59B27]/30 text-[#7B1123]">
                           {b.status || "confirmed"}
                         </span>
                       </div>
@@ -365,7 +365,7 @@ export default function DashboardPage() {
                           </span>
                           <span className={`text-[9px] px-2 py-0.5 rounded uppercase font-bold border ${
                             approved
-                              ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+                              ? "text-[#7B1123] bg-[#7B1123]/10 border-[#C59B27]/30"
                               : "text-amber-400 bg-amber-500/10 border-amber-500/30"
                           }`}>
                             {reg.status}
@@ -413,7 +413,7 @@ export default function DashboardPage() {
 
             <form onSubmit={handleProfileUpdate} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-5">
               {settingsSuccess && (
-                <div className="md:col-span-2 p-3.5 rounded-xl flex items-center gap-2 text-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                <div className="md:col-span-2 p-3.5 rounded-xl flex items-center gap-2 text-sm bg-[#7B1123]/10 border border-[#C59B27]/30 text-[#7B1123]">
                   <CheckCircle size={15} /> Profile updated successfully!
                 </div>
               )}

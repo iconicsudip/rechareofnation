@@ -113,7 +113,25 @@ interface Event {
   event_sections?: EventSectionConfig[];
   booking_form_fields?: BookingFormFieldConfig[];
   inquiry_form_fields?: BookingFormFieldConfig[];
+  highlights?: EventHighlight[];
+  exhibit_pillars?: InfoPillar[];
+  visit_pillars?: InfoPillar[];
   created_at: string;
+}
+
+export interface EventHighlight {
+  [key: string]: unknown;
+  title: string;
+  desc: string;
+  image?: string;
+  tags?: string;
+}
+
+export interface InfoPillar {
+  [key: string]: unknown;
+  title: string;
+  desc: string;
+  image?: string;
 }
 
 interface Taxonomy { value: string }
@@ -125,6 +143,8 @@ const EMPTY_AD_RATE: AdRate = { category: "", amount: "" };
 const EMPTY_ORGANIZER: Organizer = { name: "", contact: "", email: "", phone: "" };
 const EMPTY_HEADLINER: Headliner = { name: "", role: "", img: "" };
 const EMPTY_FAQ: Faq = { q: "", a: "" };
+const EMPTY_HIGHLIGHT: EventHighlight = { title: "", desc: "", image: "", tags: "" };
+const EMPTY_PILLAR: InfoPillar = { title: "", desc: "", image: "" };
 
 const EMPTY_FORM = {
   name: "", slug: "", category: "", city: "", venue: "",
@@ -171,6 +191,9 @@ export default function AdminEventsPage() {
   const [qrStages, setQrStages] = useState<{ id: string; name: string; order: number }[]>([]);
   const [bookingFormFields, setBookingFormFields] = useState<BookingFormFieldConfig[]>(DEFAULT_TICKET_BOOKING_FIELDS);
   const [inquiryFormFields, setInquiryFormFields] = useState<BookingFormFieldConfig[]>(DEFAULT_INQUIRY_FORM_FIELDS);
+  const [highlights, setHighlights] = useState<EventHighlight[]>([]);
+  const [exhibitPillars, setExhibitPillars] = useState<InfoPillar[]>([]);
+  const [visitPillars, setVisitPillars] = useState<InfoPillar[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [formFieldsConfig, setFormFieldsConfig] = useState<EventFormFieldConfig[]>(DEFAULT_EVENT_FORM_FIELDS);
@@ -223,6 +246,9 @@ export default function AdminEventsPage() {
     setOrganizer({ ...EMPTY_ORGANIZER });
     setBookingFormFields(DEFAULT_TICKET_BOOKING_FIELDS);
     setInquiryFormFields(DEFAULT_INQUIRY_FORM_FIELDS);
+    setHighlights([]);
+    setExhibitPillars([]);
+    setVisitPillars([]);
     setPanelOpen(true);
   };
   const openEdit = (ev: Event) => {
@@ -242,17 +268,119 @@ export default function AdminEventsPage() {
       dateIsTentative: ev.date_is_tentative ?? false,
     });
     setEventSections(Array.isArray(ev.event_sections) && ev.event_sections.length > 0 ? ev.event_sections : DEFAULT_EVENT_SECTIONS);
-    setTicketPrices(Array.isArray(ev.ticket_prices) && ev.ticket_prices.length > 0 ? ev.ticket_prices : [{ ...EMPTY_TICKET }]);
-    setSponsorshipTiers(Array.isArray(ev.sponsorship_tiers) ? ev.sponsorship_tiers : []);
-    setStallOptions(Array.isArray(ev.stall_options) ? ev.stall_options : []);
-    setAdRates(Array.isArray(ev.ad_rates) ? ev.ad_rates : []);
-    setHeadliners(Array.isArray(ev.headliners) ? ev.headliners : []);
-    setFaqs(Array.isArray(ev.faqs) ? ev.faqs : []);
-    setScheduleDays(Array.isArray(ev.schedule_days) ? ev.schedule_days : []);
-    setQrStages(Array.isArray(ev.qr_stages) && ev.qr_stages.length > 0 ? ev.qr_stages : [...DEFAULT_QR_STAGES]);
+    setTicketPrices(
+      Array.isArray(ev.ticket_prices) && ev.ticket_prices.length > 0
+        ? ev.ticket_prices.map(t => ({
+            ...t,
+            type: (t?.type || (t as any)?.tier || (t as any)?.name || "") as string,
+            price: Number(t?.price || 0),
+            available: Number(t?.available ?? (t as any)?.total ?? 0),
+            description: (t?.description || "") as string,
+          }))
+        : [{ ...EMPTY_TICKET }]
+    );
+    setSponsorshipTiers(
+      Array.isArray(ev.sponsorship_tiers)
+        ? ev.sponsorship_tiers.map(t => ({
+            ...t,
+            tier: (t?.tier || (t as any)?.name || "") as string,
+            amount: (t?.amount || "") as string,
+            benefits: (t?.benefits || "") as string,
+          }))
+        : []
+    );
+    setStallOptions(
+      Array.isArray(ev.stall_options)
+        ? ev.stall_options.map(s => ({
+            ...s,
+            type: (s?.type || (s as any)?.name || "") as string,
+            size: (s?.size || "") as string,
+            rate: (s?.rate || "") as string,
+            includes: (s?.includes || "") as string,
+          }))
+        : []
+    );
+    setAdRates(
+      Array.isArray(ev.ad_rates)
+        ? ev.ad_rates.map(a => ({
+            ...a,
+            category: (a?.category || (a as any)?.name || "") as string,
+            amount: (a?.amount || "") as string,
+          }))
+        : []
+    );
+    setHeadliners(
+      Array.isArray(ev.headliners)
+        ? ev.headliners.map(h => ({
+            ...h,
+            name: (h?.name || "") as string,
+            role: (h?.role || "") as string,
+            img: (h?.img || "") as string,
+          }))
+        : []
+    );
+    setFaqs(
+      Array.isArray(ev.faqs)
+        ? ev.faqs.map(f => ({
+            ...f,
+            q: (f?.q || (f as any)?.question || "") as string,
+            a: (f?.a || (f as any)?.answer || "") as string,
+          }))
+        : []
+    );
+    setScheduleDays(
+      Array.isArray(ev.schedule_days)
+        ? ev.schedule_days.map(d => ({
+            ...d,
+            dayLabel: (d?.dayLabel || (d as any)?.day_label || (d as any)?.day || (d as any)?.title || "Day") as string,
+            items: Array.isArray(d?.items) ? d.items : [],
+          }))
+        : []
+    );
+    setQrStages(
+      Array.isArray(ev.qr_stages) && ev.qr_stages.length > 0
+        ? ev.qr_stages.map(q => ({
+            ...q,
+            id: (q?.id || "") as string,
+            name: (q?.name || "") as string,
+            order: Number(q?.order || 1),
+          }))
+        : [...DEFAULT_QR_STAGES]
+    );
     setOrganizer(ev.organizer && ev.organizer.name !== undefined ? ev.organizer : { ...EMPTY_ORGANIZER });
     setBookingFormFields(Array.isArray(ev.booking_form_fields) && ev.booking_form_fields.length > 0 ? ev.booking_form_fields : DEFAULT_TICKET_BOOKING_FIELDS);
     setInquiryFormFields(Array.isArray(ev.inquiry_form_fields) && ev.inquiry_form_fields.length > 0 ? ev.inquiry_form_fields : DEFAULT_INQUIRY_FORM_FIELDS);
+    setHighlights(
+      Array.isArray(ev.highlights)
+        ? ev.highlights.map(h => ({
+            ...h,
+            title: (h?.title || "") as string,
+            desc: (h?.desc || "") as string,
+            image: (h?.image || "") as string,
+            tags: Array.isArray((h as any)?.tags) ? ((h as any).tags as string[]).join(", ") : ((h?.tags as string) || ""),
+          }))
+        : []
+    );
+    setExhibitPillars(
+      Array.isArray(ev.exhibit_pillars)
+        ? ev.exhibit_pillars.map(p => ({
+            ...p,
+            title: (p?.title || "") as string,
+            desc: (p?.desc || "") as string,
+            image: (p?.image || "") as string,
+          }))
+        : []
+    );
+    setVisitPillars(
+      Array.isArray(ev.visit_pillars)
+        ? ev.visit_pillars.map(p => ({
+            ...p,
+            title: (p?.title || "") as string,
+            desc: (p?.desc || "") as string,
+            image: (p?.image || "") as string,
+          }))
+        : []
+    );
     setPanelOpen(true);
   };
 
@@ -262,27 +390,62 @@ export default function AdminEventsPage() {
     const method = editTarget ? "PUT" : "POST";
     const body = {
       ...form,
-      videoUrl: form.videoUrl.trim(),
-      galleryUrls: form.galleryUrlsText
+      videoUrl: (form.videoUrl || "").trim(),
+      galleryUrls: (form.galleryUrlsText || "")
         .split("\n")
-        .map(s => s.trim())
+        .map(s => (s || "").trim())
         .filter(Boolean),
-      brochurePdfUrl: form.brochurePdfUrl.trim(),
+      brochurePdfUrl: (form.brochurePdfUrl || "").trim(),
       exhibitInfo: form.exhibitInfo,
       visitInfo: form.visitInfo,
       eventSections,
       bookingFormFields,
       inquiryFormFields,
+      highlights: highlights
+        .filter(h => Boolean((h?.title || "").trim() || (h?.desc || "").trim()))
+        .map(h => ({
+          title: (h?.title || "").trim(),
+          desc: (h?.desc || "").trim(),
+          image: (h?.image || "").trim(),
+          tags: typeof h?.tags === "string"
+            ? (h.tags as string).split(",").map(t => t.trim()).filter(Boolean)
+            : Array.isArray(h?.tags) ? h.tags : [],
+        })),
+      exhibitPillars: exhibitPillars
+        .filter(p => Boolean((p?.title || "").trim() || (p?.desc || "").trim()))
+        .map(p => ({
+          title: (p?.title || "").trim(),
+          desc: (p?.desc || "").trim(),
+          image: (p?.image || "").trim(),
+        })),
+      visitPillars: visitPillars
+        .filter(p => Boolean((p?.title || "").trim() || (p?.desc || "").trim()))
+        .map(p => ({
+          title: (p?.title || "").trim(),
+          desc: (p?.desc || "").trim(),
+          image: (p?.image || "").trim(),
+        })),
       rating: Number(form.rating) || 0,
       reviewCount: Number(form.reviewCount) || 0,
-      ticketPrices: ticketPrices.filter(t => t.type.trim()),
-      sponsorshipTiers: sponsorshipTiers.filter(t => t.tier.trim()),
-      stallOptions: stallOptions.filter(s => s.type.trim()),
-      adRates: adRates.filter(a => a.category.trim()),
-      headliners: headliners.filter(h => h.name.trim()),
-      faqs: faqs.filter(f => f.q.trim()),
-      scheduleDays: scheduleDays.filter(d => d.dayLabel.trim()),
-      qrStages: qrStages.filter(q => q.id.trim() && q.name.trim()),
+      ticketPrices: ticketPrices
+        .filter(t => Boolean((t?.type || (t as any)?.tier || (t as any)?.name)?.trim()))
+        .map(t => ({
+          ...t,
+          type: (t?.type || (t as any)?.tier || (t as any)?.name || "").trim(),
+        })),
+      sponsorshipTiers: sponsorshipTiers.filter(t => Boolean((t?.tier || (t as any)?.name)?.trim())),
+      stallOptions: stallOptions.filter(s => Boolean((s?.type || (s as any)?.name)?.trim())),
+      adRates: adRates.filter(a => Boolean((a?.category || (a as any)?.name)?.trim())),
+      headliners: headliners.filter(h => Boolean(h?.name?.trim())),
+      faqs: faqs.filter(f => Boolean((f?.q || (f as any)?.question)?.trim())),
+      scheduleDays: scheduleDays
+        .filter(d => Boolean((d?.dayLabel || (d as any)?.day_label || (d as any)?.day || (d as any)?.title)?.trim()))
+        .map(d => ({
+          ...d,
+          dayLabel: (d?.dayLabel || (d as any)?.day_label || (d as any)?.day || (d as any)?.title || "").trim(),
+          items: Array.isArray(d?.items) ? d.items : [],
+        })),
+      qrStages: qrStages.filter(q => Boolean((q?.id || "").trim() && (q?.name || "").trim())),
       organizer,
       ...(editTarget ? { id: editTarget.id } : {}),
     };
@@ -389,7 +552,7 @@ export default function AdminEventsPage() {
                       )}
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold w-fit ${
                         ev.is_upcoming
-                          ? "text-emerald-400 border border-emerald-400/20 bg-emerald-400/10"
+                          ? "text-[#C59B27] border border-[#C59B27]/40 bg-[#7B1123]/25"
                           : "text-[#8F7A66] border border-[rgba(203,185,160,0.2)] bg-[rgba(203,185,160,0.08)]"
                       }`}>
                         {ev.is_upcoming ? "Upcoming" : "Past"}
@@ -581,6 +744,22 @@ export default function AdminEventsPage() {
                     <RichTextEditor label="Full Description" value={form.description}
                       onChange={(html) => setForm(prev => ({ ...prev, description: html }))} />
                   ),
+                  highlights: (
+                    <RepeaterField
+                      label="Key Highlights & Visual Pillars"
+                      hint="Editorial numbered showcase (01, 02, 03...) on the event details page. Upload an image for each pillar, and add title, description, and comma-separated tags."
+                      columns={[
+                        { key: "title", label: "Title / Headline", span: 2 },
+                        { key: "desc", label: "Description / Details", type: "textarea", span: 2 },
+                        { key: "image", label: "Feature Image", type: "image", span: 2 },
+                        { key: "tags", label: "Tag Pills (comma-separated, e.g. VENUE, CITY HUB, ENTRY)", span: 2 },
+                      ]}
+                      value={highlights}
+                      onChange={setHighlights}
+                      emptyRow={EMPTY_HIGHLIGHT}
+                      addLabel="Add highlight item"
+                    />
+                  ),
                   eventSectionsBlock: (
                     <div className="flex flex-col gap-4 p-5 rounded-2xl border border-amber-500/25 bg-[#170C07] shadow-xl">
                       <div className="flex items-center justify-between border-b border-amber-500/15 pb-3">
@@ -705,6 +884,36 @@ export default function AdminEventsPage() {
                         </div>
                       </div>
                     </div>
+                  ),
+                  exhibitPillars: (
+                    <RepeaterField
+                      label="Why Exhibit — Key Pillars &amp; Photos"
+                      hint="Editorial 2-column showcase on the event details page. Add title, description, and an optional photo for each exhibitor pillar."
+                      columns={[
+                        { key: "title", label: "Pillar Title (e.g. BRAND VISIBILITY, NEW BUYERS)", span: 2 },
+                        { key: "desc", label: "Description / Bullet text", type: "textarea", span: 2 },
+                        { key: "image", label: "Feature Photo (Optional)", type: "image", span: 2 },
+                      ]}
+                      value={exhibitPillars}
+                      onChange={setExhibitPillars}
+                      emptyRow={EMPTY_PILLAR}
+                      addLabel="Add exhibitor pillar"
+                    />
+                  ),
+                  visitPillars: (
+                    <RepeaterField
+                      label="Why Visit — Key Pillars &amp; Photos"
+                      hint="Editorial 2-column showcase for visitors and buyers. Add title, description, and an optional photo for each visitor pillar."
+                      columns={[
+                        { key: "title", label: "Pillar Title (e.g. SOURCE NEW PRODUCTS, CONNECT DIRECTLY)", span: 2 },
+                        { key: "desc", label: "Description / Bullet text", type: "textarea", span: 2 },
+                        { key: "image", label: "Feature Photo (Optional)", type: "image", span: 2 },
+                      ]}
+                      value={visitPillars}
+                      onChange={setVisitPillars}
+                      emptyRow={EMPTY_PILLAR}
+                      addLabel="Add visitor pillar"
+                    />
                   ),
                   ratingReview: (
                     <div className="grid grid-cols-2 gap-3">

@@ -112,9 +112,9 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#120B07]/85 backdrop-blur-xl border-b border-amber-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all">
+    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-xl border-b border-amber-800/15 shadow-[0_4px_25px_rgba(180,130,30,0.06)] transition-all">
       {/* Top subtle golden ambient beam */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/40 to-transparent pointer-events-none" />
 
       <div className="container max-w-[1440px] mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between relative gap-4">
@@ -130,10 +130,11 @@ export default function Navbar() {
               className="h-10 sm:h-11 w-auto object-contain drop-shadow-[0_2px_12px_rgba(245,158,11,0.3)] group-hover:scale-105 transition-all duration-300"
             />
             <div className="flex flex-col text-left leading-none">
-              <span className="text-[13px] sm:text-[14.5px] font-black tracking-tight text-white font-primary uppercase leading-tight">
-                RECHARGE<span className="text-amber-400"> FOR NATION</span>
+              <span className="text-[13px] sm:text-[14.5px] font-black tracking-tight font-primary uppercase leading-tight">
+                <span className="text-[#7B1123]">RECHARGE</span>
+                <span className="text-[#C59B27]"> FOR NATION</span>
               </span>
-              <span className="text-[6.8px] sm:text-[7.5px] font-primary font-bold tracking-[0.22em] text-amber-500/80 uppercase mt-0.5 leading-none">
+              <span className="text-[6.8px] sm:text-[7.5px] font-primary font-bold tracking-[0.22em] text-[#997316] uppercase mt-0.5 leading-none truncate max-w-[170px] sm:max-w-none">
                 {brandTagline === "Experience India" ? "ONE NATION • ONE ENERGY • ONE FUTURE" : brandTagline}
               </span>
             </div>
@@ -145,13 +146,13 @@ export default function Navbar() {
               href="/"
               className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 outline-none focus:outline-none ${
                 pathname === "/"
-                  ? "text-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
-                  : "text-stone-300 hover:text-amber-300 hover:bg-white/[0.04]"
+                  ? "text-[#7B1123] bg-[#7B1123]/10 border border-[#C59B27]/40 shadow-[0_0_12px_rgba(197,155,39,0.18)]"
+                  : "text-[#581825] hover:text-[#7B1123] hover:bg-[#7B1123]/5"
               }`}
             >
               Home
               {pathname === "/" && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400 animate-pulse" />
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C59B27] animate-pulse" />
               )}
             </Link>
             {primaryLinks
@@ -166,13 +167,13 @@ export default function Navbar() {
                     href={link.href}
                     className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 outline-none focus:outline-none ${
                       isActive
-                        ? "text-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
-                        : "text-stone-300 hover:text-amber-300 hover:bg-white/[0.04]"
+                        ? "text-[#7B1123] bg-[#7B1123]/10 border border-[#C59B27]/40 shadow-[0_0_12px_rgba(197,155,39,0.18)]"
+                        : "text-[#581825] hover:text-[#7B1123] hover:bg-[#7B1123]/5"
                     }`}
                   >
                     {link.name}
                     {isActive && (
-                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C59B27] animate-pulse" />
                     )}
                   </Link>
                 );
@@ -194,7 +195,7 @@ export default function Navbar() {
                   type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   onMouseEnter={() => setUserMenuOpen(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-amber-500/20 text-stone-200 transition-all cursor-pointer text-xs font-bold outline-none focus:outline-none"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/[0.03] hover:bg-black/[0.06] border border-amber-700/20 text-stone-800 transition-all cursor-pointer text-xs font-bold outline-none focus:outline-none"
                 >
                   <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-[#170D08] flex items-center justify-center text-[9px] font-black shrink-0">
                     {user.name ? user.name[0].toUpperCase() : "U"}
@@ -202,53 +203,53 @@ export default function Navbar() {
                   <span className="max-w-[90px] truncate text-[11px]">{user.name || "Account"}</span>
                   <ChevronDown
                     size={11}
-                    className={`transition-transform text-stone-400 ${
-                      userMenuOpen ? "rotate-180 text-amber-400" : ""
+                    className={`transition-transform text-stone-500 ${
+                      userMenuOpen ? "rotate-180 text-amber-600" : ""
                     }`}
                   />
                 </button>
 
                 {userMenuOpen && (
                   <div
-                    className="absolute top-full right-0 mt-2 w-52 bg-[#180E09]/95 backdrop-blur-xl border border-amber-500/20 rounded-2xl p-1.5 shadow-2xl flex flex-col gap-1 z-50 animate-fade-in text-left"
+                    className="absolute top-full right-0 mt-2 w-52 bg-white/98 backdrop-blur-xl border border-amber-700/20 rounded-2xl p-1.5 shadow-xl flex flex-col gap-1 z-50 animate-fade-in text-left"
                     onMouseEnter={() => setUserMenuOpen(true)}
                   >
-                    <div className="px-3 py-2 border-b border-white/[0.06] mb-1">
-                      <p className="text-[11px] font-bold text-white truncate">{user.name}</p>
-                      <p className="text-[10px] text-stone-400 truncate">{user.email}</p>
+                    <div className="px-3 py-2 border-b border-stone-200/80 mb-1">
+                      <p className="text-[11px] font-bold text-[var(--text-primary)] truncate">{user.name}</p>
+                      <p className="text-[10px] text-stone-500 truncate">{user.email}</p>
                     </div>
 
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:text-stone-900 hover:bg-amber-500/10 transition-colors"
                     >
-                      <Ticket size={13} className="text-amber-400 shrink-0" />
+                      <Ticket size={13} className="text-amber-600 shrink-0" />
                       <span>My Passes &amp; Wallet</span>
                     </Link>
 
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-300 hover:text-white hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:text-stone-900 hover:bg-amber-500/10 transition-colors"
                     >
-                      <Layers size={13} className="text-stone-400 shrink-0" />
+                      <Layers size={13} className="text-stone-500 shrink-0" />
                       <span>Dashboard</span>
                     </Link>
 
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-amber-400 hover:bg-amber-500/10 transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-amber-700 hover:bg-amber-500/15 transition-colors"
                     >
-                      <Compass size={13} className="text-amber-400 shrink-0" />
+                      <Compass size={13} className="text-amber-600 shrink-0" />
                       <span>Gate Scanner</span>
                     </Link>
 
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex items-center gap-2.5 px-3 py-2 mt-1 border-t border-white/[0.06] rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition-colors w-full text-left cursor-pointer"
+                      className="flex items-center gap-2.5 px-3 py-2 mt-1 border-t border-stone-200/80 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-500/10 transition-colors w-full text-left cursor-pointer"
                     >
                       <LogOut size={13} className="shrink-0" />
                       <span>Sign Out</span>
@@ -260,14 +261,14 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="text-xs font-bold uppercase tracking-wider text-stone-300 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/[0.04] transition-all outline-none focus:outline-none"
+                  className="text-xs font-bold uppercase tracking-wider text-[#7B1123] hover:text-[#4A0814] px-3.5 py-1.5 rounded-full border border-[#7B1123]/25 hover:bg-[#7B1123]/5 transition-all outline-none focus:outline-none"
                 >
                   Login
                 </Link>
 
                 <Link
                   href="/register"
-                  className="bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-[#170D08] text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.35)] transition-all transform hover:-translate-y-0.5 outline-none focus:outline-none"
+                  className="bg-gradient-to-r from-[#7B1123] via-[#961E34] to-[#7B1123] hover:from-[#580B17] hover:to-[#7B1123] text-[#F3BA2F] text-xs font-black uppercase tracking-wider px-4.5 py-1.5 rounded-full border border-[#C59B27]/50 shadow-[0_0_15px_rgba(123,17,35,0.25)] hover:shadow-[0_0_25px_rgba(197,155,39,0.35)] transition-all transform hover:-translate-y-0.5 outline-none focus:outline-none"
                 >
                   Register
                 </Link>
@@ -280,7 +281,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-stone-300 hover:text-white transition-colors cursor-pointer outline-none focus:outline-none"
+              className="p-2 text-[#7B1123] hover:text-[#4A0814] transition-colors cursor-pointer outline-none focus:outline-none"
             >
               {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -291,17 +292,17 @@ export default function Navbar() {
 
       {/* Mobile Drawer Overlay */}
       {isOpen && (
-        <div className="lg:hidden absolute top-[64px] left-0 w-full bg-[#120B07]/98 border-b border-amber-500/10 p-5 flex flex-col gap-4 shadow-2xl animate-fade-in z-50">
+        <div className="lg:hidden absolute top-[64px] left-0 w-full bg-white/98 border-b border-[#7B1123]/20 p-5 flex flex-col gap-4 shadow-2xl animate-fade-in z-50">
           <div className="flex flex-col gap-2">
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
               className={`flex items-center justify-between text-xs font-bold py-2.5 px-3 rounded-xl uppercase tracking-wider transition-colors ${
-                pathname === "/" ? "bg-amber-500/10 text-amber-400" : "text-stone-300 hover:bg-white/5 hover:text-white"
+                pathname === "/" ? "bg-[#7B1123]/10 text-[#7B1123] border border-[#C59B27]/30" : "text-[#581825] hover:bg-[#7B1123]/5 hover:text-[#7B1123]"
               }`}
             >
               <span>Home</span>
-              <ChevronRight size={14} className="text-stone-500" />
+              <ChevronRight size={14} className="text-[#C59B27]" />
             </Link>
 
             {primaryLinks
@@ -316,31 +317,31 @@ export default function Navbar() {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center justify-between text-xs font-bold py-2.5 px-3 rounded-xl uppercase tracking-wider transition-colors ${
-                      isActive ? "bg-amber-500/10 text-amber-400" : "text-stone-300 hover:bg-white/5 hover:text-white"
+                      isActive ? "bg-[#7B1123]/10 text-[#7B1123] border border-[#C59B27]/30" : "text-[#581825] hover:bg-[#7B1123]/5 hover:text-[#7B1123]"
                     }`}
                   >
                     <span>{link.name}</span>
-                    <ChevronRight size={14} className="text-stone-500" />
+                    <ChevronRight size={14} className="text-[#C59B27]" />
                   </Link>
                 );
               })}
           </div>
 
-          <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
+          <div className="pt-2 border-t border-stone-200 flex flex-col gap-2">
             {user ? (
               <>
                 <Link
                   href="/dashboard"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 rounded-xl text-stone-200 text-xs font-bold uppercase"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-[#7B1123]/5 border border-[#7B1123]/20 rounded-xl text-[#7B1123] text-xs font-bold uppercase"
                 >
-                  <Ticket size={13} className="text-amber-400" />
+                  <Ticket size={13} className="text-[#C59B27]" />
                   <span>My Passes &amp; Wallet</span>
                 </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="py-2.5 text-rose-400 text-xs font-bold uppercase text-center cursor-pointer"
+                  className="py-2.5 text-[#7B1123] hover:text-[#4A0814] text-xs font-bold uppercase text-center cursor-pointer"
                 >
                   Sign Out
                 </button>
@@ -350,14 +351,14 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="py-2.5 text-center border border-white/10 rounded-xl text-stone-300 text-xs font-bold uppercase hover:bg-white/5"
+                  className="py-2.5 text-center border border-[#7B1123]/30 rounded-xl text-[#7B1123] text-xs font-bold uppercase hover:bg-[#7B1123]/5"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setIsOpen(false)}
-                  className="py-2.5 text-center bg-gradient-to-r from-amber-500 to-amber-400 text-[#170D08] rounded-xl text-xs font-black uppercase shadow-lg shadow-amber-500/20"
+                  className="py-2.5 text-center bg-gradient-to-r from-[#7B1123] via-[#961E34] to-[#7B1123] text-[#F3BA2F] rounded-xl text-xs font-black uppercase shadow-lg shadow-[#7B1123]/20 border border-[#C59B27]/40"
                 >
                   Register
                 </Link>

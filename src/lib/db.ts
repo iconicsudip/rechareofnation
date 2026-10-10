@@ -253,6 +253,20 @@ async function runSchemaInitialization() {
   `;
 
   await sql`
+    CREATE TABLE IF NOT EXISTS uploaded_photos (
+      id TEXT PRIMARY KEY,
+      filename TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      size_bytes INT NOT NULL,
+      data BYTEA NOT NULL,
+      width INT,
+      height INT,
+      category TEXT DEFAULT 'general',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
     CREATE TABLE IF NOT EXISTS _bootstrap_state (
       key TEXT PRIMARY KEY,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -283,6 +297,9 @@ async function runSchemaInitialization() {
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS event_sections JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS booking_form_fields JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS inquiry_form_fields JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS highlights JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS exhibit_pillars JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS visit_pillars JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE competitions ADD COLUMN IF NOT EXISTS registration_form_fields JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS description TEXT`;
   await sql`ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS industry TEXT`;

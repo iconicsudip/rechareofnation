@@ -274,7 +274,14 @@ export default function SponsorsPage() {
                         className="flex items-center gap-2.5 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl px-4 py-3"
                       >
                         {partner.logoUrl ? (
-                          <img src={partner.logoUrl} alt={partner.name} className="h-6 w-auto object-contain" />
+                          <img
+                            src={partner.logoUrl}
+                            alt={partner.name}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                            className="h-6 w-auto object-contain"
+                          />
                         ) : (
                           <Building size={14} className="text-[var(--text-muted)] shrink-0" />
                         )}
@@ -310,12 +317,12 @@ export default function SponsorsPage() {
             </div>
 
             {/* Selector Pills */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 no-scrollbar max-w-full">
               {(["TITLE", "PLATINUM", "GOLD", "ASSOCIATE"] as const).map((tierKey) => (
                 <button
                   key={tierKey}
                   onClick={() => setSelectedTier(tierKey)}
-                  className={`px-4 py-2 rounded-lg text-xs font-black tracking-wider uppercase transition-all cursor-pointer ${selectedTier === tierKey
+                  className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-lg text-xs font-black tracking-wider uppercase transition-all cursor-pointer ${selectedTier === tierKey
                     ? "bg-amber-500 text-[#170D08] shadow-md"
                     : "bg-white/5 border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-white/10"
                     }`}
@@ -507,7 +514,7 @@ export default function SponsorsPage() {
                 href="https://www.uhcvs.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-stone-300 hover:text-white text-xs font-bold font-primary uppercase tracking-wider transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-[#7B1123]/10 border border-stone-200 text-stone-700 hover:text-[#7B1123] text-xs font-bold font-primary uppercase tracking-wider transition-colors"
               >
                 <span>uhcvs.org</span>
                 <ExternalLink size={12} />
@@ -547,30 +554,30 @@ export default function SponsorsPage() {
                 {foodExpoConfig.sponsorshipTiers.map((tier) => (
                   <div
                     key={tier.rank || tier.no}
-                    className="flex flex-col gap-2.5 px-3.5 py-3 rounded-2xl bg-[var(--bg-panel)] hover:bg-white/[0.05] border border-[var(--border-color)] hover:border-amber-500/40 transition-all duration-200"
+                    className="flex flex-col gap-2.5 px-3.5 py-3 rounded-2xl bg-[var(--bg-card)] hover:bg-stone-50 border border-[var(--border-color)] hover:border-amber-600/40 shadow-sm transition-all duration-200"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span className={`w-7 h-7 rounded-xl text-xs font-black flex items-center justify-center text-white bg-gradient-to-br ${tier.bg} shadow-md shrink-0`}>
                         {tier.rank || tier.no}
                       </span>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs sm:text-sm font-black text-white font-primary uppercase tracking-tight whitespace-nowrap">
+                        <span className="text-xs sm:text-sm font-black text-[var(--text-primary)] font-primary uppercase tracking-tight whitespace-nowrap">
                           {tier.name}
                         </span>
-                        <span className="text-[9.5px] text-[var(--text-muted)] font-secondary truncate">
+                        <span className="text-[9.5px] text-[var(--text-secondary)] font-secondary truncate">
                           {tier.desc || tier.tag}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between gap-2 pl-10">
-                      <span className="text-xs sm:text-sm font-black font-mono text-amber-300 bg-amber-500/10 px-3 py-1 rounded-xl border border-amber-500/20">
+                      <span className="text-xs sm:text-sm font-black font-mono text-amber-800 bg-amber-500/15 px-3 py-1 rounded-xl border border-amber-600/25">
                         {tier.price}
                       </span>
                       <a
                         href="#enlist"
                         onClick={() => setTierInterest(`Food Expo: ${tier.name} (${tier.price})`)}
-                        className="inline-flex px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-[#170D08] text-[9.5px] font-primary font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                        className="inline-flex px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-800 hover:text-[#170D08] text-[9.5px] font-primary font-bold uppercase tracking-wider transition-colors cursor-pointer"
                       >
                         Enlist
                       </a>
@@ -633,7 +640,7 @@ export default function SponsorsPage() {
           {/* Clickable Graphic Poster Preview */}
           <div
             onClick={() => setShowFoodSponsorModal(true)}
-            className="group relative rounded-2xl overflow-hidden border border-amber-500/30 shadow-xl bg-[#120B07] p-2 sm:p-4 cursor-pointer relative z-10 flex items-center justify-center max-h-[480px] aspect-[16/9] sm:aspect-[16/8]"
+            className="group relative rounded-2xl overflow-hidden border border-amber-500/30 shadow-xl bg-[var(--bg-card)] p-2 sm:p-4 cursor-pointer relative z-10 flex items-center justify-center max-h-[480px] aspect-[16/9] sm:aspect-[16/8]"
           >
             <img
               src={foodExpoConfig.images.sponsorshipPoster}
@@ -650,21 +657,21 @@ export default function SponsorsPage() {
 
         {/* Lightbox modal for Food Expo Sponsorship Chart on Sponsors Page */}
         {showFoodSponsorModal && (
-          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
-            <div className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-[#120B07] border border-amber-500/30 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-white/10 mb-3">
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+            <div className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-white border border-amber-500/30 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-stone-200 mb-3">
                 <div className="flex flex-col text-left">
-                  <span className="text-[9px] font-primary font-bold text-amber-400 uppercase tracking-widest">
+                  <span className="text-[9px] font-primary font-bold text-amber-700 uppercase tracking-widest">
                     Food Expo 2026–2027 Official Blueprint
                   </span>
-                  <h3 className="text-sm sm:text-lg font-black font-primary text-white uppercase">
+                  <h3 className="text-sm sm:text-lg font-black font-primary text-[var(--text-primary)] uppercase">
                     Sponsorship Categories &amp; Benefits Poster
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowFoodSponsorModal(false)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer transition-colors"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-stone-800 cursor-pointer transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -763,7 +770,7 @@ export default function SponsorsPage() {
                             TITLE SPONSOR
                           </span>
                           {/* Active Indicator dot */}
-                          <div className="absolute top-3 right-3 w-3 h-3 bg-emerald-500 border-2 border-[#170D08] rounded-full shadow-md" />
+                          <div className="absolute top-3 right-3 w-3 h-3 bg-[#C59B27] border-2 border-[#1C0509] rounded-full shadow-md" />
                         </div>
 
                         <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 flex-1 text-center sm:text-left">
@@ -1011,7 +1018,7 @@ export default function SponsorsPage() {
 
               {isSubmitted ? (
                 <div className="py-12 flex flex-col items-center justify-center text-center gap-4">
-                  <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                  <div className="w-16 h-16 bg-[#7B1123]/10 rounded-full flex items-center justify-center text-[#C59B27] border border-[#C59B27]/30">
                     <CheckCircle className="w-8 h-8" />
                   </div>
                   <h4 className="font-bold font-primary text-lg text-[var(--text-primary)]">Proposal Pitch Requested!</h4>
