@@ -22,6 +22,7 @@ import {
   Trophy,
   Tags,
   Ticket,
+  MessageCircle,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -43,6 +44,7 @@ const CONTENT_NAV_ITEMS = [
   { href: "/admin/gallery", label: "Gallery", icon: Image },
   { href: "/admin/content", label: "Site Content", icon: FileText },
   { href: "/admin/taxonomies", label: "Categories & Cities", icon: Tags },
+  { href: "/admin/whatsapp", label: "City WhatsApp", icon: MessageCircle },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

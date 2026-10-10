@@ -314,8 +314,8 @@ export const mapDbEvent = (e: any): Event => ({
   rules: Array.isArray(e.rules)
     ? e.rules
     : (() => { try { return JSON.parse(e.rules || '[]'); } catch { return []; } })(),
-  rating: e.rating != null ? Number(e.rating) : 4.6,
-  reviewCount: e.review_count != null ? Number(e.review_count) : 25,
+  rating: e.rating != null ? Number(e.rating) : 0,
+  reviewCount: e.review_count != null ? Number(e.review_count) : 0,
   sponsorshipTiers: Array.isArray(e.sponsorship_tiers)
     ? e.sponsorship_tiers
     : (() => { try { return JSON.parse(e.sponsorship_tiers || '[]'); } catch { return []; } })(),
@@ -329,12 +329,30 @@ export const mapDbEvent = (e: any): Event => ({
   headliners: Array.isArray(e.headliners)
     ? e.headliners
     : (() => { try { return JSON.parse(e.headliners || '[]'); } catch { return []; } })(),
-  faqs: Array.isArray(e.faqs)
+  // Accept both {q,a} (admin editor) and {question,answer} (imported content).
+  faqs: (Array.isArray(e.faqs)
     ? e.faqs
-    : (() => { try { return JSON.parse(e.faqs || '[]'); } catch { return []; } })(),
-  scheduleDays: Array.isArray(e.schedule_days)
+    : (() => { try { return JSON.parse(e.faqs || '[]'); } catch { return []; } })()
+  ).filter(Boolean)
+    .map((f: any) => ({ q: String(f.q ?? f.question ?? '').trim(), a: String(f.a ?? f.answer ?? '').trim() }))
+    .filter((f: { q: string; a: string }) => f.q && f.a),
+  scheduleDays: (Array.isArray(e.schedule_days)
     ? e.schedule_days
-    : (() => { try { return JSON.parse(e.schedule_days || '[]'); } catch { return []; } })(),
+    : (() => { try { return JSON.parse(e.schedule_days || '[]'); } catch { return []; } })()
+  ).filter(Boolean).map((d: any) => {
+    // Accept both the admin shape (dayLabel/items/desc) and the imported-from-PDF
+    // shape (title/sessions/description).
+    const raw = Array.isArray(d.items) ? d.items : Array.isArray(d.sessions) ? d.sessions : [];
+    return {
+      ...d,
+      dayLabel: d.dayLabel || d.title || d.date || '',
+      items: raw.filter(Boolean).map((it: any) => ({
+        time: it.time || '',
+        title: it.title || '',
+        desc: it.desc || it.description || '',
+      })),
+    };
+  }),
   sponsors: [],
   videoUrl: e.video_url || '',
   galleryUrls: Array.isArray(e.gallery_urls)
@@ -419,13 +437,17 @@ export const ApiClient = {
   },
 
   getEventBySlug: async (slug: string): Promise<Event | undefined> => {
-    const all = await ApiClient.getEvents();
-    return all.find(e => e.slug === slug);
+    const res = await fetch(`/api/events?slug=${encodeURIComponent(slug)}`);
+    if (!res.ok) throw new Error('Failed to load event');
+    const data = await res.json();
+    return (data.events ?? []).map(mapDbEvent)[0];
   },
 
   getEventById: async (id: string): Promise<Event | undefined> => {
-    const all = await ApiClient.getEvents();
-    return all.find(e => e.id === id);
+    const res = await fetch(`/api/events?id=${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error('Failed to load event');
+    const data = await res.json();
+    return (data.events ?? []).map(mapDbEvent)[0];
   },
 
   getSponsors: async (): Promise<Sponsor[]> => {

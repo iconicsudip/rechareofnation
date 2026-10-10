@@ -72,7 +72,7 @@ export default function BlogDetailPage({ params }: PageProps) {
         <div className="relative rounded-[32px] overflow-hidden shadow-sm border border-[var(--border-color)] aspect-[16/9] md:aspect-[21/9] bg-black/30">
           {blog.imageUrl ? (
             <img loading="lazy" decoding="async"
-              src={blog.imageUrl}
+              src={blog.imageUrl || undefined}
               alt={blog.title}
               className="w-full h-full object-cover opacity-75"
             />
@@ -170,7 +170,7 @@ export default function BlogDetailPage({ params }: PageProps) {
             {blog.imageUrl && (
               <div className="rounded-[24px] overflow-hidden border border-[var(--border-color)] aspect-[16/9] w-full bg-black/20 mt-4 shadow-sm">
                 <img loading="lazy" decoding="async"
-                  src={blog.imageUrl}
+                  src={blog.imageUrl || undefined}
                   alt={blog.title}
                   className="w-full h-full object-cover"
                 />
@@ -197,7 +197,7 @@ export default function BlogDetailPage({ params }: PageProps) {
                   <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-[var(--border-color)] bg-black/20 shadow-sm flex items-center justify-center">
                     {popBlog.imageUrl ? (
                       <img loading="lazy" decoding="async"
-                        src={popBlog.imageUrl}
+                        src={popBlog.imageUrl || undefined}
                         alt={popBlog.title}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />

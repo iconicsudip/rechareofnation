@@ -38,7 +38,7 @@ export default function TermsConditionsPage() {
   const sections = content?.sections ?? [];
 
   return (
-    <div className="min-h-screen container mx-auto px-4 py-16 md:py-24 flex flex-col gap-12 max-w-6xl text-left">
+    <div className="min-h-screen container mx-auto px-4 py-16 md:py-24 flex flex-col gap-12 max-w-[1360px] text-left">
       {/* Header */}
       <div className="flex flex-col gap-3 max-w-2xl">
         <span className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full font-primary w-fit">

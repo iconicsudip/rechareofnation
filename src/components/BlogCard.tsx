@@ -35,7 +35,7 @@ export default function BlogCard({
       <div className={`relative ${aspectRatio} rounded-[24px] overflow-hidden shadow-sm border border-[var(--border-color)] bg-black/20`}>
         {imageUrl ? (
           <img
-            src={imageUrl}
+            src={imageUrl || undefined}
             alt={title}
             loading="lazy"
             decoding="async"

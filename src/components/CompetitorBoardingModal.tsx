@@ -429,7 +429,7 @@ export default function CompetitorBoardingModal({ competition, onClose, initialN
 
                   <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-amber-500/50 bg-slate-800 flex items-center justify-center relative mt-2">
                     {headshotPreview ? (
-                      <img src={headshotPreview} alt="Contestant headshot" className="w-full h-full object-cover" />
+                      <img src={headshotPreview || undefined} alt="Contestant headshot" className="w-full h-full object-cover" />
                     ) : (
                       <User size={32} className="text-slate-500" />
                     )}

@@ -29,7 +29,7 @@ function QRImage({ value, size = 160 }: { value: string; size?: number }) {
   const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=ffffff&color=000000&margin=2`;
   return (
     <img
-      src={url}
+      src={url || undefined}
       alt="QR Code"
       width={size}
       height={size}
@@ -46,7 +46,7 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
       <div className="w-full max-w-sm rounded-[28px] overflow-hidden relative bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl">
 
         {/* Header stripe */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#B8892A] via-[#E5C05B] to-[#C59B27]" />
 
         <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer">
           <X size={15} />
@@ -101,7 +101,7 @@ function PassModal({ pass, onClose }: { pass: PassData; onClose: () => void }) {
           )}
 
           <button onClick={() => window.print()}
-            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-400 hover:from-amber-500 hover:to-amber-300 text-[#170D08] font-primary cursor-pointer transition-all shadow-md">
+            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-[#B8892A] via-[#E5C05B] to-[#C59B27] hover:from-[#C59B27] hover:to-[#EBCB6B] text-[#170D08] font-primary cursor-pointer transition-all shadow-md">
             <Download size={14} /> Download / Print Pass
           </button>
         </div>
@@ -215,7 +215,7 @@ export default function DashboardPage() {
       <div className="lg:w-72 flex flex-col gap-4 flex-shrink-0">
         {/* Profile Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-sm p-6 flex flex-col gap-4 text-center">
-          <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center mx-auto font-black text-2xl text-[#170D08] bg-gradient-to-br from-amber-500 to-amber-600 font-primary">
+          <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center mx-auto font-black text-2xl text-[#170D08] bg-gradient-to-br from-[#B8892A] via-[#E5C05B] to-[#C59B27] font-primary">
             {currentUser.name.charAt(0).toUpperCase()}
             {currentUser.isVerified && (
               <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center bg-gradient-to-br from-[#7B1123] to-[#961E34] text-[#F3BA2F] shadow-sm">

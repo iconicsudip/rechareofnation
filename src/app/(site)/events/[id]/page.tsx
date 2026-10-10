@@ -9,7 +9,7 @@ import {
   AlertCircle, Printer, X, Clock, ArrowRight,
   ChevronDown, ChevronUp, Sliders, Star, HelpCircle, Sparkles,
   Radio, Navigation, Flame, Zap, CheckCircle2, Music,
-  ExternalLink, QrCode, CheckCheck, Send,
+  ExternalLink, QrCode, CheckCheck, Send, MessageCircle,
   ChevronLeft, ChevronRight, Play, Maximize2, Film, Image as ImageIcon
 } from "lucide-react";
 import {
@@ -17,6 +17,8 @@ import {
   CompetitionRegistration, User, GalleryItem, EventSectionItem
 } from "@/lib/api-client";
 import RichTextContent from "@/components/RichTextContent";
+import { useWhatsAppConfig } from "@/lib/useWhatsAppConfig";
+import { buildWhatsAppUrl, findWhatsAppNumber, getWhatsAppCities } from "@/lib/whatsapp";
 import { isFieldEnabled, DEFAULT_TICKET_BOOKING_FIELDS, DEFAULT_INQUIRY_FORM_FIELDS } from "@/lib/bookingFormFields";
 
 interface FoodExpoSponsorTier {
@@ -148,8 +150,12 @@ export default function EventDetailPage({ params }: PageProps) {
   useEffect(() => {
     const fetchEventData = async () => {
       try {
-        const allEvents = await ApiClient.getEvents();
-        const found = allEvents.find(e => e.slug === eventId || e.id === eventId);
+        // Fetch just this event (by slug or id) instead of downloading every event.
+        const [bySlug, byId] = await Promise.all([
+          ApiClient.getEventBySlug(eventId),
+          ApiClient.getEventById(eventId),
+        ]);
+        const found = bySlug ?? byId;
         if (found) {
           // Ensure list-type fields are always arrays so rendering never hits undefined.
           setEvent({
@@ -409,11 +415,19 @@ export default function EventDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--bg-main)] text-[var(--text-secondary)] font-secondary">
-        <div className="w-12 h-12 rounded-full border border-[#7B1123]/20 border-t-[#C59B27] animate-spin" />
-        <span className="text-xs font-primary font-bold tracking-widest uppercase text-[#7B1123]">
-          Loading Royal Event Experience...
-        </span>
+      <div className="flex flex-col gap-8 px-4 py-10 max-w-[1360px] mx-auto w-full" role="status" aria-label="Loading event">
+        <div className="skeleton h-[340px] sm:h-[420px] w-full rounded-2xl" />
+        <div className="flex flex-col gap-3">
+          <div className="skeleton h-4 w-40" />
+          <div className="skeleton h-10 w-3/4" />
+          <div className="skeleton h-4 w-full max-w-2xl" />
+          <div className="skeleton h-4 w-2/3 max-w-xl" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="skeleton h-28" />
+          <div className="skeleton h-28" />
+          <div className="skeleton h-28" />
+        </div>
       </div>
     );
   }
@@ -456,35 +470,72 @@ export default function EventDetailPage({ params }: PageProps) {
     heroMediaItems.find((m) => m.poster)?.poster ||
     null;
 
+  // Admin-written FAQs win; events without any get a short set built only from the
+  // event's real details (no invented policies).
+  const faqList: { q: string; a: string }[] =
+    event.faqs && event.faqs.length > 0
+      ? event.faqs
+      : [
+          {
+            q: `When and where is ${event.name}?`,
+            a: [
+              event.date && `${event.date}${event.time ? ` at ${event.time}` : ""}`,
+              [event.venue, event.city].filter(Boolean).join(", "),
+            ].filter(Boolean).join(" — "),
+          },
+          ...(event.ticketPrices.length > 0
+            ? [{
+                q: "How do I get my pass?",
+                a: "Choose a ticket tier in the Tickets section and complete checkout. Your digital E-Pass with a QR code is generated instantly and sent to your email — show it at the entry gate.",
+              }]
+            : []),
+          ...(event.organizer?.name?.trim()
+            ? [{
+                q: "Who is organising this event?",
+                a: [event.organizer.name, event.organizer.contact].filter(Boolean).join(" — "),
+              }]
+            : []),
+          {
+            q: "How can I get help or more information?",
+            a: "Use the Contact page to reach the team, or choose your city there to chat with us directly on WhatsApp.",
+          },
+        ].filter((f) => f.a.trim());
+  const hasExperience = Boolean(
+    event.description?.replace(/<[^>]*>/g, "").trim() ||
+    event.summary?.trim() ||
+    (Array.isArray(event.highlights) && event.highlights.length > 0)
+  );
+  const hasVenueInfo = Boolean(event.venue?.trim() || event.city?.trim());
+  const hasOrganizer = Boolean(event.organizer?.name?.trim());
   const hasStalls = Array.isArray(event.stallOptions) && event.stallOptions.length > 0;
   const hasSponsors = Array.isArray(event.sponsorshipTiers) && event.sponsorshipTiers.length > 0;
   const hasTickets = Array.isArray(event.ticketPrices) && event.ticketPrices.length > 0;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-secondary relative selection:bg-[#7B1123]/20 selection:text-[#7B1123] overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] font-secondary relative selection:bg-[#E5C05B] selection:text-[#2E050C] overflow-x-clip">
 
       {/* ─── Luxurious Modern Background Atmosphere & Architectural Guides ─── */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden select-none">
         {/* Architectural Hairline Margin Guides */}
-        <div className="absolute inset-y-0 left-0 right-0 max-w-7xl mx-auto px-4 sm:px-6 pointer-events-none">
-          <div className="w-full h-full border-x border-[#EADBCE]/35" />
+        <div className="absolute inset-y-0 left-0 right-0 max-w-[1520px] mx-auto px-4 sm:px-6 pointer-events-none">
+          <div className="w-full h-full border-x border-[#C59B27]/25" />
         </div>
 
         {/* Golden Champagne & Velvet Wine Ambient Glow Orbs */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-[radial-gradient(ellipse_at_center,rgba(197,155,39,0.08)_0%,rgba(123,17,35,0.03)_50%,transparent_75%)] blur-3xl pointer-events-none" />
-        <div className="absolute top-[1800px] -left-48 w-[800px] h-[650px] bg-[radial-gradient(circle_at_center,rgba(123,17,35,0.04)_0%,rgba(197,155,39,0.03)_50%,transparent_75%)] blur-3xl pointer-events-none" />
-        <div className="absolute top-[3800px] -right-48 w-[850px] h-[700px] bg-[radial-gradient(circle_at_center,rgba(197,155,39,0.06)_0%,rgba(140,109,35,0.02)_50%,transparent_75%)] blur-3xl pointer-events-none" />
-        <div className="absolute top-[5600px] left-1/3 -translate-x-1/2 w-[900px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(123,17,35,0.035)_0%,rgba(197,155,39,0.025)_55%,transparent_75%)] blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-[radial-gradient(ellipse_at_center,rgba(197,155,39,0.2)_0%,rgba(123,17,35,0.07)_50%,transparent_75%)] blur-3xl pointer-events-none" />
+        <div className="absolute top-[1800px] -left-48 w-[800px] h-[650px] bg-[radial-gradient(circle_at_center,rgba(123,17,35,0.1)_0%,rgba(197,155,39,0.07)_50%,transparent_75%)] blur-3xl pointer-events-none" />
+        <div className="absolute top-[3800px] -right-48 w-[850px] h-[700px] bg-[radial-gradient(circle_at_center,rgba(197,155,39,0.16)_0%,rgba(140,109,35,0.06)_50%,transparent_75%)] blur-3xl pointer-events-none" />
+        <div className="absolute top-[5600px] left-1/3 -translate-x-1/2 w-[900px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(123,17,35,0.09)_0%,rgba(197,155,39,0.06)_55%,transparent_75%)] blur-3xl pointer-events-none" />
 
         {/* Subtle Micro-Lattice Texture */}
-        <div className="absolute inset-0 opacity-[0.018] bg-[radial-gradient(#7B1123_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(#8C6D23_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
       </div>
 
       {/* Dynamic Cinema Lightbox Overlay */}
       {isLightboxOpen && currentMedia && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-between p-4 sm:p-6 animate-in fade-in duration-200">
           {/* Top Bar */}
-          <div className="w-full max-w-6xl flex items-center justify-between gap-4 py-2 border-b border-white/10">
+          <div className="w-full max-w-[1360px] flex items-center justify-between gap-4 py-2 border-b border-white/10">
             <div className="flex items-center gap-3">
               <span className={`px-2.5 py-1 rounded-full text-[10px] font-primary font-bold uppercase tracking-wider ${currentMedia.type === "video" ? "bg-red-500/20 text-red-300 border border-red-500/30" : "bg-[#7B1123]/30 text-[#F3BA2F] border border-[#C59B27]/40"
                 }`}>
@@ -529,7 +580,7 @@ export default function EventDetailPage({ params }: PageProps) {
                   const embedUrl = getEmbedVideoUrl(currentMedia.url);
                   return embedUrl ? (
                     <iframe
-                      src={embedUrl}
+                      src={embedUrl || undefined}
                       title={currentMedia.title}
                       className="w-full h-full max-w-4xl aspect-video rounded-xl border border-white/20 shadow-2xl"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -537,7 +588,7 @@ export default function EventDetailPage({ params }: PageProps) {
                     />
                   ) : (
                     <video
-                      src={currentMedia.url}
+                      src={currentMedia.url || undefined}
                       controls
                       autoPlay
                       playsInline
@@ -547,7 +598,7 @@ export default function EventDetailPage({ params }: PageProps) {
                 })()
               ) : (
                 <img
-                  src={currentMedia.url}
+                  src={currentMedia.url || undefined}
                   alt={currentMedia.title}
                   className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-2xl border border-white/10 select-none"
                 />
@@ -585,14 +636,14 @@ export default function EventDetailPage({ params }: PageProps) {
                   {m.type === "video" ? (
                     <div className="w-full h-full bg-[#1C0509] flex items-center justify-center relative">
                       {m.poster && (
-                        <img src={m.poster} alt="" className="w-full h-full object-cover opacity-60" />
+                        <img src={m.poster || undefined} alt="" className="w-full h-full object-cover opacity-60" />
                       )}
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <Play size={14} className="text-[#F3BA2F] fill-[#F3BA2F]" />
                       </div>
                     </div>
                   ) : (
-                    <img src={m.url} alt="" className="w-full h-full object-cover" />
+                    <img src={m.url || undefined} alt="" className="w-full h-full object-cover" />
                   )}
                 </button>
               ))}
@@ -853,7 +904,7 @@ export default function EventDetailPage({ params }: PageProps) {
         <div className="absolute inset-0 -z-10 pointer-events-none select-none">
           {heroBgImage && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={heroBgImage} alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
+            <img src={heroBgImage || undefined} alt="" className="absolute inset-0 w-full h-full object-cover scale-105" />
           )}
           <div className="absolute inset-0 bg-gradient-to-r from-[#140205] via-[#1C0509]/90 to-[#1C0509]/45" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#140205] via-transparent to-[#140205]/60" />
@@ -861,7 +912,7 @@ export default function EventDetailPage({ params }: PageProps) {
           <div className="absolute inset-0 opacity-[0.06] bg-[radial-gradient(#F3BA2F_1px,transparent_1px)] [background-size:26px_26px]" />
           <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C59B27]/70 to-transparent" />
         </div>
-        <div className="container relative z-10 max-w-7xl mx-auto px-4">
+        <div className="container relative z-10 max-w-[1520px] mx-auto px-4">
           
           {/* Top Breadcrumb & Share Navigation Bar */}
           <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
@@ -951,7 +1002,8 @@ export default function EventDetailPage({ params }: PageProps) {
                   </span>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 hover:border-[#C59B27] rounded-xl p-3.5 sm:p-4 flex flex-col gap-1 shadow-xs hover:shadow-md transition-all duration-300">
+                {event.rating > 0 && (
+<div className="bg-white/10 backdrop-blur-md border border-white/20 hover:border-[#C59B27] rounded-xl p-3.5 sm:p-4 flex flex-col gap-1 shadow-xs hover:shadow-md transition-all duration-300">
                   <span className="flex items-center gap-1.5 text-[9px] font-serif font-bold tracking-wider text-[#F3BA2F] uppercase">
                     <Star size={13} className="text-[#F3BA2F] fill-[#F3BA2F] shrink-0" /> Rating
                   </span>
@@ -962,6 +1014,7 @@ export default function EventDetailPage({ params }: PageProps) {
                     {event.reviewCount} Verified Reviews
                   </span>
                 </div>
+)}
 
                 <div className="bg-white/10 backdrop-blur-md border border-white/20 hover:border-[#C59B27] rounded-xl p-3.5 sm:p-4 flex flex-col gap-1 shadow-xs hover:shadow-md transition-all duration-300">
                   <span className="flex items-center gap-1.5 text-[9px] font-serif font-bold tracking-wider text-[#F3BA2F] uppercase">
@@ -1069,10 +1122,10 @@ export default function EventDetailPage({ params }: PageProps) {
       {/* 2. STICKY SUB-NAV STRIP (Luxury Editorial Navigation)                     */}
       {/* ========================================================================= */}
       <nav className="sticky top-16 z-30 bg-[#FCFAF6]/90 backdrop-blur-xl border-b border-[#EADBCE] shadow-[0_2px_15px_rgba(0,0,0,0.03)] pt-2.5 pb-2.5">
-        <div className="container max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 overflow-x-auto py-1 no-scrollbar">
+        <div className="container max-w-[1520px] mx-auto px-4 flex items-center justify-between gap-4 overflow-x-auto py-1 no-scrollbar">
           <div className="flex items-center gap-1.5 sm:gap-2">
             {[
-              { id: "experience", label: "Experience" },
+              ...(hasExperience ? [{ id: "experience", label: "Experience" }] : []),
               ...(event.exhibitInfo && event.exhibitInfo.trim() ? [{ id: "exhibit", label: "Why Exhibit" }] : []),
               ...(event.visitInfo && event.visitInfo.trim() ? [{ id: "visit", label: "Why Visit" }] : []),
               ...(event.scheduleDays.length > 0 ? [{ id: "schedule", label: "Schedule" }] : []),
@@ -1080,12 +1133,12 @@ export default function EventDetailPage({ params }: PageProps) {
               ...(event.ticketPrices.length > 0 ? [{ id: "pass-studio", label: "Pass Studio" }] : []),
               ...(event.headliners.length > 0 ? [{ id: "headliners", label: "Headliners" }] : []),
               ...(eventGalleryItems.length > 0 ? [{ id: "gallery", label: "Gallery" }] : []),
-              { id: "venue", label: "Venue & Travel" },
+              ...(hasVenueInfo ? [{ id: "venue", label: "Venue & Travel" }] : []),
               ...(event.rules && event.rules.length > 0 ? [{ id: "rules", label: "Guidelines" }] : []),
-              ...(event.faqs && event.faqs.length > 0 ? [{ id: "faq", label: "FAQs" }] : []),
+              ...(faqList.length > 0 ? [{ id: "faq", label: "FAQs" }] : []),
               ...(event.sponsorshipTiers.length > 0 || event.stallOptions.length > 0 || event.adRates.length > 0
                 ? [{ id: "commercial", label: "Commercial" }] : []),
-              { id: "custodians", label: "Organizers" },
+              ...(hasOrganizer ? [{ id: "custodians", label: "Organizers" }] : []),
             ].map(item => {
               const isActive = activeNavSection === item.id;
               return (
@@ -1118,15 +1171,16 @@ export default function EventDetailPage({ params }: PageProps) {
       {/* ========================================================================= */}
       {/* 3. SINGLE PAGE LANDING PAGE FLOW                                         */}
       {/* ========================================================================= */}
-      <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-20 flex flex-col gap-16 md:gap-24">
+      <div className="container max-w-[1520px] mx-auto px-4 sm:px-6 py-12 md:py-20 flex flex-col gap-16 md:gap-24">
 
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 1: THE EXPERIENCE                                         */}
             {/* ----------------------------------------------------------------- */}
-            <section id="experience" className="scroll-mt-36 flex flex-col gap-8 text-left relative">
+            {hasExperience && (
+            <section id="experience" className="cv-auto-pad scroll-mt-36 flex flex-col gap-8 text-left relative">
               <div className="relative flex flex-col items-start gap-2 pb-6 border-b border-[#EADBCE]/80 overflow-hidden">
                 {/* Floating Architectural Watermark Numeral */}
-                <span className="absolute -top-3 sm:-top-7 right-0 text-7xl sm:text-8xl md:text-9xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                <span className="absolute -top-3 sm:-top-7 right-0 text-7xl sm:text-8xl md:text-9xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                   01
                 </span>
 
@@ -1157,12 +1211,14 @@ export default function EventDetailPage({ params }: PageProps) {
               </div>
 
               {/* Curated Manuscript / Description Box */}
+              {event.description?.replace(/<[^>]*>/g, "").trim() && (
               <div className="bg-[#FCFAF6] border border-[#EADBCE] rounded-xl p-7 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] relative overflow-hidden">
                 <RichTextContent
                   html={event.description}
                   className="text-stone-700 text-sm sm:text-base leading-relaxed font-sans space-y-4"
                 />
               </div>
+              )}
 
               {/* Dynamic Feature Highlights & Visual Experience Pillars */}
               {(() => {
@@ -1194,7 +1250,7 @@ export default function EventDetailPage({ params }: PageProps) {
                 ];
 
                 const hasCustomHighlights = Array.isArray(event.highlights) && event.highlights.length > 0;
-                const rawList = hasCustomHighlights ? event.highlights! : fallbackHighlights;
+                const rawList = hasCustomHighlights ? event.highlights! : [];
 
                 const displayHighlights = rawList.map((item, idx) => {
                   const fallback = fallbackHighlights[idx % fallbackHighlights.length];
@@ -1211,6 +1267,8 @@ export default function EventDetailPage({ params }: PageProps) {
                   if (tags.length === 0) tags = fallback.tags;
                   return { title, desc, image, tags };
                 });
+
+                if (displayHighlights.length === 0) return null;
 
                 return (
                   <div className="flex flex-col gap-6 pt-4">
@@ -1267,7 +1325,7 @@ export default function EventDetailPage({ params }: PageProps) {
                             {hasImage && (
                               <div className="shrink-0 w-full sm:w-56 md:w-64 lg:w-72 aspect-[16/10] rounded-xl overflow-hidden border border-[#EADBCE] shadow-xs relative group/img self-center">
                                 <img
-                                  src={item.image}
+                                  src={item.image || undefined}
                                   alt={item.title}
                                   className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105"
                                   loading="lazy"
@@ -1285,6 +1343,7 @@ export default function EventDetailPage({ params }: PageProps) {
                 );
               })()}
             </section>
+            )}
 
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 1B: WHY EXHIBIT                                           */}
@@ -1312,11 +1371,11 @@ export default function EventDetailPage({ params }: PageProps) {
               const sectionTitle = event.name.includes("(") ? event.name.match(/\((.*?)\)/)?.[1]?.trim() || event.name : event.name;
 
               return (
-                <section id="exhibit" className="scroll-mt-32 flex flex-col gap-8 text-left py-4 relative">
+                <section id="exhibit" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left py-4 relative">
                   {/* Eyebrow & Editorial Heading Matching Reference */}
                   <div className="relative flex flex-col items-start border-b border-[#EADBCE]/80 pb-5 overflow-hidden">
                     {/* Floating Architectural Watermark Numeral */}
-                    <span className="absolute -top-3 sm:-top-7 right-0 text-7xl sm:text-8xl md:text-9xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                    <span className="absolute -top-3 sm:-top-7 right-0 text-7xl sm:text-8xl md:text-9xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                       EXHIBIT
                     </span>
 
@@ -1357,7 +1416,7 @@ export default function EventDetailPage({ params }: PageProps) {
                           {hasImage && (
                             <div className="aspect-[16/10] w-full rounded-xl overflow-hidden bg-stone-100 shadow-xs relative group mb-4">
                               <img
-                                src={item.image}
+                                src={item.image || undefined}
                                 alt={item.title}
                                 loading="lazy"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -1440,11 +1499,11 @@ export default function EventDetailPage({ params }: PageProps) {
               const sectionTitle = event.name.includes("(") ? event.name.match(/\((.*?)\)/)?.[1]?.trim() || event.name : event.name;
 
               return (
-                <section id="visit" className="scroll-mt-32 flex flex-col gap-8 text-left py-4 relative">
+                <section id="visit" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left py-4 relative">
                   {/* Eyebrow & Editorial Heading Matching Reference */}
                   <div className="relative flex flex-col items-start border-b border-[#EADBCE]/80 pb-5 overflow-hidden">
                     {/* Floating Architectural Watermark Numeral */}
-                    <span className="absolute -top-3 sm:-top-7 right-0 text-7xl sm:text-8xl md:text-9xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                    <span className="absolute -top-3 sm:-top-7 right-0 text-7xl sm:text-8xl md:text-9xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                       VISIT
                     </span>
 
@@ -1485,7 +1544,7 @@ export default function EventDetailPage({ params }: PageProps) {
                           {hasImage && (
                             <div className="aspect-[16/10] w-full rounded-xl overflow-hidden bg-stone-100 shadow-xs relative group mb-4">
                               <img
-                                src={item.image}
+                                src={item.image || undefined}
                                 alt={item.title}
                                 loading="lazy"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -1546,16 +1605,16 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* SECTION 2: PROGRAM SCHEDULE                                       */}
             {/* ----------------------------------------------------------------- */}
             {event.scheduleDays.length > 0 && (
-              <section id="schedule" className="scroll-mt-32 flex flex-col gap-8 text-left">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-stone-200/80">
+              <section id="schedule" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
+                <div className="flex flex-col gap-5 pb-6 border-b border-stone-200/80">
                   <div className="flex flex-col gap-1.5">
                     <div className="relative flex flex-col items-start gap-2">
-                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                         02
                       </span>
                       <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#8C6D23] animate-pulse" />
-                        <span className="text-[10px] sm:text-[11px] font-serif font-bold tracking-[0.24em] text-[#8C6D23] uppercase">
+                        <span className="text-[10px] sm:text-[11px] font-serif font-bold tracking-[0.24em] text-[#8C6D23] uppercase whitespace-nowrap">
                           CHAPTER 02 • THE ITINERARY &amp; PROGRAM
                         </span>
                         <span className="text-[9px] text-[#C59B27] font-serif">✦</span>
@@ -1572,17 +1631,18 @@ export default function EventDetailPage({ params }: PageProps) {
                   </div>
 
                   {/* Day Switcher */}
-                  <div className="flex bg-[#FCFAF6] border border-[#EADBCE] p-1 rounded-xl gap-1 shrink-0">
+                  <div className="flex bg-[#FCFAF6] border border-[#EADBCE] p-1 rounded-xl gap-1 w-full sm:w-fit max-w-full overflow-x-auto no-scrollbar">
                     {event.scheduleDays.map((day, idx) => (
                       <button
                         key={idx}
                         onClick={() => setScheduleTab(idx)}
-                        className={`px-4 py-2 rounded-xl text-xs font-serif font-bold uppercase tracking-wider transition-all cursor-pointer ${scheduleTab === idx
+                        title={day.dayLabel}
+                        className={`shrink-0 whitespace-nowrap px-5 py-2.5 rounded-xl text-xs font-serif font-bold uppercase tracking-wider transition-all cursor-pointer ${scheduleTab === idx
                             ? "bg-[#7B1123] text-[#F3BA2F] border border-[#C59B27]/50 shadow-sm"
                             : "text-stone-700 hover:text-[#7B1123]"
                           }`}
                       >
-                        {day.dayLabel}
+                        {day.dayLabel.split(":")[0]}
                       </button>
                     ))}
                   </div>
@@ -1592,16 +1652,16 @@ export default function EventDetailPage({ params }: PageProps) {
                 {event.scheduleDays[scheduleTab] && (
                   <div className="bg-[#FCFAF6] border border-[#EADBCE] rounded-xl p-7 sm:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col gap-6">
                     <div className="flex items-center justify-between border-b border-[#EADBCE] pb-3">
-                      <span className="text-xs font-serif font-bold text-[#7B1123] uppercase tracking-widest">
-                        {event.scheduleDays[scheduleTab].dayLabel} Itinerary
+                      <span className="text-sm sm:text-base font-serif font-bold text-[#7B1123] tracking-tight">
+                        {event.scheduleDays[scheduleTab].dayLabel}
                       </span>
                       <span className="text-[11px] font-mono text-stone-500 uppercase">
-                        {event.scheduleDays[scheduleTab].items.length} Track Sessions
+                        {(event.scheduleDays[scheduleTab].items ?? []).length} Track Sessions
                       </span>
                     </div>
 
                     <div className="flex flex-col gap-6 relative before:absolute before:left-3 sm:before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-[#8C6D23] before:via-[#8C6D23]/30 before:to-transparent">
-                      {event.scheduleDays[scheduleTab].items.map((item, idx) => (
+                      {(event.scheduleDays[scheduleTab].items ?? []).map((item, idx) => (
                         <div key={idx} className="flex items-start gap-4 sm:gap-6 relative pl-8 group">
                           {/* Dot on Timeline */}
                           <div className="absolute left-1.5 top-2 w-3.5 h-3.5 rounded-full bg-[#7B1123] border border-[#D4AF37] group-hover:scale-125 transition-all shadow-[0_0_8px_rgba(212,175,55,0.4)]" />
@@ -1634,11 +1694,11 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* SECTION 3: INTERACTIVE STADIUM ARENA & SEATING ZONES              */}
             {/* ----------------------------------------------------------------- */}
             {event.ticketPrices.length > 0 && (
-              <section id="tickets" className="scroll-mt-32 flex flex-col gap-8 text-left">
+              <section id="tickets" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-stone-200/80">
                   <div className="flex flex-col gap-1.5">
                     <div className="relative flex flex-col items-start gap-2">
-                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                         03
                       </span>
                       <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -1902,11 +1962,11 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* SECTION 3B: INTERACTIVE DELEGATE ACCREDITATION PASS STUDIO        */}
             {/* ----------------------------------------------------------------- */}
             {event.ticketPrices.length > 0 && (
-              <section id="pass-studio" className="scroll-mt-32 flex flex-col gap-8 text-left">
+              <section id="pass-studio" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-stone-200/80">
                   <div className="flex flex-col gap-1.5">
                     <div className="relative flex flex-col items-start gap-2">
-                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                         PASS
                       </span>
                       <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2112,10 +2172,10 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* SECTION 4: HEADLINERS & PERFORMERS                                */}
             {/* ----------------------------------------------------------------- */}
             {event.headliners.length > 0 && (
-              <section id="headliners" className="scroll-mt-32 flex flex-col gap-8 text-left">
+              <section id="headliners" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
                 <div className="flex flex-col gap-1.5 pb-6 border-b border-stone-200/80">
                   <div className="relative flex flex-col items-start gap-2">
-                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                       04
                     </span>
                     <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2145,7 +2205,7 @@ export default function EventDetailPage({ params }: PageProps) {
                       <div className="relative w-24 h-24 rounded-full p-1 border border-[#C59B27] bg-[#FCFAF6] transition-colors shadow-xs">
                         <div className="w-full h-full rounded-full overflow-hidden bg-stone-100">
                           <img
-                            src={artist.img}
+                            src={artist.img || undefined}
                             alt={artist.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -2173,10 +2233,10 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* SECTION 4B: GALLERY (items tagged with this event's category)     */}
             {/* ----------------------------------------------------------------- */}
             {eventGalleryItems.length > 0 && (
-              <section id="gallery" className="scroll-mt-32 flex flex-col gap-8 text-left">
+              <section id="gallery" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
                 <div className="flex flex-col gap-1.5 pb-6 border-b border-stone-200/80">
                   <div className="relative flex flex-col items-start gap-2">
-                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                       ARCHIVE
                     </span>
                     <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2204,7 +2264,7 @@ export default function EventDetailPage({ params }: PageProps) {
                       className="relative aspect-square rounded-xl overflow-hidden border border-[#EADBCE] hover:border-[#8C6D23] bg-stone-900 group shadow-xs transition-all"
                     >
                       <img
-                        src={item.thumbnailUrl || item.url}
+                        src={item.thumbnailUrl || item.url || undefined}
                         alt={item.title}
                         loading="lazy"
                         decoding="async"
@@ -2227,10 +2287,11 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 5: VENUE & TRAVEL INTELLIGENCE                            */}
             {/* ----------------------------------------------------------------- */}
-            <section id="venue" className="scroll-mt-32 flex flex-col gap-8 text-left">
+            {hasVenueInfo && (
+            <section id="venue" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
               <div className="flex flex-col gap-1.5 pb-6 border-b border-stone-200/80">
                 <div className="relative flex flex-col items-start gap-2">
-                  <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                  <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                     05
                   </span>
                   <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2271,7 +2332,7 @@ export default function EventDetailPage({ params }: PageProps) {
                   <div className="w-full h-72 rounded-xl overflow-hidden border border-[#EADBCE] bg-stone-100 relative shadow-inner">
                     {event.googleMapEmbedUrl ? (
                       <iframe
-                        src={event.googleMapEmbedUrl}
+                        src={event.googleMapEmbedUrl || undefined}
                         width="100%"
                         height="100%"
                         style={{ border: 0 }}
@@ -2348,15 +2409,16 @@ export default function EventDetailPage({ params }: PageProps) {
 
               </div>
             </section>
+            )}
 
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 6: EVENT GUIDELINES & RULES                               */}
             {/* ----------------------------------------------------------------- */}
             {event.rules && Array.isArray(event.rules) && event.rules.length > 0 && (
-              <section id="rules" className="scroll-mt-32 flex flex-col gap-8 text-left">
+              <section id="rules" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
                 <div className="flex flex-col gap-1.5 pb-6 border-b border-stone-200/80">
                   <div className="relative flex flex-col items-start gap-2">
-                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                       06
                     </span>
                     <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2399,11 +2461,11 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 7: FREQUENTLY ASKED QUESTIONS                            */}
             {/* ----------------------------------------------------------------- */}
-            {event.faqs && event.faqs.length > 0 && (
-              <section id="faq" className="scroll-mt-36 flex flex-col gap-8 text-left">
+            {faqList.length > 0 && (
+              <section id="faq" className="cv-auto-pad scroll-mt-36 flex flex-col gap-8 text-left">
                 <div className="flex flex-col gap-1.5 pb-6 border-b border-stone-200/80">
                   <div className="relative flex flex-col items-start gap-2">
-                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                    <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                       07
                     </span>
                     <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2428,7 +2490,7 @@ export default function EventDetailPage({ params }: PageProps) {
                 </div>
 
                 <div className="flex flex-col gap-3.5 w-full">
-                  {event.faqs.map((faq, i) => {
+                  {faqList.map((faq, i) => {
                     const isOpen = faqOpen === i;
                     return (
                       <div
@@ -2463,12 +2525,12 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* SECTION 8: COMMERCIAL / SPONSORSHIPS & STALLS                     */}
             {/* ----------------------------------------------------------------- */}
             {(event.sponsorshipTiers.length > 0 || event.stallOptions.length > 0 || event.adRates.length > 0) && (
-              <section id="commercial" className="scroll-mt-32 flex flex-col gap-8 text-left">
+              <section id="commercial" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
                 {/* Heading & Subtitle Block matching Reference Design */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-stone-200/80">
                   <div className="flex flex-col text-left">
                     <div className="relative flex flex-col items-start gap-2">
-                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                      <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                         08
                       </span>
                       <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2543,40 +2605,25 @@ export default function EventDetailPage({ params }: PageProps) {
                   {commercialTab === "sponsorship" && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
                       {event.sponsorshipTiers.map((tier, i) => {
-                        const isTopTier =
-                          i < 2 ||
-                          tier.tier.toLowerCase().includes("presenter") ||
-                          tier.tier.toLowerCase().includes("title sponsor");
-
                         return (
                           <div
                             key={i}
-                            className={`rounded-xl p-6 sm:p-7 flex flex-col justify-between min-h-[290px] transition-all duration-200 hover:-translate-y-1 ${
-                              isTopTier
-                                ? "bg-[#4E121E] text-white shadow-[0_8px_30px_rgba(78,18,30,0.22)] border border-[#6E1C2C]"
-                                : "bg-white text-[#1C0509] shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#EADBCE] hover:border-[#C59B27]/40"
-                            }`}
+                            className={`group rounded-xl p-6 sm:p-7 flex flex-col justify-between min-h-[290px] transition-all duration-300 hover:-translate-y-1.5 bg-white text-[#1C0509] shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#EADBCE] hover:bg-[#4E121E] hover:border-[#6E1C2C] hover:shadow-[0_12px_36px_rgba(78,18,30,0.28)]`}
                           >
                             <div>
                               <h3
-                                className={`font-serif font-bold text-sm sm:text-base uppercase tracking-wider ${
-                                  isTopTier ? "text-white" : "text-[#1C0509]"
-                                }`}
+                                className={`font-serif font-bold text-sm sm:text-base uppercase tracking-wider text-[#1C0509] group-hover:text-white`}
                               >
                                 {tier.tier}
                               </h3>
                               <div
-                                className={`font-serif font-bold text-2xl sm:text-3xl mt-3 tracking-tight ${
-                                  isTopTier ? "text-[#E5A93C]" : "text-[#541520]"
-                                }`}
+                                className={`font-serif font-bold text-2xl sm:text-3xl mt-3 tracking-tight text-[#541520] group-hover:text-[#E5A93C]`}
                               >
                                 {tier.amount}
                               </div>
                               {tier.benefits && (
                                 <p
-                                  className={`text-xs mt-3 line-clamp-3 leading-relaxed font-sans ${
-                                    isTopTier ? "text-stone-300" : "text-stone-600"
-                                  }`}
+                                  className={`text-xs mt-3 line-clamp-3 leading-relaxed font-sans text-stone-600 group-hover:text-stone-300`}
                                 >
                                   {tier.benefits}
                                 </p>
@@ -2594,11 +2641,7 @@ export default function EventDetailPage({ params }: PageProps) {
                                     mode: "proposal",
                                   })
                                 }
-                                className={`w-full py-2.5 px-3 rounded-xl text-xs font-serif font-semibold transition-all text-center cursor-pointer border ${
-                                  isTopTier
-                                    ? "border-[#8C3A48] hover:border-[#E5A93C] text-stone-200 hover:text-white bg-[#3B0E16]/80 hover:bg-[#3B0E16]"
-                                    : "border-[#D5BE99] hover:border-[#B88E3E] text-[#541520] hover:bg-[#541520]/5 bg-transparent"
-                                }`}
+                                className={`w-full py-2.5 px-3 rounded-xl text-xs font-serif font-semibold transition-all text-center cursor-pointer border border-[#D5BE99] text-[#541520] bg-transparent group-hover:border-[#8C3A48] group-hover:text-stone-200 group-hover:bg-[#3B0E16]/80 hover:!border-[#E5A93C] hover:!text-white hover:!bg-[#3B0E16]`}
                               >
                                 Request Proposal
                               </button>
@@ -2723,10 +2766,11 @@ export default function EventDetailPage({ params }: PageProps) {
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 9: EVENT CUSTODIANS & VERIFIED ORGANIZERS                 */}
             {/* ----------------------------------------------------------------- */}
-            <section id="custodians" className="scroll-mt-32 flex flex-col gap-8 text-left">
+            {hasOrganizer && (
+            <section id="custodians" className="cv-auto-pad scroll-mt-32 flex flex-col gap-8 text-left">
               <div className="flex flex-col gap-1.5 pb-6 border-b border-stone-200/80">
                 <div className="relative flex flex-col items-start gap-2">
-                  <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.06] select-none pointer-events-none tracking-tighter">
+                  <span className="absolute -top-4 left-48 sm:left-72 text-6xl sm:text-8xl font-serif font-black italic text-[#8C6D23]/[0.12] select-none pointer-events-none tracking-tighter">
                     09
                   </span>
                   <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-gradient-to-r from-[#FBF6EE] via-[#F7EFE2] to-[#FAF3E8] border border-[#EADBCE] shadow-xs w-fit">
@@ -2829,11 +2873,13 @@ export default function EventDetailPage({ params }: PageProps) {
                 </div>
               </div>
             </section>
+            )}
 
             {/* ----------------------------------------------------------------- */}
             {/* SECTION 10: GRAND CLOSING LANDING BANNER                          */}
             {/* ----------------------------------------------------------------- */}
-            <section id="cta" className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#2E070F] via-[#1B0307] to-[#0D0104] border border-[#D4AF37]/50 p-10 sm:p-16 lg:p-20 text-center text-white shadow-[0_25px_80px_rgba(46,7,15,0.4)]">
+            {hasTickets && (
+            <section id="cta" className="cv-auto-pad relative overflow-hidden rounded-xl bg-gradient-to-br from-[#2E070F] via-[#1B0307] to-[#0D0104] border border-[#D4AF37]/50 p-10 sm:p-16 lg:p-20 text-center text-white shadow-[0_25px_80px_rgba(46,7,15,0.4)]">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#C59B27]/25 via-transparent to-transparent pointer-events-none" />
 
               <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-6">
@@ -2894,6 +2940,7 @@ export default function EventDetailPage({ params }: PageProps) {
                 </div>
               </div>
             </section>
+            )}
 
       </div>
 
@@ -2974,6 +3021,10 @@ function TicketBookingWizard({ event, user, initialTierIndex = 0, customPasshold
   const [visitorMobile, setVisitorMobile] = useState(user?.mobile || "");
   const [visitorCity, setVisitorCity] = useState(user?.city || "");
   const [specialRequests, setSpecialRequests] = useState("");
+  const whatsapp = useWhatsAppConfig();
+  const whatsappCities = getWhatsAppCities(whatsapp);
+  // Prefer the visitor's chosen city; fall back to the event's own city hub.
+  const whatsappNumber = findWhatsAppNumber(whatsapp, visitorCity || event.city);
 
   // Payment states
   const [paymentMethod, setPaymentMethod] = useState("UPI");
@@ -3250,14 +3301,31 @@ function TicketBookingWizard({ event, user, initialTierIndex = 0, customPasshold
                 {showBookingCity && (
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-stone-700">City *</label>
-                    <input
-                      type="text"
-                      placeholder="Bangalore"
-                      value={visitorCity}
-                      onChange={(e) => setVisitorCity(e.target.value)}
-                      className="w-full text-xs sm:text-sm rounded-xl bg-white shadow-sm border border-stone-200 px-4 py-3 text-stone-900 outline-none focus:border-[#C59B27] focus:ring-1 focus:ring-[#C59B27]/30"
-                      required
-                    />
+                    {whatsappCities.length > 0 ? (
+                      <select
+                        value={visitorCity}
+                        onChange={(e) => setVisitorCity(e.target.value)}
+                        className="w-full text-xs sm:text-sm rounded-xl bg-white shadow-sm border border-stone-200 px-4 py-3 text-stone-900 outline-none focus:border-[#C59B27] focus:ring-1 focus:ring-[#C59B27]/30"
+                        required
+                      >
+                        <option value="">Select city</option>
+                        {visitorCity && !whatsappCities.includes(visitorCity) && (
+                          <option value={visitorCity}>{visitorCity}</option>
+                        )}
+                        {whatsappCities.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="Bangalore"
+                        value={visitorCity}
+                        onChange={(e) => setVisitorCity(e.target.value)}
+                        className="w-full text-xs sm:text-sm rounded-xl bg-white shadow-sm border border-stone-200 px-4 py-3 text-stone-900 outline-none focus:border-[#C59B27] focus:ring-1 focus:ring-[#C59B27]/30"
+                        required
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -3471,6 +3539,24 @@ function TicketBookingWizard({ event, user, initialTierIndex = 0, customPasshold
                 >
                   <Printer size={14} /> Download E-Pass
                 </button>
+                {whatsappNumber && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.open(
+                        buildWhatsAppUrl(
+                          whatsappNumber,
+                          `Hello, I just booked ${completedBooking.quantity} x ${completedBooking.ticketType} for ${completedBooking.eventName}. Booking ref: ${completedBooking.bookingRef}. Name: ${completedBooking.visitorName}.`
+                        ),
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                    className="bg-[#25D366] hover:bg-[#1ebe5b] text-white rounded-xl py-3 flex-grow text-xs font-primary font-bold uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <MessageCircle size={14} /> Confirm on WhatsApp
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => {

@@ -23,7 +23,7 @@ export default function CompetitionCard(arena: CompetitionCardProps) {
       <div className="h-56 relative overflow-hidden bg-black/20 shrink-0">
         {arena.bannerUrl ? (
           <img
-            src={arena.bannerUrl}
+            src={arena.bannerUrl || undefined}
             alt={arena.name}
             loading="lazy"
             decoding="async"

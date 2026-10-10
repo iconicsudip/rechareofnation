@@ -214,7 +214,7 @@ export default function GalleryPage() {
                   const embed = getGalleryEmbedUrl(activeLightboxItem.url);
                   return embed ? (
                     <iframe
-                      src={embed}
+                      src={embed || undefined}
                       title={activeLightboxItem.title}
                       className="w-full h-full border-0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -222,7 +222,7 @@ export default function GalleryPage() {
                     />
                   ) : (
                     <video
-                      src={activeLightboxItem.url}
+                      src={activeLightboxItem.url || undefined}
                       controls
                       autoPlay
                       playsInline
@@ -234,7 +234,7 @@ export default function GalleryPage() {
             ) : (
               <div className="w-full max-h-[75vh] relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl flex items-center justify-center bg-black/60">
                 <img loading="lazy" decoding="async"
-                  src={activeLightboxItem.url}
+                  src={activeLightboxItem.url || undefined}
                   alt={activeLightboxItem.title}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
@@ -258,7 +258,7 @@ export default function GalleryPage() {
       )}
 
       {/* Main Container */}
-      <div className="container max-w-7xl mx-auto px-4 sm:px-6 flex flex-col gap-10 text-center">
+      <div className="container max-w-[1520px] mx-auto px-4 sm:px-6 flex flex-col gap-10 text-center">
 
         {/* Header Section */}
         <div className="flex flex-col items-center gap-3 max-w-3xl mx-auto">
@@ -367,7 +367,7 @@ export default function GalleryPage() {
               >
                 {/* Image / Thumbnail */}
                 <img
-                  src={item.thumbnailUrl || item.url}
+                  src={item.thumbnailUrl || item.url || undefined}
                   alt={item.title}
                   loading="lazy"
                   onError={(e) => {

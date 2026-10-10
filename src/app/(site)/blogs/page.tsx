@@ -59,7 +59,7 @@ export default function BlogsPage() {
               {/* Background Image */}
               {blogs[0].imageUrl ? (
                 <img loading="lazy" decoding="async"
-                  src={blogs[0].imageUrl}
+                  src={blogs[0].imageUrl || undefined}
                   alt={blogs[0].title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -94,7 +94,7 @@ export default function BlogsPage() {
                   {/* Background Image */}
                   {blog.imageUrl ? (
                     <img loading="lazy" decoding="async"
-                      src={blog.imageUrl}
+                      src={blog.imageUrl || undefined}
                       alt={blog.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />

@@ -244,7 +244,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <a
                     href="#register"
-                    className="group relative overflow-hidden inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-[#170D08] px-7 py-4 rounded-2xl font-primary font-black text-xs sm:text-sm uppercase tracking-wider hover:brightness-110 shadow-[0_10px_30px_rgba(201,162,39,0.35)] transition-all cursor-pointer"
+                    className="group relative overflow-hidden inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#B8892A] via-[#E5C05B] to-[#C59B27] text-[#170D08] px-7 py-4 rounded-2xl font-primary font-black text-xs sm:text-sm uppercase tracking-wider hover:brightness-110 shadow-[0_10px_30px_rgba(201,162,39,0.35)] transition-all cursor-pointer"
                   >
                     <Trophy size={17} />
                     <span>Register Now</span>
@@ -275,7 +275,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
 
                       {/* Main Media Viewport */}
                       <div className="relative aspect-[4/3] sm:aspect-[16/11] rounded-2xl overflow-hidden bg-black/60 border border-white/10">
-                        <img loading="lazy" decoding="async" src={competition.bannerUrl} alt={competition.name} className="w-full h-full object-cover" />
+                        <img loading="lazy" decoding="async" src={competition.bannerUrl || undefined} alt={competition.name} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
                         {/* Top Right Badge */}
@@ -336,7 +336,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
       {/* STICKY SUB-NAV STRIP (matches the event details page pattern)           */}
       {/* ========================================================================= */}
       <nav className="sticky top-16 z-30 bg-white/90 backdrop-blur-xl border-b border-amber-800/15 shadow-[0_4px_20px_rgba(180,130,30,0.06)] pt-3 pb-3">
-        <div className="container max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 overflow-x-auto py-2.5 no-scrollbar">
+        <div className="container max-w-[1520px] mx-auto px-4 flex items-center justify-between gap-4 overflow-x-auto py-2.5 no-scrollbar">
           <div className="flex items-center gap-1.5 sm:gap-2">
             {[
               ...(isBespokeContent ? [{ id: "about", label: "About" }] : []),
@@ -367,7 +367,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
 
           <a
             href="#register"
-            className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-[#170D08] px-4.5 py-1.5 rounded-full font-primary font-black text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.25)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all transform hover:-translate-y-0.5 shrink-0 cursor-pointer outline-none focus:outline-none"
+            className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-[#B8892A] via-[#E5C05B] to-[#C59B27] hover:from-[#C59B27] hover:to-[#EBCB6B] text-[#170D08] px-4.5 py-1.5 rounded-full font-primary font-black text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.25)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all transform hover:-translate-y-0.5 shrink-0 cursor-pointer outline-none focus:outline-none"
           >
             <Trophy size={13} className="shrink-0" />
             <span>Register</span>

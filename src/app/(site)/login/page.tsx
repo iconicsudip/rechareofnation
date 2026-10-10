@@ -169,7 +169,7 @@ function LoginContent() {
                 <div className="flex gap-3.5 mt-2">
                   <button
                     type="submit"
-                    className="py-3 bg-gradient-to-r from-amber-600 to-amber-400 hover:from-amber-500 hover:to-amber-300 text-[#170D08] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex-grow cursor-pointer"
+                    className="py-3 bg-gradient-to-r from-[#B8892A] via-[#E5C05B] to-[#C59B27] hover:from-[#C59B27] hover:to-[#EBCB6B] text-[#170D08] font-primary font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex-grow cursor-pointer"
                   >
                     Send Reset Link
                   </button>

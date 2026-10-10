@@ -18,7 +18,7 @@ export interface EventCardProps {
 
 export default function EventCard(evt: EventCardProps) {
   return (
-    <div className="relative bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:border-amber-500/40 hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-all duration-500 flex flex-col h-full group">
+    <div className="relative bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(74,8,20,0.05),0_12px_32px_rgba(74,8,20,0.07)] hover:border-[#C59B27]/60 hover:shadow-[0_4px_12px_rgba(74,8,20,0.08),0_24px_48px_rgba(74,8,20,0.14)] hover:-translate-y-1.5 transition-all duration-500 flex flex-col h-full group">
 
       {/* Gold corner flourish */}
       <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-amber-400/50 rounded-tl-md z-20 pointer-events-none" />
@@ -29,7 +29,7 @@ export default function EventCard(evt: EventCardProps) {
         <div className="h-44 relative overflow-hidden bg-black/20 rounded-xl border border-[var(--border-color)]">
           {evt.bannerUrl ? (
             <img
-              src={evt.bannerUrl}
+              src={evt.bannerUrl || undefined}
               alt={evt.name}
               loading="lazy"
               decoding="async"
@@ -47,13 +47,13 @@ export default function EventCard(evt: EventCardProps) {
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/90 to-transparent pointer-events-none z-0" />
 
           {evt.tag && (
-            <span className="absolute top-2.5 right-2.5 bg-[#7B1123] text-[#F3BA2F] border border-[#C59B27]/40 font-primary text-[7.5px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider z-10 shadow-md">
+            <span className="absolute top-2.5 right-2.5 bg-[#7B1123] text-[#F3BA2F] border border-[#C59B27]/40 font-primary text-[9px] font-extrabold px-2.5 py-1 rounded uppercase tracking-wider z-10 shadow-md">
               {evt.tag}
             </span>
           )}
 
           {/* Location Badge */}
-          <div className="absolute bottom-2.5 left-2.5 bg-black/75 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[8.5px] font-extrabold text-white tracking-widest font-primary uppercase z-10 shadow-md">
+          <div className="absolute bottom-2.5 left-2.5 bg-black/75 backdrop-blur-sm px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[10px] font-extrabold text-white tracking-widest font-primary uppercase z-10 shadow-md">
             <MapPin size={10} className="text-[#C59B27] shrink-0" />
             <span>{evt.city}</span>
           </div>
@@ -65,40 +65,40 @@ export default function EventCard(evt: EventCardProps) {
         <div>
           {/* Eyebrow: category label + rating */}
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[9px] font-primary font-bold text-[#7B1123] uppercase tracking-[0.15em] flex items-center gap-1.5">
+            <span className="text-[11px] font-primary font-bold text-[#7B1123] uppercase tracking-[0.12em] flex items-center gap-1.5">
               <span className="text-[#C59B27]">✦</span> {evt.category}
             </span>
-            <div className="flex items-center gap-1 text-[10.5px] font-bold text-[#C59B27] shrink-0">
-              <Star size={11} fill="#C59B27" className="text-[#C59B27]" />
-              <span>{evt.rating}</span>
-            </div>
+            {evt.rating > 0 && (
+              <div className="flex items-center gap-1 text-xs font-bold text-[#997316] shrink-0">
+                <Star size={12} fill="#C59B27" className="text-[#C59B27]" />
+                <span>{evt.rating}</span>
+                {evt.reviews > 0 && <span className="font-normal text-stone-500">({evt.reviews})</span>}
+              </div>
+            )}
           </div>
 
           {/* Title */}
           <Link href={`/events/${evt.id}`}>
-            <h3 className="font-extrabold text-[var(--text-primary)] text-[14px] font-primary tracking-tight mt-2.5 uppercase line-clamp-2 leading-snug group-hover:text-[#7B1123] transition-colors">
+            <h3 className="font-extrabold text-[var(--text-primary)] text-[17px] font-primary tracking-tight mt-2.5 line-clamp-2 leading-snug group-hover:text-[#7B1123] transition-colors">
               {evt.name}
             </h3>
           </Link>
 
           {/* Description */}
-          <p className="text-stone-700 text-[10.5px] leading-relaxed font-secondary mt-2 line-clamp-2">
+          <p className="text-stone-700 text-[13px] leading-relaxed font-secondary mt-2 line-clamp-2">
             {evt.desc}
           </p>
-          <span className="text-stone-500 text-[9.5px] font-secondary italic block mt-1">
-            ({evt.reviews} reviews)
-          </span>
         </div>
 
         {/* Footer Pricing & Button */}
         <div className="pt-4 border-t border-dotted border-[var(--border-color)] flex items-center justify-between gap-2 mt-auto">
           <div>
-            <span className="text-[8px] text-stone-600 font-primary uppercase block tracking-wider font-semibold">Starting From</span>
-            <span className="text-[#7B1123] font-primary italic font-bold text-[17px] mt-0.5 block">₹{evt.price}</span>
+            <span className="text-[10px] text-stone-600 font-primary uppercase block tracking-wider font-semibold">Starting from</span>
+            <span className="text-[#7B1123] font-primary font-bold text-xl mt-0.5 block">{evt.price > 0 ? `₹${evt.price}` : "Free"}</span>
           </div>
           <Link
             href={`/events/${evt.id}`}
-            className="bg-[#7B1123] hover:bg-[#580B17] text-[#F3BA2F] border border-[#C59B27]/50 font-primary text-[9px] font-bold px-4 py-2.5 rounded-lg tracking-widest uppercase transition-all duration-300 flex items-center gap-1.5 shadow-sm"
+            className="bg-[#7B1123] hover:bg-[#580B17] text-[#F3BA2F] border border-[#C59B27]/50 font-primary text-[11px] font-bold px-5 py-3 rounded-lg tracking-widest uppercase transition-all duration-300 flex items-center gap-1.5 shadow-sm"
           >
             Book
             <ArrowUpRight size={11} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

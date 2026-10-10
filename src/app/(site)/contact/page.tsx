@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle, ShieldCheck, MessageCircle } from "lucide-react";
 import { ApiClient } from "@/lib/api-client";
+import { useWhatsAppConfig } from "@/lib/useWhatsAppConfig";
+import { buildWhatsAppUrl, findWhatsAppNumber, getWhatsAppCities } from "@/lib/whatsapp";
 
 interface ContactInfoContent {
   eyebrow: string;
@@ -26,6 +28,20 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [city, setCity] = useState("");
+  const whatsapp = useWhatsAppConfig();
+  const whatsappCities = getWhatsAppCities(whatsapp);
+  const whatsappNumber = findWhatsAppNumber(whatsapp, city);
+
+  const openWhatsApp = () => {
+    const lines = [
+      "Hello Recharge Nation team,",
+      name && `I'm ${name}${city ? ` from ${city}` : ""}.`,
+      subject && `Subject: ${subject}`,
+      message,
+    ].filter(Boolean);
+    window.open(buildWhatsAppUrl(whatsappNumber, lines.join("\n")), "_blank", "noopener,noreferrer");
+  };
 
   // Spam verification (reCAPTCHA simulator)
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
@@ -123,7 +139,7 @@ export default function ContactPage() {
           {/* Map Embed */}
           <div className="h-60 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-sm">
             <iframe
-              src={content?.mapEmbedUrl}
+              src={content?.mapEmbedUrl || undefined}
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -212,6 +228,23 @@ export default function ContactPage() {
                 />
               </div>
 
+              {whatsappCities.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-[var(--text-secondary)]">Your City</label>
+                  <select
+                    className="w-full text-sm rounded-xl bg-white/5 border border-[var(--border-color)] px-4 py-3 text-[var(--text-primary)] outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 transition-colors"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  >
+                    <option value="">Select a city</option>
+                    {whatsappCities.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <span className="text-[11px] text-[var(--text-muted)]">We&apos;ll connect you with the team in your city on WhatsApp.</span>
+                </div>
+              )}
+
               {/* Spam Protection Simulator Box */}
               <div className="p-4 rounded-xl border border-dashed border-[var(--border-color)] bg-white/5 flex items-center justify-between gap-4 mt-2">
                 <div className="flex items-center gap-2">
@@ -237,6 +270,17 @@ export default function ContactPage() {
                 <Send size={18} />
                 {isSubmitting ? "Submitting..." : "Send Message"}
               </button>
+
+              {whatsappNumber && (
+                <button
+                  type="button"
+                  onClick={openWhatsApp}
+                  className="w-full bg-[#25D366] hover:bg-[#1ebe5b] text-white rounded-xl py-3.5 font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+                >
+                  <MessageCircle size={18} />
+                  {city ? `Chat on WhatsApp · ${city}` : "Chat on WhatsApp"}
+                </button>
+              )}
             </form>
           )}
         </div>

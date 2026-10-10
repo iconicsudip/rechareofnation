@@ -89,6 +89,7 @@ function EventsContent() {
   // Load real events + dynamic category/city taxonomies
   const [categoryOptions, setCategoryOptions] = useState<string[]>(["All"]);
   const [cityOptions, setCityOptions] = useState<string[]>(["All"]);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -106,7 +107,7 @@ function EventsContent() {
         return {
           id: e.id,
           slug: e.slug,
-          name: e.name.toUpperCase(),
+          name: e.name,
           category: e.category,
           city: e.city,
           price: minPrice,
@@ -115,11 +116,12 @@ function EventsContent() {
           reviews: e.reviewCount,
           bannerUrl: e.bannerUrl,
           desc: e.summary || e.description || '',
-          tag: e.isFeatured ? "MEGA FEST" : undefined
+          tag: e.isFeatured ? "Featured" : undefined
         };
       });
 
       setEvents(mapped);
+      setEventsLoaded(true);
       setCategoryOptions(["All", ...categories]);
       setCityOptions(["All", ...cities]);
     };
@@ -223,11 +225,11 @@ function EventsContent() {
       <div className="container mx-auto px-4">
         {/* 1. Header Section */}
         <div className="border-b border-[var(--border-color)] pb-5 mb-8 text-left">
-          <h1 className="text-[25px] font-black text-[var(--text-primary)] font-primary uppercase tracking-tight">
-            NATIONAL EVENT DIRECTORY
+          <h1 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] font-primary uppercase tracking-tight">
+            National Event Directory
           </h1>
-          <p className="text-[var(--text-muted)] font-primary text-[9px] font-bold tracking-widest uppercase mt-0.5">
-            Real-time gate passes & contender registration checkout.
+          <p className="text-[var(--text-muted)] font-secondary text-sm mt-2">
+            Find an event, book your passes, or register to compete.
           </p>
         </div>
 
@@ -265,7 +267,7 @@ function EventsContent() {
             <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
               <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold uppercase text-[11px] tracking-wider">
                 <Sliders size={13} className="text-amber-400" />
-                <span>Filter Matrix</span>
+                <span>Filters</span>
               </div>
               {(search || category !== "All" || location !== "All" || dateTimeline !== "all" || priceFilter !== "all") && (
                 <button
@@ -421,7 +423,21 @@ function EventsContent() {
             </div>
 
             {/* Events Grid */}
-            {filteredEvents.length > 0 ? (
+            {!eventsLoaded ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="status" aria-label="Loading events">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl border border-[var(--border-color)] p-2.5 flex flex-col gap-4">
+                    <div className="skeleton h-44 w-full" />
+                    <div className="px-2.5 pb-3 flex flex-col gap-2.5">
+                      <div className="skeleton h-3 w-1/3" />
+                      <div className="skeleton h-5 w-4/5" />
+                      <div className="skeleton h-3 w-full" />
+                      <div className="skeleton h-10 w-full mt-3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredEvents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEvents.map((evt) => (
                   <EventCard
@@ -448,7 +464,7 @@ function EventsContent() {
                   onClick={clearFilters}
                   className="bg-gradient-to-r from-[#7B1123] to-[#961E34] text-[#F3BA2F] border border-[#C59B27]/40 text-[10px] font-primary font-bold tracking-widest px-6 py-3 rounded-xl uppercase hover:brightness-110 transition-all cursor-pointer shadow-md"
                 >
-                  Reset Filter Matrix
+                  Reset filters
                 </button>
               </div>
             )}

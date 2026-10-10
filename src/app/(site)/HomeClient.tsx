@@ -271,7 +271,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
         <div className="container max-w-5xl mx-auto px-4 relative z-10 text-center flex flex-col items-center justify-center my-auto">
           {/* Watermark Behind Heading */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
-            <span className="text-white/[0.06] font-black text-6xl sm:text-8xl md:text-9xl lg:text-[140px] font-primary tracking-[0.2em] uppercase whitespace-nowrap">
+            <span className="text-white/[0.1] font-black text-6xl sm:text-8xl md:text-9xl lg:text-[140px] font-primary tracking-[0.2em] uppercase whitespace-nowrap">
               {heroContent.watermark}
             </span>
           </div>
@@ -322,13 +322,13 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
             </span>
           </div>
 
-          <div className="max-w-6xl mx-auto px-4">
+          <div className="max-w-[1360px] mx-auto px-4">
             <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center gap-2 sm:gap-2.5 text-center overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 no-scrollbar">
               {(heroContent.upcomingLinks || []).map((link, idx) => (
                 <a
                   key={idx}
                   href={link.href}
-                  className="shrink-0 text-stone-800 hover:text-[#170D08] hover:bg-gradient-to-r hover:from-amber-400 hover:to-amber-500 text-[11px] sm:text-xs font-primary font-bold tracking-wide transition-all px-3.5 py-1.5 rounded-full bg-white/90 hover:border-amber-500 border border-amber-800/20 shadow-sm backdrop-blur-md hover:scale-105 hover:shadow-[0_4px_16px_rgba(245,158,11,0.25)] whitespace-nowrap"
+                  className="shrink-0 text-stone-800 hover:text-[#170D08] hover:bg-gradient-to-r hover:from-[#C59B27] hover:to-[#EBCB6B] text-[11px] sm:text-xs font-primary font-bold tracking-wide transition-all px-3.5 py-1.5 rounded-full bg-white/90 hover:border-amber-500 border border-amber-800/20 shadow-sm backdrop-blur-md hover:scale-105 hover:shadow-[0_4px_16px_rgba(245,158,11,0.25)] whitespace-nowrap"
                 >
                   {link.label}
                 </a>
@@ -339,8 +339,9 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
       </section>
 
       {/* 2. FRONT PAGE KEY STATS & HERITAGE (26+ Yrs, 75+ Events, 18+ Publications, 12+ Exhibition) */}
-      <section className="py-12 sm:py-16 bg-[var(--bg-main)] border-b border-[var(--border-color)] relative">
-        <div className="container max-w-6xl mx-auto px-4">
+      {stats.length > 0 && (
+      <section className="py-12 sm:py-16 bg-[var(--bg-main)]/90 border-b border-[var(--border-color)] relative">
+        <div className="container max-w-[1360px] mx-auto px-4">
           {aboutStatsContent.heading && (
             <div className="text-center max-w-2xl mx-auto mb-10 flex flex-col gap-2">
               {aboutStatsContent.eyebrow && (
@@ -376,10 +377,12 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* 3. GROUP ALLIANCE & CORE LOGOS (Laxmi Publicity, B.B. Creative worlds, Recharge for Nation, New Venture) */}
-      <section className="py-14 sm:py-18 bg-[#FFFFFF] border-b border-[var(--border-color)]">
-        <div className="container max-w-6xl mx-auto px-4">
+      {ecosystemContent.ventures.length > 0 && (
+      <section className="cv-auto py-14 sm:py-18 bg-[var(--bg-ivory)]/92 border-b border-[var(--border-color)]">
+        <div className="container max-w-[1360px] mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-10 flex flex-col gap-2">
             <span className="text-[10.5px] font-primary tracking-[0.25em] text-amber-600 font-bold uppercase">
               {ecosystemContent.eyebrow || "Brand Alignment & Group Network"}
@@ -423,7 +426,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
                       {venture.logoUrl ? (
                         <div className="h-14 w-14 rounded-xl bg-white border border-amber-500/20 flex items-center justify-center overflow-hidden p-1.5 shadow-[0_4px_16px_rgba(180,130,30,0.1)]">
                           <img loading="lazy" decoding="async"
-                            src={venture.logoUrl}
+                            src={venture.logoUrl || undefined}
                             alt={venture.name}
                             className="max-h-full max-w-full object-contain"
                           />
@@ -459,10 +462,12 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* 4. SCROLLING IMAGES FOR EVENTS & NAMES (Continuous Marquee Ribbon) */}
-      <section className="py-14 sm:py-18 bg-[var(--bg-main)] border-b border-[var(--border-color)] overflow-hidden">
-        <div className="container max-w-6xl mx-auto px-4 mb-14 text-center sm:text-left flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4">
+      {serialEvents.length > 0 && (
+      <section className="cv-auto py-14 sm:py-18 bg-[var(--bg-main)]/90 border-b border-[var(--border-color)] overflow-hidden">
+        <div className="container max-w-[1360px] mx-auto px-4 mb-14 text-center sm:text-left flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4">
           <div>
             <span className="text-[10.5px] font-primary tracking-[0.25em] text-amber-600 font-bold uppercase">
               Continuous Visual Showcase
@@ -494,7 +499,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
               >
                 <div className="relative h-44 w-full overflow-hidden bg-black/40">
                   <img
-                    src={evt.image}
+                    src={evt.image || undefined}
                     alt={evt.name}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
@@ -529,10 +534,12 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* 5. OFFICIAL "EVENT LISTING SERIAL WISE" (#01 TO #09) */}
-      <section id="serial-events" className="py-16 md:py-24 bg-[#FFFFFF] border-b border-[var(--border-color)] scroll-mt-20">
-        <div className="container max-w-6xl mx-auto px-4">
+      {serialEvents.length > 0 && (
+      <section id="serial-events" className="cv-auto py-16 md:py-24 bg-[var(--bg-ivory)]/92 border-b border-[var(--border-color)] scroll-mt-20">
+        <div className="container max-w-[1360px] mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-stone-200 pb-6 mb-12 gap-6">
             <div>
               <div className="inline-flex items-center gap-2 mb-2">
@@ -582,7 +589,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
                 {/* Image Showcase Column - matches full card height on desktop */}
                 <div className="relative w-full lg:w-5/12 h-64 sm:h-72 lg:h-full overflow-hidden shrink-0 bg-black/40">
                   <img
-                    src={evt.image}
+                    src={evt.image || undefined}
                     alt={evt.name}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-106"
@@ -682,7 +689,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                       <Link
                         href={`/events/${evt.slug}`}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-[#170D08] font-black text-xs font-primary uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-[0_4px_20px_rgba(245,158,11,0.25)] transition-all hover:scale-102 cursor-pointer text-center"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#B8892A] via-[#E5C05B] to-[#C59B27] hover:from-[#C59B27] hover:to-[#EBCB6B] text-[#170D08] font-black text-xs font-primary uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-[0_4px_20px_rgba(245,158,11,0.25)] transition-all hover:scale-102 cursor-pointer text-center"
                       >
                         Explore Event <ChevronRight size={14} />
                       </Link>
@@ -694,11 +701,12 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* 6. SEASON SNAPSHOTS (Gallery Mosaic) */}
       {gallery.length > 0 && (
-        <section className="py-16 bg-[var(--bg-main)] border-b border-[var(--border-color)]">
-          <div className="container max-w-6xl mx-auto px-4">
+        <section className="cv-auto py-16 bg-[var(--bg-main)]/90 border-b border-[var(--border-color)]">
+          <div className="container max-w-[1360px] mx-auto px-4">
             <div className="flex items-end justify-between border-b border-stone-200 pb-4 mb-8">
               <div>
                 <span className="text-[10px] font-primary tracking-[0.25em] text-amber-600 font-bold uppercase">
@@ -722,7 +730,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
                 >
                   {(item.thumbnailUrl || item.url) ? (
                     <img
-                      src={item.thumbnailUrl || item.url}
+                      src={item.thumbnailUrl || item.url || undefined}
                       alt={item.title}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -746,8 +754,8 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
 
       {/* 6.5 BRAND PARTNERS & ALLIANCE PATRONS */}
       {sponsors.length > 0 && (
-        <section className="py-16 bg-[#FFFFFF] border-b border-[var(--border-color)] overflow-hidden">
-          <div className="container max-w-6xl mx-auto px-4 text-center mb-10">
+        <section className="cv-auto py-16 bg-[var(--bg-ivory)]/92 border-b border-[var(--border-color)] overflow-hidden">
+          <div className="container max-w-[1360px] mx-auto px-4 text-center mb-10">
             <span className="text-[10px] font-primary tracking-[0.25em] text-amber-600 font-bold uppercase">
               Our Network
             </span>
@@ -772,7 +780,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
                   rel={sp.websiteUrl ? "noopener noreferrer" : undefined}
                   className="shrink-0 w-[220px] h-24 rounded-2xl bg-white flex items-center justify-center p-5 border border-amber-700/15 shadow-[0_4px_16px_rgba(180,130,30,0.06)] hover:-translate-y-1 transition-all duration-300"
                 >
-                  <img loading="lazy" decoding="async" src={sp.logoUrl} alt={sp.name} className="max-h-full max-w-full object-contain" />
+                  <img loading="lazy" decoding="async" src={sp.logoUrl || undefined} alt={sp.name} className="max-h-full max-w-full object-contain" />
                 </a>
               ))}
             </div>
@@ -782,8 +790,8 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
 
       {/* 7. VERIFIED REVIEWS / TESTIMONIALS */}
       {testimonials.length > 0 && (
-        <section className="py-20 bg-[var(--bg-main)] border-b border-[var(--border-color)] overflow-hidden">
-          <div className="container max-w-6xl mx-auto px-4">
+        <section className="cv-auto py-20 bg-[var(--bg-main)]/90 border-b border-[var(--border-color)] overflow-hidden">
+          <div className="container max-w-[1360px] mx-auto px-4">
             <div className="text-center max-w-2xl mx-auto mb-14 flex flex-col gap-2">
               <span className="text-[10px] font-primary tracking-widest text-amber-600 font-bold uppercase">
                 Verified Participants &amp; Patrons
@@ -827,8 +835,8 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
 
       {/* 8. RECHARGE CHRONICLE (BLOG PREVIEWS) */}
       {blogs.length > 0 && (
-        <section className="py-16 bg-[#FFFFFF] border-b border-[var(--border-color)]">
-          <div className="container max-w-6xl mx-auto px-4">
+        <section className="cv-auto py-16 bg-[var(--bg-ivory)]/92 border-b border-[var(--border-color)]">
+          <div className="container max-w-[1360px] mx-auto px-4">
             <div className="flex items-end justify-between border-b border-stone-200 pb-4 mb-8">
               <div>
                 <span className="text-[10px] font-primary tracking-[0.25em] text-amber-600 font-bold uppercase">
@@ -862,9 +870,10 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
       )}
 
       {/* 9. VIP GATEWAY PRE-SALE ALERT CREW (NEWSLETTER) */}
-      <section className="py-18 bg-[var(--bg-main)]">
+      {Boolean(newsletterContent.heading) && (
+      <section className="cv-auto py-18 bg-[var(--bg-main)]/90">
         <div className="container max-w-4xl mx-auto px-4">
-          <div className="p-8 sm:p-12 text-center rounded-3xl bg-[#FFFFFF] border border-amber-600/25 shadow-[0_15px_40px_rgba(180,130,30,0.08)] flex flex-col items-center gap-4 relative overflow-hidden">
+          <div className="p-8 sm:p-12 text-center rounded-3xl bg-[var(--bg-ivory)] border border-amber-600/25 shadow-[0_15px_40px_rgba(180,130,30,0.08)] flex flex-col items-center gap-4 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-44 h-44 bg-amber-500/10 rounded-bl-full filter blur-2xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-44 h-44 bg-amber-500/5 rounded-tr-full filter blur-2xl pointer-events-none" />
 
@@ -904,6 +913,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* Official Directory Poster Modal */}
       {showFoodChartModal && (
@@ -931,7 +941,7 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-lg"
               />
             </div>
-            <div className="p-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-3 bg-[#FFFFFF]">
+            <div className="p-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-ivory)]">
               <div className="flex items-center gap-3 text-xs">
                 <a href="https://www.udaipurfoodexpo.com" target="_blank" rel="noopener noreferrer" className="text-amber-700 hover:underline font-bold">
                   www.udaipurfoodexpo.com
@@ -974,12 +984,12 @@ export default function HomeClient({ initial }: { initial: HomeInitialData }) {
             </div>
             <div className="p-4 overflow-hidden flex-1 flex items-center justify-center bg-stone-100 max-h-[75vh]">
               <img loading="lazy" decoding="async"
-                src={foodExpoConfig.images.sponsorshipPoster}
+                src={foodExpoConfig.images.sponsorshipPoster || undefined}
                 alt="Food Expo Sponsorship Categories &amp; Benefits"
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-lg"
               />
             </div>
-            <div className="p-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-3 bg-[#FFFFFF]">
+            <div className="p-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-ivory)]">
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-stone-600 italic">Your Support &bull; <span className="text-amber-700 font-bold">Our Strength</span></span>
               </div>

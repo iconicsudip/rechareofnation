@@ -94,7 +94,7 @@ function SponsorLogo({ logoUrl, name }: { logoUrl?: string; name: string }) {
   return (
     <div className="w-full h-full bg-white flex items-center justify-center p-5">
       <img loading="lazy" decoding="async"
-        src={logoUrl}
+        src={logoUrl || undefined}
         alt={name}
         className="max-w-full max-h-full object-contain"
         onError={() => setFailed(true)}
@@ -275,7 +275,7 @@ export default function SponsorsPage() {
                       >
                         {partner.logoUrl ? (
                           <img loading="lazy" decoding="async"
-                            src={partner.logoUrl}
+                            src={partner.logoUrl || undefined}
                             alt={partner.name}
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -643,7 +643,7 @@ export default function SponsorsPage() {
             className="group relative rounded-2xl overflow-hidden border border-amber-500/30 shadow-xl bg-[var(--bg-card)] p-2 sm:p-4 cursor-pointer relative z-10 flex items-center justify-center max-h-[480px] aspect-[16/9] sm:aspect-[16/8]"
           >
             <img loading="lazy" decoding="async"
-              src={foodExpoConfig.images.sponsorshipPoster}
+              src={foodExpoConfig.images.sponsorshipPoster || undefined}
               alt="Food Expo Sponsorship Categories &amp; Benefits Poster"
               className="w-full h-full max-h-full max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-300"
             />
@@ -678,7 +678,7 @@ export default function SponsorsPage() {
               </div>
               <div className="overflow-hidden max-h-[78vh] w-full rounded-2xl flex items-center justify-center p-2 bg-black/40">
                 <img loading="lazy" decoding="async"
-                  src={foodExpoConfig.images.sponsorshipPoster}
+                  src={foodExpoConfig.images.sponsorshipPoster || undefined}
                   alt="Food Expo Sponsorship Poster"
                   className="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-xl shadow-2xl"
                 />
@@ -704,22 +704,22 @@ export default function SponsorsPage() {
             <>
               {/* Title Sponsor Skeleton */}
               <div className="flex flex-col items-start gap-4">
-                <div className="text-left w-full max-w-7xl">
+                <div className="text-left w-full max-w-[1520px]">
                   <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
                     Grand Title Sponsor
                   </h3>
                 </div>
-                <div className="h-40 rounded-3xl animate-pulse border border-[var(--border-color)] bg-white/[0.03] max-w-7xl w-full" />
+                <div className="h-40 rounded-3xl animate-pulse border border-[var(--border-color)] bg-white/[0.03] max-w-[1520px] w-full" />
               </div>
 
               {/* Platinum Skeleton */}
               <div className="flex flex-col items-start gap-4 w-full">
-                <div className="text-left w-full max-w-7xl mx-auto">
+                <div className="text-left w-full max-w-[1520px] mx-auto">
                   <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
                     Platinum Alliance Patrons
                   </h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-[1520px] mx-auto">
                   {[...Array(2)].map((_, i) => (
                     <div key={i} className="h-40 rounded-3xl animate-pulse border border-[var(--border-color)] bg-white/[0.03]" />
                   ))}
@@ -727,7 +727,7 @@ export default function SponsorsPage() {
               </div>
 
               {/* Gold and Associate Skeleton */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-[1520px] mx-auto">
                 <div className="flex flex-col items-start gap-4 w-full">
                   <div className="text-left w-full">
                     <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -756,13 +756,13 @@ export default function SponsorsPage() {
               {titleSponsors.length > 0 && (
                 <div className={`grid grid-cols-1  gap-8 w-full max-w-8xl mx-auto`}>
                   <div className="flex flex-col items-start gap-4">
-                    <div className="text-left w-full max-w-7xl">
+                    <div className="text-left w-full max-w-[1520px]">
                       <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
                         Grand Title Sponsor
                       </h3>
                     </div>
                     {titleSponsors.map((sponsor) => (
-                      <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 max-w-7xl w-full">
+                      <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 max-w-[1520px] w-full">
                         <div className="relative w-full sm:w-48 h-40 sm:h-auto shrink-0 bg-black/20">
                           <SponsorLogo logoUrl={sponsor.logoUrl} name={sponsor.name} />
                           {/* Badge overlay inside image */}
@@ -819,13 +819,13 @@ export default function SponsorsPage() {
               {platinumSponsors.length > 0 && (
                 <div className={`grid grid-cols-1  gap-8 w-full max-w-8xl mx-auto`}>
                   <div className="flex flex-col items-start gap-4 w-full">
-                    <div className="text-left w-full max-w-7xl mx-auto">
+                    <div className="text-left w-full max-w-[1520px] mx-auto">
                       <h3 className="text-[10.5px] font-primary font-bold uppercase tracking-widest text-[var(--text-muted)]">
                         Platinum Alliance Patrons
                       </h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-[1520px] mx-auto">
                       {platinumSponsors.map((sponsor) => (
                         <div key={sponsor.id} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl flex flex-col sm:flex-row overflow-hidden shadow-sm hover:border-amber-500/40 transition-all duration-300 w-full">
                           <div className="relative w-full sm:w-40 h-40 sm:h-auto shrink-0 bg-black/20">
