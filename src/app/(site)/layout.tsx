@@ -3,7 +3,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { usePathname } from "next/navigation";
-import RevealOnScroll from "@/components/RevealOnScroll";
 import LuxeBackdrop from "@/components/LuxeBackdrop";
 
 export default function SiteLayout({
@@ -20,7 +19,6 @@ export default function SiteLayout({
 
   return (
     <div className="luxe flex flex-col min-h-screen">
-      <RevealOnScroll />
       <LuxeBackdrop />
       <Navbar />
       <main className="relative z-[2] flex-grow flex flex-col">

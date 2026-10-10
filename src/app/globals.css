@@ -846,25 +846,26 @@ body .text-amber-300:not([class*="bg-black"] *):not([class*="bg-stone-9"] *):not
   text-wrap: pretty;
 }
 
-/* Scroll reveal — classes are added by <RevealOnScroll /> only when JS runs,
-   so content is never hidden without JavaScript. */
-.rv {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform;
+/* Scroll reveal — pure CSS (scroll-driven animation), no script and no DOM mutation, so
+   it can never cause a hydration mismatch. Browsers without support simply show the
+   sections normally. Sections already on screen at load are past the entry range, so
+   they appear fully visible straight away. */
+@supports (animation-timeline: view()) {
+  .luxe main section:not(:first-of-type) {
+    animation: luxe-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
 }
 
-.rv.rv-in {
-  opacity: 1;
-  transform: none;
+@keyframes luxe-reveal {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rv {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .luxe main section {
+    animation: none !important;
   }
 
   html {
@@ -954,7 +955,7 @@ body .text-amber-300:not([class*="bg-black"] *):not([class*="bg-stone-9"] *):not
 .luxe-spin-rev { animation: luxe-rotate 260s linear infinite reverse; will-change: transform; }
 .luxe-aurora { animation: luxe-drift 26s ease-in-out infinite alternate; will-change: transform; }
 .luxe-aurora-b { animation: luxe-drift 32s ease-in-out infinite alternate-reverse; will-change: transform; }
-.luxe-dust { opacity: 0.35; animation: luxe-float ease-in-out infinite; will-change: transform, opacity; }
+.luxe-dust { opacity: 0.55; animation: luxe-float ease-in-out infinite; will-change: transform, opacity; }
 
 @keyframes luxe-rotate { to { transform: rotate(360deg); } }
 @keyframes luxe-drift {
@@ -962,8 +963,8 @@ body .text-amber-300:not([class*="bg-black"] *):not([class*="bg-stone-9"] *):not
   to { transform: translate3d(6vw, 5vh, 0) scale(1.12); }
 }
 @keyframes luxe-float {
-  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.15; }
-  50% { transform: translate3d(14px, -38px, 0); opacity: 0.65; }
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.3; }
+  50% { transform: translate3d(14px, -38px, 0); opacity: 0.95; }
 }
 
 /* Readability: text always paints above decorative watermarks/numerals. Positioned
