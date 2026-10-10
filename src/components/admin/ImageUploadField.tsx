@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UploadCloud, X, Link as LinkIcon, Loader2, Check } from "lucide-react";
 import { optimizeImageBeforeUpload } from "@/lib/client-image-optimizer";
 
@@ -61,8 +61,36 @@ export default function ImageUploadField({ label, value, onChange, allowVideo }:
     }
   };
 
+  // Paste-to-upload: while the pointer is over (or focus is inside) this field,
+  // a pasted image from the clipboard is uploaded like a chosen file.
+  const [active, setActive] = useState(false);
+  const handleFileRef = useRef(handleFile);
+  handleFileRef.current = handleFile;
+  useEffect(() => {
+    if (!active) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const items = Array.from(e.clipboardData?.items || []);
+      const item = items.find(
+        (it) => it.kind === "file" && (it.type.startsWith("image/") || (allowVideo && it.type.startsWith("video/")))
+      );
+      const file = item?.getAsFile();
+      if (!file) return;
+      e.preventDefault();
+      handleFileRef.current(file);
+    };
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, [active, allowVideo]);
+
   return (
-    <div>
+    <div
+      tabIndex={-1}
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onBlur={() => setActive(false)}
+      className="outline-none"
+    >
       {label && (
         <label className="text-xs font-bold uppercase tracking-wider block mb-1.5" style={{ color: "rgba(148,163,184,0.5)" }}>
           {label}
@@ -119,7 +147,7 @@ export default function ImageUploadField({ label, value, onChange, allowVideo }:
               <>
                 <UploadCloud size={20} className="text-amber-500/80" />
                 <span className="text-xs font-medium text-[#F5EEE2]">Click to upload {allowVideo ? "an image or video" : "an image"}</span>
-                <span className="text-[10px] text-amber-500/70 font-mono">Auto-compressed &lt;1MB • Stored in Database</span>
+                <span className="text-[10px] text-amber-500/70 font-mono">Or hover &amp; paste (Ctrl/Cmd+V) • Auto-compressed</span>
               </>
             )}
           </button>
