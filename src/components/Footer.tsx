@@ -153,7 +153,7 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-2 flex flex-col gap-5">
             {/* Brand Logo with Official Emblem */}
             <Link href="/" className="flex items-center gap-3.5 group select-none">
-              <img
+              <img loading="lazy" decoding="async"
                 src="/images/logo-transparent.png"
                 alt="Recharge For Nation"
                 className="h-12 sm:h-16 w-auto object-contain drop-shadow-[0_4px_16px_rgba(197,155,39,0.35)] group-hover:scale-105 transition-all duration-300"

@@ -233,7 +233,7 @@ export default function GalleryPage() {
               </div>
             ) : (
               <div className="w-full max-h-[75vh] relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl flex items-center justify-center bg-black/60">
-                <img
+                <img loading="lazy" decoding="async"
                   src={activeLightboxItem.url}
                   alt={activeLightboxItem.title}
                   onError={(e) => {

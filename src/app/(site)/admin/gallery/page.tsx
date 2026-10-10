@@ -143,7 +143,7 @@ export default function AdminGalleryPage() {
     try {
       const [itemsRes, taxRes] = await Promise.all([
         fetch("/api/admin/gallery"),
-        fetch("/api/taxonomies?type=gallery_category"),
+        fetch("/api/taxonomies?type=gallery_category", { cache: "no-store" }),
       ]);
       const itemsData = await itemsRes.json();
       const taxData = await taxRes.json();
@@ -166,7 +166,7 @@ export default function AdminGalleryPage() {
       try {
         const [itemsRes, taxRes] = await Promise.all([
           fetch("/api/admin/gallery"),
-          fetch("/api/taxonomies?type=gallery_category"),
+          fetch("/api/taxonomies?type=gallery_category", { cache: "no-store" }),
         ]);
         const itemsData = await itemsRes.json();
         const taxData = await taxRes.json();

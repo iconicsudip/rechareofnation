@@ -62,7 +62,7 @@ interface SponsorsPageContent {
   partners: PartnerLogo[];
 }
 
-// Renders a stylized text lockup in place of a broken <img> when a sponsor
+// Renders a stylized text lockup in place of a broken <img loading="lazy" decoding="async"> when a sponsor
 // has no logoUrl (e.g. Paytm Checkout) or its logoUrl fails to load. Fully
 // self-contained (own background + centering) so it looks right regardless
 // of what the parent image-slot container is styled as.
@@ -83,7 +83,7 @@ const renderLogoFallback = (name: string) => {
 };
 
 // A sponsor.logoUrl being set doesn't guarantee the URL still resolves to an
-// image (dead/moved hosting, revoked hotlink, etc.) — a plain `logoUrl ? <img>
+// image (dead/moved hosting, revoked hotlink, etc.) — a plain `logoUrl ? <img loading="lazy" decoding="async">
 // : fallback` ternary only catches an empty value, not a broken one, so a bad
 // URL rendered a broken-image icon with the alt text overlapping the tier
 // badge. This tracks the actual load result and swaps to the text fallback
@@ -93,7 +93,7 @@ function SponsorLogo({ logoUrl, name }: { logoUrl?: string; name: string }) {
   if (!logoUrl || failed) return renderLogoFallback(name);
   return (
     <div className="w-full h-full bg-white flex items-center justify-center p-5">
-      <img
+      <img loading="lazy" decoding="async"
         src={logoUrl}
         alt={name}
         className="max-w-full max-h-full object-contain"
@@ -274,7 +274,7 @@ export default function SponsorsPage() {
                         className="flex items-center gap-2.5 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl px-4 py-3"
                       >
                         {partner.logoUrl ? (
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={partner.logoUrl}
                             alt={partner.name}
                             onError={(e) => {
@@ -642,7 +642,7 @@ export default function SponsorsPage() {
             onClick={() => setShowFoodSponsorModal(true)}
             className="group relative rounded-2xl overflow-hidden border border-amber-500/30 shadow-xl bg-[var(--bg-card)] p-2 sm:p-4 cursor-pointer relative z-10 flex items-center justify-center max-h-[480px] aspect-[16/9] sm:aspect-[16/8]"
           >
-            <img
+            <img loading="lazy" decoding="async"
               src={foodExpoConfig.images.sponsorshipPoster}
               alt="Food Expo Sponsorship Categories &amp; Benefits Poster"
               className="w-full h-full max-h-full max-w-full object-contain rounded-xl group-hover:scale-[1.01] transition-transform duration-300"
@@ -677,7 +677,7 @@ export default function SponsorsPage() {
                 </button>
               </div>
               <div className="overflow-hidden max-h-[78vh] w-full rounded-2xl flex items-center justify-center p-2 bg-black/40">
-                <img
+                <img loading="lazy" decoding="async"
                   src={foodExpoConfig.images.sponsorshipPoster}
                   alt="Food Expo Sponsorship Poster"
                   className="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-xl shadow-2xl"

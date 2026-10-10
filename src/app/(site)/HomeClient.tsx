@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   Search, Calendar, MapPin, Trophy, ArrowRight, Star, Heart,
@@ -11,7 +11,7 @@ import {
   Palette, Rocket, Mic, Tv, Building2, TrendingUp, CheckCircle2,
   ExternalLink, ArrowUpRight, X
 } from "lucide-react";
-import { ApiClient, GalleryItem, Event, CompetitionRecord, Blog, Sponsor } from "@/lib/api-client";
+import { GalleryItem, Event, CompetitionRecord, Blog, Sponsor, mapDbEvent, mapDbSponsor, mapDbBlog, mapDbGalleryItem } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import BlogCard from "@/components/BlogCard";
 
@@ -109,75 +109,70 @@ interface FoodExpoConfig {
 }
 
 
-export default function HomePage() {
-  const router = useRouter();
+export interface HomeInitialData {
+  siteContent: { key: string; value: unknown }[];
+  events: unknown[];
+  gallery: unknown[];
+  blogs: unknown[];
+  sponsors: unknown[];
+}
 
-  // Dynamic CMS content — all content is loaded from the database; no
-  // hardcoded fallback copy ships in the bundle, so sections simply render
-  // once their CMS data has loaded (same pattern as gallery/blogs/sponsors below).
-  const [heroContent, setHeroContent] = useState<HeroContent>({});
-  const [stats, setStats] = useState<StatItem[]>([]);
-  const [aboutStatsContent, setAboutStatsContent] = useState<AboutStatsContent>({ eyebrow: "", heading: "", description: "" });
-  const [ecosystemContent, setEcosystemContent] = useState<AlliedVenturesContent>({ eyebrow: "", heading: "", description: "", ventures: [] });
-  const [foodExpoConfig, setFoodExpoConfig] = useState<FoodExpoConfig>({
+// Builds the page's initial state from the server-fetched rows so the first
+// HTML response already contains the content (no client-side fetch waterfall).
+function deriveHome(initial: HomeInitialData) {
+  const all: Record<string, unknown> = {};
+  for (const row of initial.siteContent) all[row.key] = row.value;
+  const events: Event[] = initial.events.map(mapDbEvent);
+
+  let hero: HeroContent = {};
+  let stats: StatItem[] = [];
+  let aboutStats: AboutStatsContent = { eyebrow: "", heading: "", description: "" };
+  let ecosystem: AlliedVenturesContent = { eyebrow: "", heading: "", description: "", ventures: [] };
+  let foodExpo: FoodExpoConfig = {
     exhibitors: [], visitors: [], sponsorshipTiers: [], benefits: [],
     portals: [], slogans: { primary: "", motto: "" }, images: { chartPoster: "", sponsorshipPoster: "" },
-  });
-  const [serialEvents, setSerialEvents] = useState<SerialEventItem[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
-  const [activeFilter, setActiveFilter] = useState<string>("all");
-  const [foodExpoTab, setFoodExpoTab] = useState<"exhibitor" | "visitor" | "sponsorship">("exhibitor");
-  const [showFoodChartModal, setShowFoodChartModal] = useState<boolean>(false);
-  const [showFoodSponsorModal, setShowFoodSponsorModal] = useState<boolean>(false);
+  };
+  let serialEvents: SerialEventItem[] = [];
+  let testimonials: Testimonial[] = [];
+  let newsletter: NewsletterContent = { eyebrow: "", heading: "", description: "", ctaLabel: "", successMessage: "" };
 
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
-  const [newsletterContent, setNewsletterContent] = useState<NewsletterContent>({ eyebrow: "", heading: "", description: "", ctaLabel: "", successMessage: "" });
+  {
 
-  // Fetch CMS site content and live database events atomically
-  useEffect(() => {
-    Promise.all([
-      ApiClient.getAllSiteContent(),
-      ApiClient.getEvents().catch(() => []),
-    ]).then(([all, events]) => {
       const rawHero = all.homepage_hero as any;
       if (rawHero && (rawHero.title || rawHero.edition)) {
-        setHeroContent((prev) => ({ ...prev, ...rawHero }));
+        hero = { ...hero, ...rawHero };
       }
       const statsContent = all.homepage_stats as Partial<AboutStatsContent> & { stats?: StatItem[] } | undefined;
       if (statsContent?.stats && statsContent.stats.length > 0) {
-        setStats(statsContent.stats);
+        stats = statsContent.stats;
       }
       if (statsContent) {
-        setAboutStatsContent((prev) => ({
-          eyebrow: statsContent.eyebrow || prev.eyebrow,
-          heading: statsContent.heading || prev.heading,
-          description: statsContent.description || prev.description,
-        }));
+        aboutStats = {
+          eyebrow: statsContent.eyebrow || aboutStats.eyebrow,
+          heading: statsContent.heading || aboutStats.heading,
+          description: statsContent.description || aboutStats.description,
+        };
       }
       const venturesContent = all.homepage_allied_ventures as Partial<AlliedVenturesContent> | undefined;
       if (venturesContent) {
-        setEcosystemContent((prev) => ({
-          eyebrow: venturesContent.eyebrow || prev.eyebrow,
-          heading: venturesContent.heading || prev.heading,
-          description: venturesContent.description || prev.description,
+        ecosystem = {
+          eyebrow: venturesContent.eyebrow || ecosystem.eyebrow,
+          heading: venturesContent.heading || ecosystem.heading,
+          description: venturesContent.description || ecosystem.description,
           ventures:
             venturesContent.ventures && venturesContent.ventures.length > 0
               ? venturesContent.ventures
-              : prev.ventures,
-        }));
+              : ecosystem.ventures,
+        };
       }
       const foodConfig = all.food_expo_config as FoodExpoConfig | undefined;
       if (foodConfig && foodConfig.exhibitors && foodConfig.sponsorshipTiers) {
-        setFoodExpoConfig(foodConfig);
+        foodExpo = foodConfig;
       }
-      setTestimonials((all.homepage_testimonials as { testimonials: Testimonial[] } | undefined)?.testimonials ?? []);
+      testimonials = (all.homepage_testimonials as { testimonials: Testimonial[] } | undefined)?.testimonials ?? [];
       const rawNewsletter = all.homepage_newsletter as Partial<NewsletterContent> | undefined;
       if (rawNewsletter) {
-        setNewsletterContent((prev) => ({ ...prev, ...rawNewsletter }));
+        newsletter = { ...newsletter, ...rawNewsletter };
       }
 
       // Serial events come from CMS (homepage_serial_events), enriched with
@@ -210,13 +205,39 @@ export default function HomePage() {
           };
         });
       }
-      setSerialEvents(baseList);
-    }).catch(() => { });
+      serialEvents = baseList;
+  }
 
-    ApiClient.getGalleryItems().then(setGallery).catch(() => { });
-    ApiClient.getBlogs().then(setBlogs).catch(() => { });
-    ApiClient.getSponsors().then(setSponsors).catch(() => { });
-  }, []);
+  return {
+    hero, stats, aboutStats, ecosystem, foodExpo, serialEvents, testimonials, newsletter,
+    gallery: initial.gallery.map(mapDbGalleryItem) as GalleryItem[],
+    blogs: initial.blogs.map(mapDbBlog) as Blog[],
+    sponsors: initial.sponsors.map(mapDbSponsor) as Sponsor[],
+  };
+}
+
+export default function HomeClient({ initial }: { initial: HomeInitialData }) {
+  const router = useRouter();
+  const [derived] = useState(() => deriveHome(initial));
+
+  const [heroContent] = useState<HeroContent>(derived.hero);
+  const [stats] = useState<StatItem[]>(derived.stats);
+  const [aboutStatsContent] = useState<AboutStatsContent>(derived.aboutStats);
+  const [ecosystemContent] = useState<AlliedVenturesContent>(derived.ecosystem);
+  const [foodExpoConfig] = useState<FoodExpoConfig>(derived.foodExpo);
+  const [serialEvents] = useState<SerialEventItem[]>(derived.serialEvents);
+  const [gallery] = useState<GalleryItem[]>(derived.gallery);
+  const [testimonials] = useState<Testimonial[]>(derived.testimonials);
+  const [blogs] = useState<Blog[]>(derived.blogs);
+  const [sponsors] = useState<Sponsor[]>(derived.sponsors);
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [foodExpoTab, setFoodExpoTab] = useState<"exhibitor" | "visitor" | "sponsorship">("exhibitor");
+  const [showFoodChartModal, setShowFoodChartModal] = useState<boolean>(false);
+  const [showFoodSponsorModal, setShowFoodSponsorModal] = useState<boolean>(false);
+
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+  const [newsletterContent] = useState<NewsletterContent>(derived.newsletter);
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -401,7 +422,7 @@ export default function HomePage() {
                     <div className="h-14 w-full flex items-center justify-start">
                       {venture.logoUrl ? (
                         <div className="h-14 w-14 rounded-xl bg-white border border-amber-500/20 flex items-center justify-center overflow-hidden p-1.5 shadow-[0_4px_16px_rgba(180,130,30,0.1)]">
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={venture.logoUrl}
                             alt={venture.name}
                             className="max-h-full max-w-full object-contain"
@@ -751,7 +772,7 @@ export default function HomePage() {
                   rel={sp.websiteUrl ? "noopener noreferrer" : undefined}
                   className="shrink-0 w-[220px] h-24 rounded-2xl bg-white flex items-center justify-center p-5 border border-amber-700/15 shadow-[0_4px_16px_rgba(180,130,30,0.06)] hover:-translate-y-1 transition-all duration-300"
                 >
-                  <img src={sp.logoUrl} alt={sp.name} className="max-h-full max-w-full object-contain" />
+                  <img loading="lazy" decoding="async" src={sp.logoUrl} alt={sp.name} className="max-h-full max-w-full object-contain" />
                 </a>
               ))}
             </div>
@@ -904,7 +925,7 @@ export default function HomePage() {
               </button>
             </div>
             <div className="p-4 overflow-hidden flex-1 flex items-center justify-center bg-stone-100 max-h-[75vh]">
-              <img
+              <img loading="lazy" decoding="async"
                 src="/images/food-expo-chart.png"
                 alt="Food Expo Exhibitor &amp; Visitor Directory"
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-lg"
@@ -952,7 +973,7 @@ export default function HomePage() {
               </button>
             </div>
             <div className="p-4 overflow-hidden flex-1 flex items-center justify-center bg-stone-100 max-h-[75vh]">
-              <img
+              <img loading="lazy" decoding="async"
                 src={foodExpoConfig.images.sponsorshipPoster}
                 alt="Food Expo Sponsorship Categories &amp; Benefits"
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-lg"

@@ -284,7 +284,7 @@ const setStorageItem = <T>(key: string, value: T): void => {
 // ─── DB row → Event mapper ────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapDbEvent = (e: any): Event => ({
+export const mapDbEvent = (e: any): Event => ({
   id: e.id,
   name: e.name,
   slug: e.slug,
@@ -391,6 +391,23 @@ const mapDbCompetition = (c: any): CompetitionRecord => ({
 });
 
 // ─── API Client ───────────────────────────────────────────────────────────────
+
+export const mapDbSponsor = (s: any): Sponsor => ({
+  id: s.id, name: s.name, logoUrl: s.logo_url, tier: s.tier, websiteUrl: s.website_url,
+  description: s.description || '', industry: s.industry || '',
+});
+
+export const mapDbBlog = (b: any): Blog => ({
+  id: b.id, title: b.title, slug: b.slug, summary: b.summary,
+  content: b.content, imageUrl: b.image_url, category: b.category,
+  author: b.author, publishedAt: b.published_at, readTime: b.read_time,
+  subheading: b.subheading,
+  bullets: Array.isArray(b.bullets) ? b.bullets : (() => { try { return JSON.parse(b.bullets || '[]'); } catch { return []; } })(),
+});
+
+export const mapDbGalleryItem = (g: any): GalleryItem => ({
+  id: g.id, type: g.type, url: g.url, thumbnailUrl: g.thumbnail_url, title: g.title, event: g.event,
+});
 
 export const ApiClient = {
 

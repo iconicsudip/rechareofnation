@@ -1,6 +1,7 @@
 // src/app/api/gallery/route.ts
 import { sql, ensureSchema } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+import { PUBLIC_CACHE_HEADERS } from '@/lib/http-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
           hasNextPage: page < totalPages,
           hasPrevPage: page > 1,
         }
-      });
+      }, { headers: PUBLIC_CACHE_HEADERS });
     }
 
     // Default: full list (backward compatible)
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
       FROM gallery_items 
       ORDER BY created_at DESC
     `;
-    return NextResponse.json({ items });
+    return NextResponse.json({ items }, { headers: PUBLIC_CACHE_HEADERS });
   } catch (err: unknown) {
     const error = err as Error;
     return NextResponse.json({ error: error.message }, { status: 500 });

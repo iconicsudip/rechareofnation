@@ -275,7 +275,7 @@ export default function CompetitionDetailPage({ params }: PageProps) {
 
                       {/* Main Media Viewport */}
                       <div className="relative aspect-[4/3] sm:aspect-[16/11] rounded-2xl overflow-hidden bg-black/60 border border-white/10">
-                        <img src={competition.bannerUrl} alt={competition.name} className="w-full h-full object-cover" />
+                        <img loading="lazy" decoding="async" src={competition.bannerUrl} alt={competition.name} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
                         {/* Top Right Badge */}

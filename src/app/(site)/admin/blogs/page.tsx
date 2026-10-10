@@ -49,7 +49,7 @@ export default function AdminBlogsPage() {
     setLoading(true);
     const [blogsRes, taxRes] = await Promise.all([
       fetch("/api/admin/blogs"),
-      fetch("/api/taxonomies?type=blog_category"),
+      fetch("/api/taxonomies?type=blog_category", { cache: "no-store" }),
     ]);
     const blogsData = await blogsRes.json();
     const taxData = await taxRes.json();

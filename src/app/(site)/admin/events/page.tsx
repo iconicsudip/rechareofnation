@@ -215,8 +215,8 @@ export default function AdminEventsPage() {
     setLoading(true);
     const [eventsRes, catRes, cityRes] = await Promise.all([
       fetch(`/api/admin/events?search=${encodeURIComponent(search)}&page=${page}`),
-      fetch("/api/taxonomies?type=event_category"),
-      fetch("/api/taxonomies?type=city"),
+      fetch("/api/taxonomies?type=event_category", { cache: "no-store" }),
+      fetch("/api/taxonomies?type=city", { cache: "no-store" }),
     ]);
     const data = await eventsRes.json();
     const catData = await catRes.json();
